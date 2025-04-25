@@ -14,7 +14,7 @@
                 mengubah file</p>
         </div>
     @else
-        <div class="bg-red-200 p-2 md:p-4 mb-2 rounded-lg w-max">
+        <div class="bg-red-200 p-2 md:p-4 mb-2 rounded-lg w-full text-sm md:text-md lg:text-lg">
             <p class="text-gray-800">File {{ ucfirst(str_replace('_url', '', $name)) }} belum diunggah, silahkan unggah
                 disini</p>
         </div>
