@@ -57,6 +57,9 @@ php artisan migrate
 # Seed the db
 php artisan db:seed
 
+# Link the storage
+php artisan link or "ln -s $(pwd)/storage/app/public $(pwd)/public/storage"
+
 # Run in development
 php artisan serve
 npm run dev

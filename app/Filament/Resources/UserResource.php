@@ -19,6 +19,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Filters\TrashedFilter;
 use App\Filament\Resources\UserResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\UserResource\RelationManagers;
@@ -69,16 +70,13 @@ class UserResource extends Resource
                 TextColumn::make('updated_at')->label('last updated')->since()->sortable(),
             ])
             ->filters([
-                /*                 SelectFilter::make('role')
-                    ->label('Filter by Role')
-                    ->options(Role::pluck('name', 'id'))
-                    ->query(fn($query, $data) => $query->whereHas('roles', fn($q) => $q->where('name', $data))),
-                SelectFilter::make('department')
-                    ->label('Filter by Department')
-                    ->options(Department::pluck('name', 'id'))
-                    ->query(fn($query, $data) => $query->whereHas('department', fn($q) => $q->where('name', $data))) */])
+                TrashedFilter::make(),
+            ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\RestoreAction::make(),
+                Tables\Actions\ForceDeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

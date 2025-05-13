@@ -17,12 +17,12 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    
+
 </head>
 
 <body class=class="font-sans text-gray-900 antialiased bg-cover bg-center min-h-screen"
     style="background-image: url('{{ asset('images/bg1.webp') }}');">
-    <div class="px-4 py-4 min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0">
+    <div class="px-4 py-4 min-h-screen flex flex-col justify-center items-center pt-6 sm:pt-0">
         <div>
             <a href="/">
                 <x-application-logo width="125" height="125" />
