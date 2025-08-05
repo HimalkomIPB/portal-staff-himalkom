@@ -19,6 +19,9 @@ Management Information System — a centralized platform for managing all aspect
 -   BPH:
     Functions as both a department and a governance role and visibility into all departments and their respective work programs.
 
+-   PJS:
+    Functions as "acting" BPH, same privilige as BPH.
+
 -   Supervisor:
     Granted read-only access to view all departments and their work programs for monitoring and evaluation purposes.
 
@@ -68,3 +71,5 @@ npm run dev
 http://127.0.0.1:8000/superadmin for creating Users and Department
 http://127.0.0.1:8000 for main website
 ```
+### TODO Development
+- Archive System
