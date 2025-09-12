@@ -14,6 +14,20 @@ use Illuminate\Support\Facades\Storage;
 
 class WorkProgramsController extends Controller
 {
+    private function canDoAction(Department $department): bool
+    {
+        if ($this->isCurrentUserBph()) {
+            return true;
+        }
+
+        return Auth::user()->department_id === $department->id;
+    }
+
+    private function isCurrentUserBph(): bool
+    {
+        return Auth::user()->hasRole('bph');
+    }
+
     private function generateFilename(UploadedFile $file, string $extension = '.pdf')
     {
         $filename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME); // only filename not extension
@@ -24,8 +38,8 @@ class WorkProgramsController extends Controller
 
     public function index(Department $department): View
     {
-        if (Auth::user()->department_id !== $department->id) {
-            abort(403, 'Unauthorized Access of Department.');
+        if (!$this->canDoAction($department)) {
+            abort(403, 'Unauthorized Access of Department WorkProgram');
         }
 
         return view('dashboard.workprograms.index', ['department' => $department]);
@@ -33,8 +47,8 @@ class WorkProgramsController extends Controller
 
     public function detail(Department $department, WorkProgram $workProgram): View
     {
-        if (Auth::user()->department_id !== $department->id) {
-            abort(403, 'Unauthorized Access of Department WorkProgram.');
+        if (!$this->canDoAction($department)) {
+            abort(403, 'Unauthorized Access of Department WorkProgram');
         }
 
         return view('dashboard.workprograms.detail', ['workProgram' => $workProgram]);
@@ -42,8 +56,8 @@ class WorkProgramsController extends Controller
 
     public function create(Department $department): View
     {
-        if (Auth::user()->department_id !== $department->id) {
-            abort(403, 'Unauthorized Access of Department WorkProgram Action.');
+        if (!$this->canDoAction($department)) {
+            abort(403, 'Unauthorized Access of Department WorkProgram');
         }
 
         return view('dashboard.workprograms.create', ['department' => $department]);
@@ -51,8 +65,8 @@ class WorkProgramsController extends Controller
 
     public function store(Request $request, Department $department)
     {
-        if (Auth::user()->department_id !== $department->id) {
-            abort(403, 'Unauthorized Access of Department WorkProgram Action.');
+        if (!$this->canDoAction($department)) {
+            abort(403, 'Unauthorized Access of Department WorkProgram');
         }
 
         $validated = $request->validate([
@@ -87,10 +101,15 @@ class WorkProgramsController extends Controller
             }
 
             $validated['sources_of_funds'] = json_encode($validated['sources_of_funds']);
-            $validated['department_id'] = Auth::user()->department->id;
+            $validated['department_id'] = $department->id;
 
-            WorkProgram::create($validated);
+            $workProgram = WorkProgram::create($validated);
             DB::commit();
+
+            if ($this->isCurrentUserBph()  && Auth::user()->department->id != $department->id) {
+                return redirect()->route('dashboard.modview.workprogram.show', ['workProgram' => $workProgram, 'department' => $department])
+                    ->with('success', ['message' => "Program kerja untuk $department->name berhasil ditambahkan!", 'id' => Str::ulid()->toBase32()]);
+            }
 
             return redirect()->route('dashboard.workProgram.index', ['department' => $department])
                 ->with('success', ['message' => 'Program kerja berhasil ditambahkan!', 'id' => Str::ulid()->toBase32()]);
@@ -104,8 +123,8 @@ class WorkProgramsController extends Controller
 
     public function edit(Department $department, WorkProgram $workProgram)
     {
-        if (Auth::user()->department_id !== $workProgram->department_id) {
-            abort(403, 'Unauthorized Access of Department WorkProgram Action.');
+        if (!$this->canDoAction($department)) {
+            abort(403, 'Unauthorized Access of Department WorkProgram');
         }
 
         return view('dashboard.workprograms.edit', ['workProgram' => $workProgram]);
@@ -114,8 +133,8 @@ class WorkProgramsController extends Controller
 
     public function update(Request $request, Department $department, WorkProgram $workProgram)
     {
-        if (Auth::user()->department_id !== $workProgram->department_id) {
-            abort(403, 'Unauthorized Access of Department WorkProgram Action.');
+        if (!$this->canDoAction($department)) {
+            abort(403, 'Unauthorized Access of Department WorkProgram');
         }
 
         $validated = $request->validate([
@@ -164,6 +183,12 @@ class WorkProgramsController extends Controller
             $workProgram->update($validated);
 
             DB::commit();
+
+            if ($this->isCurrentUserBph() && Auth::user()->department->id != $department->id) {
+                return redirect()->route('dashboard.modview.workprogram.show', ['workProgram' => $workProgram, 'department' => $department])
+                    ->with('success', ['message' => "Program kerja berhasil diperbarui!", 'id' => Str::ulid()->toBase32()]);
+            }
+
             return redirect()->route('dashboard.workProgram.detail', ['workProgram' => $workProgram, 'department' => $department])
                 ->with('success', ['message' => 'Program kerja berhasil diperbarui!', 'id' => Str::ulid()->toBase32()]);
         } catch (\Exception $e) {
@@ -176,12 +201,19 @@ class WorkProgramsController extends Controller
 
     public function destroy(Department $department, WorkProgram $workProgram)
     {
-        if (Auth::user()->department_id !== $workProgram->department_id) {
-            abort(403, 'Unauthorized Access of Department WorkProgram Action.');
+        if (!$this->canDoAction($department)) {
+            abort(403, 'Unauthorized Access of Department WorkProgram');
         }
-
         try {
+            DB::beginTransaction();
             $workProgram->delete();
+            DB::commit();
+
+            if ($this->isCurrentUserBph()  && Auth::user()->department->id != $department->id) {
+                return redirect()->route('dashboard.modview.department.show', ['department' => $department])
+                    ->with('success', ['message' => "Program kerja berhasil dihapus!", 'id' => Str::ulid()->toBase32()]);
+            }
+
             return redirect()->route('dashboard.workProgram.index', ['department' => $department])
                 ->with('success', ['message' => 'Program kerja berhasil dihapus!', 'id' => Str::ulid()->toBase32()]);
         } catch (\Exception $e) {

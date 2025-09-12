@@ -78,6 +78,8 @@ class WorkProgram extends Model
         'komnews_url'
     ];
 
+    protected $with = ['department'];
+
     public function comments(): HasMany
     {
         return $this->hasMany(WorkProgramComment::class);

@@ -25,9 +25,9 @@
         </div>
 
         <div>
-            <x-input-label for="email" :value="__('Email')" />
+            <x-input-label for="email" :value="'Email'" />
             <input id="email" name="email" type="email"
-                class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                class="mt-1 block w-full text-gray-500 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
                 value="{{ old('email', $user->email) }}" required autocomplete="username" readonly disabled>
             <x-input-error class="mt-2" :messages="$errors->get('email')" />
 
@@ -49,6 +49,20 @@
                     @endif
                 </div>
             @endif
+        </div>
+
+        <div>
+            <x-input-label for="department" value="Department" />
+            <input id="department" type="text"
+                class="mt-1 block w-full text-gray-500 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                value="{{ $user->department->name ?? '-' }}" readonly disabled>
+        </div>
+
+        <div>
+            <x-input-label for="roles" value="Roles" />
+            <input id="roles" type="text"
+                class="mt-1 block w-full text-gray-500 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                value="{{ $user->getRoleNames()->implode(', ') }}" readonly disabled>
         </div>
 
         <div class="flex items-center gap-4">

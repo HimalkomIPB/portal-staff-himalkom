@@ -39,7 +39,7 @@
                                         $dashboardUrl = Auth::user()->getDashboardRoute();
                                         $linkText = auth()
                                             ->user()
-                                            ->hasAnyRole(['managing director', 'bph', 'supervisor'])
+                                            ->hasAnyRole(['managing director', 'bph', 'supervisor', 'pjs'])
                                             ? 'Dashboard'
                                             : '-';
                                     @endphp

@@ -13,14 +13,17 @@ class RolePermissionSeeder extends Seeder
      */
     public function run(): void
     {
-        $managingDirectorRole = Role::create([
+        $managingDirectorRole = Role::updateOrCreate([
             'name' => 'managing director'
         ]);
-        $supervisorRole = Role::create([
+        $supervisorRole = Role::updateOrCreate([
             'name' => 'supervisor'
         ]);
-        $bphRole = Role::create([
+        $bphRole = Role::updateOrCreate([
             'name' => 'bph'
+        ]);
+        $pjsRole = Role::updateOrCreate([
+            'name' => 'pjs'
         ]);
     }
 }

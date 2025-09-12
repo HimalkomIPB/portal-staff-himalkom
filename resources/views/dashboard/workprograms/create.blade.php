@@ -3,31 +3,51 @@
         <div class="flex flex-row items-center">
             <div class="text-gray-500 font-medium text-[11px] md:text-sm ">
                 <nav class="flex items-center space-x-1 md:space-x-2">
-                    <a href="{{ route('dashboard.workProgram.index', ['department' => $department]) }}"
-                        class="hover:underline hover:text-[#111B5A] cursor-pointer">
-                        Program Kerja
-                    </a>
-                    <span class="text-gray-400">/</span>
-                    <a href="{{ route('dashboard.workProgram.index', ['department' => $department]) }}"
-                        class="hover:underline hover:text-[#111B5A] cursor-pointer">
-                        {{ $department->name }}
-                    </a>
-                    <span class="text-gray-400">/</span>
-                    <span class="text-gray-800 font-semibold">
-                        Create
-                    </span>
+                    @if (Auth::user()->hasRole('bph') && Auth::user()->department->id !== $department->id)
+                        <a href="{{ route('dashboard.modview.department.index') }}"
+                            class="hover:underline hover:text-[#111B5A] cursor-pointer">
+                            Supervisi Department
+                        </a>
+                        <span class="text-gray-400">/</span>
+                        <a href="{{ route('dashboard.modview.department.show', ['department' => $department]) }}"
+                            class="hover:underline hover:text-[#111B5A] cursor-pointer">
+                            {{ $department->name }}
+                        </a>
+                        <span class="text-gray-400">/</span>
+                        <span class="text-gray-800 font-semibold">
+                            Create
+                        </span>
+                    @else
+                        <a href="{{ route('dashboard.workProgram.index', ['department' => $department]) }}"
+                            class="hover:underline hover:text-[#111B5A] cursor-pointer">
+                            Program Kerja
+                        </a>
+                        <span class="text-gray-400">/</span>
+                        <a href="{{ route('dashboard.workProgram.index', ['department' => $department]) }}"
+                            class="hover:underline hover:text-[#111B5A] cursor-pointer">
+                            {{ $department->name }}
+                        </a>
+                        <span class="text-gray-400">/</span>
+                        <span class="text-gray-800 font-semibold">
+                            Create
+                        </span>
+                    @endif
                 </nav>
             </div>
         </div>
     </x-slot>
+
     <div
         class="relative max-w-[90dvw] lg:max-w-6xl mx-auto mt-2 mb-8 p-2 bg-white rounded-xl md:rounded-2xl lg:rounded-3xl shadow-lg 
             before:absolute before:inset-0 before:-z-10 before:bg-gradient-to-r before:from-gray-200 before:to-gray-100 
             before:rounded-[inherit] before:p-[0.5px]">
         <div class="bg-white rounded-lg md:rounded-xl lg:rounded-2xl p-4 md:p-6 border border-gray-200">
             <h1 class="font-extrabold text-gray-900 md:mb-2 text-center text-lg md:text-xl lg:text-3xl">Tambah Program
-                Kerja - {{ $department->name }}
+                Kerja
             </h1>
+            <h2 class="font-extrabold text-gray-900 md:mb-2 text-center text-md md:text-md lg:text-lg">
+                [{{ $department->name }}]
+            </h2>
 
             @if ($errors->any())
                 <div class="bg-red-100 text-red-700 p-4 rounded-md mb-2 border border-red-400">

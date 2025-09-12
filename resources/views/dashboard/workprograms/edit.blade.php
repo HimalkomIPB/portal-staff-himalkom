@@ -1,26 +1,37 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex flex-row items-center">
-            <div class="text-[11px] text-gray-500 font-medium md:text-sm">
+            <div class="text-gray-500 font-medium text-[11px] md:text-sm ">
                 <nav class="flex items-center space-x-1 md:space-x-2">
-                    <a href="{{ route('dashboard.workProgram.index', ['department' => $workProgram->department]) }}"
-                        class="hover:underline hover:text-[#111B5A] cursor-pointer">
-                        Program Kerja
-                    </a>
-                    <span class="text-gray-400">/</span>
-                    <a href="{{ route('dashboard.workProgram.index', ['department' => $workProgram->department]) }}"
-                        class="hover:underline hover:text-[#111B5A] cursor-pointer">
-                        {{ $workProgram->department->name }}
-                    </a>
-                    <span class="text-gray-400">/</span>
-                    <a href="{{ route('dashboard.workProgram.detail', ['workProgram' => $workProgram, 'department' => $workProgram->department]) }}"
-                        class="hover:underline hover:text-[#111B5A] cursor-pointer ">
-                        {{ $workProgram->name }}
-                    </a>
-                    <span class="text-gray-400">/</span>
-                    <span class="text-gray-800 font-semibold">
-                        Edit
-                    </span>
+                    @if (Auth::user()->hasRole('bph') && Auth::user()->department->id !== $workProgram->department->id)
+                        <a href="{{ route('dashboard.modview.department.index') }}"
+                            class="hover:underline hover:text-[#111B5A] cursor-pointer">
+                            Supervisi Department
+                        </a>
+                        <span class="text-gray-400">/</span>
+                        <a href="{{ route('dashboard.modview.department.show', ['department' => $workProgram->department]) }}"
+                            class="hover:underline hover:text-[#111B5A] cursor-pointer">
+                            {{ $workProgram->department->name }}
+                        </a>
+                        <span class="text-gray-400">/</span>
+                        <span class="text-gray-800 font-semibold">
+                            Edit
+                        </span>
+                    @else
+                        <a href="{{ route('dashboard.workProgram.index', ['department' => $workProgram->department]) }}"
+                            class="hover:underline hover:text-[#111B5A] cursor-pointer">
+                            Program Kerja
+                        </a>
+                        <span class="text-gray-400">/</span>
+                        <a href="{{ route('dashboard.workProgram.index', ['department' => $workProgram->department]) }}"
+                            class="hover:underline hover:text-[#111B5A] cursor-pointer">
+                            {{ $workProgram->department->name }}
+                        </a>
+                        <span class="text-gray-400">/</span>
+                        <span class="text-gray-800 font-semibold">
+                            Edit
+                        </span>
+                    @endif
                 </nav>
             </div>
         </div>
@@ -31,7 +42,10 @@
         before:rounded-[inherit] before:p-[0.5px]">
         <div class="bg-white rounded-lg md:rounded-xl lg:rounded-2xl p-4 md:p-6 border border-gray-200">
             <h2 class="font-extrabold text-gray-900 md:mb-2 text-center text-lg md:text-xl lg:text-3xl">Edit Program
-                Kerja - {{ $workProgram->name }}</h2>
+                Kerja</h2>
+            <h3 class="font-extrabold text-gray-900 md:mb-2 text-center text-md md:text-md lg:text-lg">
+                [{{ $workProgram->name }}]
+            </h3>
             @if ($errors->any())
                 <div class="bg-red-100 text-red-700 p-4 rounded-lg mb-6 border border-red-400">
                     <strong>Terjadi kesalahan:</strong>
@@ -54,6 +68,14 @@
                         Program</label>
                     <input type="text" name="name" id="title" value="{{ $workProgram->name }}"
                         class="bg-[#FAFAFA] border border-gray-200 shadow-sm rounded-md p-2 w-full focus:ring-1 focus:ring-gray-100 focus:shadow-md focus:border-gray-100 focus:outline-none text-gray-700 text-sm md:text-md lg:text-lg">
+                </div>
+
+                <div class="mb-4">
+                    <label for="department-placeholder"
+                        class="mb-1 block font-normal text-gray-400 text-sm md:text-lg">Department</label>
+                    <input type="text" name="department-placeholder" id="department-placeholder"
+                        value="{{ $workProgram->department->name }}" readonly
+                        class="bg-[#FAFAFA] border border-gray-200 shadow-sm rounded-md p-2 w-full focus:ring-1 focus:ring-gray-100 focus:shadow-md focus:border-gray-100 focus:outline-none text-gray-500 text-sm md:text-md lg:text-lg">
                 </div>
 
                 <div class="mb-4">
@@ -131,7 +153,8 @@
                 </div>
 
                 <div class="mb-4">
-                    <label for="participation_coverage" class="mb-1 block font-normal text-gray-600 text-sm md:text-lg">
+                    <label for="participation_coverage"
+                        class="mb-1 block font-normal text-gray-600 text-sm md:text-lg">
                         Cakupan Partisipasi
                     </label>
 

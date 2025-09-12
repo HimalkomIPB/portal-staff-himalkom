@@ -4,7 +4,7 @@
             <div class="text-[12px]  text-gray-500 font-medium md:text-sm">
                 <nav class="flex items-center space-x-1 md:space-x-2">
                     <span class="text-gray-800 font-semibold">
-                        Department
+                        Supervisi Department
                     </span>
                     <span class="text-gray-400">/</span>
                 </nav>
