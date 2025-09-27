@@ -39,7 +39,7 @@ class AuthenticatedSessionController extends Controller
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
 
-                abort(403, 'Your account is currently inactive');
+                abort(403, 'Your department is currently archived.');
             }
         }
 
