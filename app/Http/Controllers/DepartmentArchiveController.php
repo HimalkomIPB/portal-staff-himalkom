@@ -27,6 +27,7 @@ class DepartmentArchiveController extends Controller
 
         $department->load(['workPrograms']);
         $department->append('managing_director');
-        dd($department);
+
+        return view('dashboard.archives.show-department', ['department' => $department]);
     }
 }
