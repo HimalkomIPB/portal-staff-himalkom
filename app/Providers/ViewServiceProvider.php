@@ -21,7 +21,7 @@ class ViewServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        View::composer('*', function ($view) {
+        View::composer('layouts.app', function ($view) {
             $unreadCount = 0;
             if (Auth::check()) {
                 $unreadCount = Auth::user()->unreadNotifications()->count();
