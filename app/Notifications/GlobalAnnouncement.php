@@ -2,8 +2,8 @@
 
 namespace App\Notifications;
 
-use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
 
 class GlobalAnnouncement extends Notification
 {
@@ -17,7 +17,7 @@ class GlobalAnnouncement extends Notification
     public function toDatabase($notifiable)
     {
         return [
-            'title' => 'Public' . ' - ' . $this->title,
+            'title' => 'Public'.' - '.$this->title,
             'message' => $this->message,
         ];
     }

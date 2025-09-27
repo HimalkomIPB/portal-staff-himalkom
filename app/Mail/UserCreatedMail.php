@@ -3,10 +3,7 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Content;
-use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
 class UserCreatedMail extends Mailable
@@ -14,7 +11,9 @@ class UserCreatedMail extends Mailable
     use Queueable, SerializesModels;
 
     public $data;
+
     public $unhashedPassword;
+
     /**
      * Create a new message instance.
      */

@@ -8,7 +8,9 @@ use Illuminate\Notifications\Notification;
 class WorkProgramCommentNotification extends Notification
 {
     protected $title;
+
     protected $message;
+
     protected $url;
 
     public function __construct($title, $message, $url)
@@ -37,7 +39,7 @@ class WorkProgramCommentNotification extends Notification
     {
         return (new MailMessage)
             ->subject($this->title)
-            ->greeting('Halo ' . $notifiable->name . '!,')
+            ->greeting('Halo '.$notifiable->name.'!,')
             ->line($this->message)
             ->action('Cek', $this->url)
             ->line('Thank you for your attention!');

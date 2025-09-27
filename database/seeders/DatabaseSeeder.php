@@ -15,8 +15,8 @@ class DatabaseSeeder extends Seeder
     {
         User::updateOrCreate(['email' => env('APP_FILAMENT_USER')], [
             'name' => 'superadmin_kacow',
-            'email' => env("APP_FILAMENT_USER"),
-            'password' => bcrypt(env("APP_FILAMENT_PASSWORD")),
+            'email' => env('APP_FILAMENT_USER'),
+            'password' => bcrypt(env('APP_FILAMENT_PASSWORD')),
             'email_verified_at' => now(),
         ]);
 

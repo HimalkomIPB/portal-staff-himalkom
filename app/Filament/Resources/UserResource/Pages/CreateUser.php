@@ -2,13 +2,12 @@
 
 namespace App\Filament\Resources\UserResource\Pages;
 
-use Filament\Actions;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Hash;
 use App\Filament\Resources\UserResource;
 use App\Mail\UserCreatedMail;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class CreateUser extends CreateRecord
 {
@@ -20,6 +19,7 @@ class CreateUser extends CreateRecord
         $data['password'] = Hash::make($randomPassword);
 
         Mail::to($data['email'])->send(new UserCreatedMail($data, $randomPassword));
+
         return $data;
     }
 

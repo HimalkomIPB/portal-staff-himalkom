@@ -2,16 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Str;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
 /**
- * 
- *
  * @property string $id
  * @property string $work_program_id
  * @property string $user_id
@@ -20,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\User $author
  * @property-read \App\Models\WorkProgram $workProgram
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|WorkProgramComment newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|WorkProgramComment newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|WorkProgramComment query()
@@ -29,13 +27,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|WorkProgramComment whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|WorkProgramComment whereUserId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|WorkProgramComment whereWorkProgramId($value)
+ *
  * @mixin \Eloquent
  */
 class WorkProgramComment extends Model
 {
     use HasUlids;
+
     public $incrementing = false;
+
     protected $keyType = 'string';
+
     protected $fillable = [
         'work_program_id',
         'user_id',
@@ -54,7 +56,7 @@ class WorkProgramComment extends Model
 
     protected function createdAt(): Attribute
     {
-        return Attribute::get(fn($value) => \Carbon\Carbon::parse($value)->format('d M Y H:i'));
+        return Attribute::get(fn ($value) => \Carbon\Carbon::parse($value)->format('d M Y H:i'));
     }
 
     protected static function boot()
@@ -62,7 +64,7 @@ class WorkProgramComment extends Model
 
         parent::boot();
         static::creating(function ($model) {
-            if (!$model->id) {
+            if (! $model->id) {
                 $model->id = Str::ulid()->toBase32();
             }
         });

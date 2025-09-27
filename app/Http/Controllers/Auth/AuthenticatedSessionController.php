@@ -32,22 +32,22 @@ class AuthenticatedSessionController extends Controller
         $department = $user->department;
         $departmentIsArchived = $department && $department->deleted_at !== null;
 
-        if ($userRole->contains("managing director") || $userRole->contains("bph")) {
+        if ($userRole->contains('managing director') || $userRole->contains('bph')) {
             if ($departmentIsArchived) {
                 // Logout
                 Auth::guard('web')->logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
 
-                abort(403, "Your account is currently inactive");
+                abort(403, 'Your account is currently inactive');
             }
         }
 
         $request->session()->regenerate();
 
-        if ($userRole->contains("managing director") || $userRole->contains("bph") || $userRole->contains("pjs")) {
+        if ($userRole->contains('managing director') || $userRole->contains('bph') || $userRole->contains('pjs')) {
             return redirect()->intended(route('dashboard', ['department' => $user->department->slug], absolute: false));
-        } else if ($userRole->contains("supervisor")) {
+        } elseif ($userRole->contains('supervisor')) {
             return redirect()->intended(route('dashboard.supervisor', absolute: false));
         } else {
             return redirect()->intended();

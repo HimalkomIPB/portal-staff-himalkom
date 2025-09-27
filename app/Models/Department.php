@@ -2,15 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Str;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 /**
- * 
- *
  * @property string $id
  * @property string $name
  * @property string $abbreviation
@@ -24,6 +22,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read int|null $users_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\WorkProgram> $workPrograms
  * @property-read int|null $work_programs_count
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Department newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Department newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Department onlyTrashed()
@@ -38,12 +37,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Department whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Department withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Department withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class Department extends Model
 {
     use HasUlids, SoftDeletes;
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [
@@ -56,7 +58,8 @@ class Department extends Model
     public function getManagingDirectorAttribute()
     {
         return $this->users()
-            ->whereHas('roles', fn($q) => $q->where('name', 'managing director'))
+            ->withTrashed()
+            ->whereHas('roles', fn ($q) => $q->where('name', 'managing director'))
             ->select(['id', 'name', 'email'])
             ->first();
     }
@@ -64,7 +67,7 @@ class Department extends Model
     public function getPjsAttribute()
     {
         return $this->users()
-            ->whereHas('roles', fn($q) => $q->where('name', 'pjs'))
+            ->whereHas('roles', fn ($q) => $q->where('name', 'pjs'))
             ->select(['id', 'name', 'email'])
             ->get();
     }
@@ -83,11 +86,11 @@ class Department extends Model
     {
         parent::boot();
         static::creating(function ($model) {
-            if (!$model->id) {
+            if (! $model->id) {
                 $model->id = Str::ulid()->toBase32(); // Generate ULID
             }
 
-            if (!$model->slug) {
+            if (! $model->slug) {
                 $model->slug = Str::slug($model->name);
             }
         });
