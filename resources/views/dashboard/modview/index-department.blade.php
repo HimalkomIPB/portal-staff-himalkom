@@ -27,11 +27,24 @@
                                 <h3 class="text-[14px] md:text-sm font-semibold text-[#14267B]">Managing Director</h3>
                                 <div class="mt-1 text-[12px] md:text-sm font-semibold text-gray-500 space-y-0.5">
                                     <p>{{ $department->managing_director->name }}</p>
-                                    <p class="text-[11px] md:text-sm text-gray-400">Email: {{ $department->managing_director->email }}</p>
-                                </div>                                
+                                    <p class="text-[11px] md:text-sm text-gray-400">Email:
+                                        {{ $department->managing_director->email }}</p>
+                                </div>
                             </div>
                         @else
                             <span class="text-[14px] md:text-sm font-semibold text-[#14267B] ">Managing Director:
+                                -</span>
+                        @endif
+                        </br>
+                        @if ($department->pjs_count > 0)
+                            <div>
+                                <h3 class="text-[14px] md:text-sm font-semibold text-[#14267B]">PJS</h3>
+                                <div class="mt-1 text-[12px] md:text-sm font-semibold text-gray-500 space-y-0.5">
+                                    <p>{{ $department->pjs_count }} Orang</p>
+                                </div>
+                            </div>
+                        @else
+                            <span class="text-[14px] md:text-sm font-semibold text-[#14267B] ">PJS:
                                 -</span>
                         @endif
                     </div>

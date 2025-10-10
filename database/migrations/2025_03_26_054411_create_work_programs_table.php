@@ -17,7 +17,7 @@ return new class extends Migration
             $table->text('description');
             $table->date('start_at');
             $table->date('finished_at');
-            $table->decimal('funds', 15 ,2);
+            $table->decimal('funds', 15, 2);
             $table->string('sources_of_funds');
             $table->integer('participation_total');
             $table->string('participation_coverage');

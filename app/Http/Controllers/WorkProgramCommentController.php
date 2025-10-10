@@ -3,13 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\WorkProgram;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
 use App\Models\WorkProgramComment;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
 use App\Notifications\WorkProgramCommentNotification;
-
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class WorkProgramCommentController extends Controller
 {
@@ -38,8 +37,8 @@ class WorkProgramCommentController extends Controller
                 ]);
 
                 $managingDirector->notify(new WorkProgramCommentNotification(
-                    'Komentar Baru pada Program Kerja ' . $workProgram->name,
-                    '"' . strip_tags(html_entity_decode($newComment->content)) .  '" oleh ' . Auth::user()->name,
+                    'Komentar Baru pada Program Kerja '.$workProgram->name,
+                    '"'.strip_tags(html_entity_decode($newComment->content)).'" oleh '.Auth::user()->name,
                     $routeToMD
                 ));
             }
@@ -52,18 +51,20 @@ class WorkProgramCommentController extends Controller
                         'workProgram' => $workProgram,
                     ]);
                     $pj->notify(new WorkProgramCommentNotification(
-                        'Komentar Baru pada Program Kerja ' . $workProgram->name,
-                         '"' . strip_tags(html_entity_decode($newComment->content)) .  '" oleh ' . Auth::user()->name,
+                        'Komentar Baru pada Program Kerja '.$workProgram->name,
+                        '"'.strip_tags(html_entity_decode($newComment->content)).'" oleh '.Auth::user()->name,
                         $routeToPjs
                     ));
                 }
             }
 
             DB::commit();
+
             return redirect()->back()->with('success', ['message' => 'Komentar Berhasil Ditambahkan!', 'id' => Str::ulid()->toBase32()]);
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', ['message' => 'Terjadi kesalahan saat menambahkan komentar: ' . $e->getMessage(), 'id' => Str::ulid()->toBase32()]);
+
+            return redirect()->back()->with('error', ['message' => 'Terjadi kesalahan saat menambahkan komentar: '.$e->getMessage(), 'id' => Str::ulid()->toBase32()]);
         }
     }
 
@@ -74,6 +75,7 @@ class WorkProgramCommentController extends Controller
         }
 
         $comment->delete();
+
         return redirect()->back()->with('success', ['message' => 'Komentar Berhasil Dihapus!', 'id' => Str::ulid()->toBase32()]);
     }
 }

@@ -4,21 +4,19 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Notifications\Notifiable;
-use Filament\Models\Contracts\FilamentUser;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 
 /**
- * 
- *
  * @property string $id
  * @property string $name
  * @property string $email
@@ -38,6 +36,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  * @property-read int|null $roles_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\WorkProgramComment> $workProgramComments
  * @property-read int|null $work_program_comments_count
+ *
  * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newQuery()
@@ -59,12 +58,13 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutPermission($permissions)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutRole($roles, $guard = null)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasUlids, HasRoles, HasFactory, Notifiable, SoftDeletes;
+    use HasFactory, HasRoles, HasUlids, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -76,9 +76,11 @@ class User extends Authenticatable implements FilamentUser
         'email',
         'password',
     ];
+
     protected $with = ['department', 'roles'];
 
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     /**
@@ -96,7 +98,7 @@ class User extends Authenticatable implements FilamentUser
         $roles = $this->pluckRoleNames();
         if ($roles->contains('managing director') || $roles->contains('bph') || $roles->contains('pjs')) {
             return route('dashboard', ['department' => $this->department]);
-        } else if ($roles->contains('supervisor')) { // supervisor
+        } elseif ($roles->contains('supervisor')) { // supervisor
             return route('dashboard.supervisor');
         } else {
             return route('welcome');
@@ -107,11 +109,11 @@ class User extends Authenticatable implements FilamentUser
     {
         $roles = $this->pluckRoleNames();
         if ($roles->contains('managing director')) {
-            return 'Managing Director of ' . $this->department->name;
+            return 'Managing Director of '.$this->department->name;
         } elseif ($roles->contains('bph')) {
             return 'Badan Pengurus Harian';
         } elseif ($roles->contains('pjs')) {
-            return 'PJS of ' . $this->department->name;
+            return 'PJS of '.$this->department->name;
         } elseif ($roles->contains('supervisor')) {
             return 'Supervisor';
         } else {
@@ -152,12 +154,11 @@ class User extends Authenticatable implements FilamentUser
         ];
     }
 
-
     protected static function boot()
     {
         parent::boot();
         static::creating(function ($model) {
-            if (!$model->id) {
+            if (! $model->id) {
                 $model->id = Str::ulid()->toBase32(); // Generate ULID
             }
         });

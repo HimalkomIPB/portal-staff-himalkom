@@ -1,12 +1,11 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\WorkProgramsController;
-use App\Http\Controllers\WorkProgramsCommentController;
 use App\Http\Controllers\ModViewController;
 use App\Http\Controllers\PDFController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WorkProgramCommentController;
+use App\Http\Controllers\WorkProgramsController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -62,7 +61,7 @@ Route::middleware('auth')->prefix('/dashboard/{department:slug}/workprograms')->
         ->name('workProgram.destroy');
 });
 
-//Comment Routes
+// Comment Routes
 Route::middleware('auth')->group(function () {
     Route::prefix('/dashboard/{workProgram}/comments')
         ->middleware('role:managing director|bph|supervisor|pjs')
@@ -95,9 +94,10 @@ Route::middleware('auth')
             ->name('workprogram.show');
     });
 
-//Clear Session
+// Clear Session
 Route::get('/session/clear/{key}', function ($key) {
     session()->forget($key);
+
     return response()->noContent();
 })->name('session.clear');
 
@@ -107,4 +107,4 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 });
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';

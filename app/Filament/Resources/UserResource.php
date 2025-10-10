@@ -2,27 +2,16 @@
 
 namespace App\Filament\Resources;
 
-use Log;
-use Dom\Text;
-use Filament\Forms;
-use App\Models\User;
-use Filament\Tables;
-use Filament\Forms\Form;
-use App\Models\Department;
-use Filament\Tables\Table;
-use Illuminate\Support\Str;
-use Filament\Resources\Resource;
-use Spatie\Permission\Models\Role;
-use Illuminate\Support\Facades\Hash;
-use Filament\Forms\Components\Select;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\TextInput;
-use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Database\Eloquent\Builder;
-use Filament\Tables\Filters\TrashedFilter;
 use App\Filament\Resources\UserResource\Pages;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Resources\UserResource\RelationManagers;
+use App\Models\User;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Table;
 
 class UserResource extends Resource
 {
@@ -39,7 +28,7 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('name')->placeholder("Ex. Budi Utomo")->required(),
+                TextInput::make('name')->placeholder('Ex. Budi Utomo')->required(),
                 TextInput::make('email')->email()->required(),
                 Select::make('roles')
                     ->multiple()
@@ -50,7 +39,7 @@ class UserResource extends Resource
                     ->label('Department')
                     ->relationship('department', 'name')
                     ->searchable()
-                    ->preload()
+                    ->preload(),
             ]);
     }
 

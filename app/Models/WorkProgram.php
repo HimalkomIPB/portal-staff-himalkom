@@ -3,18 +3,14 @@
 namespace App\Models;
 
 use Carbon\Carbon;
-use App\Models\Department;
-use Illuminate\Support\Str;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 /**
- * 
- *
  * @property string $id
  * @property string $name
  * @property string $description
@@ -35,6 +31,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read int|null $comments_count
  * @property-read Department $department
  * @property-read mixed $timeline_range_text
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|WorkProgram newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|WorkProgram newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|WorkProgram query()
@@ -54,12 +51,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|WorkProgram whereSpgUrl($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|WorkProgram whereStartAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|WorkProgram whereUpdatedAt($value)
+ *
  * @mixin \Eloquent
  */
 class WorkProgram extends Model
 {
     use HasUlids;
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [
@@ -75,7 +75,7 @@ class WorkProgram extends Model
         'proposal_url',
         'lpj_url',
         'spg_url',
-        'komnews_url'
+        'komnews_url',
     ];
 
     protected $with = ['department'];
@@ -94,7 +94,7 @@ class WorkProgram extends Model
     public function getTimelineRangeTextAttribute()
     {
         if ($this->start_at == $this->finished_at) {
-            return date('D d M Y', strtotime($this->start_at)) . ' - ' . date('D d M Y', strtotime($this->finished_at)) . ' (' . "1 day" . ')';
+            return date('D d M Y', strtotime($this->start_at)).' - '.date('D d M Y', strtotime($this->finished_at)).' ('.'1 day'.')';
         }
 
         $start = Carbon::parse($this->start_at);
@@ -109,11 +109,17 @@ class WorkProgram extends Model
         $days = floor($days);
 
         $parts = [];
-        if ($years > 0) $parts[] = "$years year" . ($years > 1 ? "s" : "");
-        if ($months > 0) $parts[] = "$months month" . ($months > 1 ? "s" : "");
-        if ($days > 0) $parts[] = "$days day" . ($days > 1 ? "s" : "");
+        if ($years > 0) {
+            $parts[] = "$years year".($years > 1 ? 's' : '');
+        }
+        if ($months > 0) {
+            $parts[] = "$months month".($months > 1 ? 's' : '');
+        }
+        if ($days > 0) {
+            $parts[] = "$days day".($days > 1 ? 's' : '');
+        }
 
-        return date('D d M Y', strtotime($this->start_at)) . ' - ' . date('D d M Y', strtotime($this->finished_at)) . ' (' . implode(" ", $parts) . ')';
+        return date('D d M Y', strtotime($this->start_at)).' - '.date('D d M Y', strtotime($this->finished_at)).' ('.implode(' ', $parts).')';
     }
 
     protected static function boot()
@@ -121,7 +127,7 @@ class WorkProgram extends Model
 
         parent::boot();
         static::creating(function ($model) {
-            if (!$model->id) {
+            if (! $model->id) {
                 $model->id = Str::ulid()->toBase32();
             }
         });

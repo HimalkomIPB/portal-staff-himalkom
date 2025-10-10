@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class RolePermissionSeeder extends Seeder
 {
@@ -14,16 +13,16 @@ class RolePermissionSeeder extends Seeder
     public function run(): void
     {
         $managingDirectorRole = Role::updateOrCreate([
-            'name' => 'managing director'
+            'name' => 'managing director',
         ]);
         $supervisorRole = Role::updateOrCreate([
-            'name' => 'supervisor'
+            'name' => 'supervisor',
         ]);
         $bphRole = Role::updateOrCreate([
-            'name' => 'bph'
+            'name' => 'bph',
         ]);
         $pjsRole = Role::updateOrCreate([
-            'name' => 'pjs'
+            'name' => 'pjs',
         ]);
     }
 }

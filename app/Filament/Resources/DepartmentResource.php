@@ -2,20 +2,16 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
-use Filament\Forms\Form;
-use App\Models\Department;
-use Filament\Tables\Table;
-use Filament\Resources\Resource;
-use Filament\Forms\Components\Textarea;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\TextInput;
-use Illuminate\Database\Eloquent\Builder;
-use Filament\Tables\Filters\TrashedFilter;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\DepartmentResource\Pages;
-use App\Filament\Resources\DepartmentResource\RelationManagers;
+use App\Models\Department;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Table;
 
 class DepartmentResource extends Resource
 {
@@ -34,7 +30,7 @@ class DepartmentResource extends Resource
             ->schema([
                 TextInput::make('name')->placeholder('Ex. Research and Technology')->required(),
                 TextInput::make('abbreviation')->placeholder('Ex. Richtech')->required(),
-                Textarea::make('description')->placeholder('Ex. Deskripsi departemen')->required()
+                Textarea::make('description')->placeholder('Ex. Deskripsi departemen')->required(),
             ]);
     }
 
@@ -45,7 +41,7 @@ class DepartmentResource extends Resource
                 TextColumn::make('name')
                     ->searchable()
                     ->sortable()
-                    ->description(fn(Department $record): string => $record->abbreviation)
+                    ->description(fn (Department $record): string => $record->abbreviation)
                     ->wrap(),
                 TextColumn::make('description')->limit(50)->wrap(),
                 TextColumn::make('slug'),
@@ -53,9 +49,8 @@ class DepartmentResource extends Resource
                     ->label('Managing Director')
                     ->placeholder('Null')
                     ->formatStateUsing(
-                        fn($record) =>
-                        $record->users()
-                            ->whereHas('roles', fn($q) => $q->where('name', 'managing director'))
+                        fn ($record) => $record->users()
+                            ->whereHas('roles', fn ($q) => $q->where('name', 'managing director'))
                             ->pluck('name')
                             ->join(', ')
                     )

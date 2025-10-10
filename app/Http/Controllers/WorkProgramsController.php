@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\View\View;
 use App\Models\Department;
 use App\Models\WorkProgram;
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 class WorkProgramsController extends Controller
 {
@@ -32,13 +32,14 @@ class WorkProgramsController extends Controller
     {
         $filename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME); // only filename not extension
         $filename = preg_replace('/[^a-zA-Z0-9_\-\s()]/', '', $filename);
-        $generatedFilename = time() . '-' . Str::random(rand(4, 16)) . '_' . Str::slug($filename) . $extension;
+        $generatedFilename = time().'-'.Str::random(rand(4, 16)).'_'.Str::slug($filename).$extension;
+
         return $generatedFilename;
     }
 
     public function index(Department $department): View
     {
-        if (!$this->canDoAction($department)) {
+        if (! $this->canDoAction($department)) {
             abort(403, 'Unauthorized Access of Department WorkProgram');
         }
 
@@ -47,7 +48,7 @@ class WorkProgramsController extends Controller
 
     public function detail(Department $department, WorkProgram $workProgram): View
     {
-        if (!$this->canDoAction($department)) {
+        if (! $this->canDoAction($department)) {
             abort(403, 'Unauthorized Access of Department WorkProgram');
         }
 
@@ -56,7 +57,7 @@ class WorkProgramsController extends Controller
 
     public function create(Department $department): View
     {
-        if (!$this->canDoAction($department)) {
+        if (! $this->canDoAction($department)) {
             abort(403, 'Unauthorized Access of Department WorkProgram');
         }
 
@@ -65,7 +66,7 @@ class WorkProgramsController extends Controller
 
     public function store(Request $request, Department $department)
     {
-        if (!$this->canDoAction($department)) {
+        if (! $this->canDoAction($department)) {
             abort(403, 'Unauthorized Access of Department WorkProgram');
         }
 
@@ -82,7 +83,7 @@ class WorkProgramsController extends Controller
             'lpj_url' => 'sometimes|nullable|mimes:pdf|max:5120',
             'spg_url' => 'sometimes|nullable|mimes:pdf|max:5120',
             'proposal_url' => 'sometimes|nullable|mimes:pdf|max:5120',
-            'komnews_url' => 'sometimes|nullable|mimes:pdf|max:5120'
+            'komnews_url' => 'sometimes|nullable|mimes:pdf|max:5120',
         ]);
 
         DB::beginTransaction();
@@ -106,7 +107,7 @@ class WorkProgramsController extends Controller
             $workProgram = WorkProgram::create($validated);
             DB::commit();
 
-            if ($this->isCurrentUserBph()  && Auth::user()->department->id != $department->id) {
+            if ($this->isCurrentUserBph() && Auth::user()->department->id != $department->id) {
                 return redirect()->route('dashboard.modview.workprogram.show', ['workProgram' => $workProgram, 'department' => $department])
                     ->with('success', ['message' => "Program kerja untuk $department->name berhasil ditambahkan!", 'id' => Str::ulid()->toBase32()]);
             }
@@ -115,25 +116,25 @@ class WorkProgramsController extends Controller
                 ->with('success', ['message' => 'Program kerja berhasil ditambahkan!', 'id' => Str::ulid()->toBase32()]);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return redirect()->route('dashboard.workProgram.create', ['department' => $department])
                 ->withInput()
-                ->with('error', ['message' => 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage(), 'id' => Str::ulid()->toBase32()]);
+                ->with('error', ['message' => 'Terjadi kesalahan saat menyimpan data: '.$e->getMessage(), 'id' => Str::ulid()->toBase32()]);
         }
     }
 
     public function edit(Department $department, WorkProgram $workProgram)
     {
-        if (!$this->canDoAction($department)) {
+        if (! $this->canDoAction($department)) {
             abort(403, 'Unauthorized Access of Department WorkProgram');
         }
 
         return view('dashboard.workprograms.edit', ['workProgram' => $workProgram]);
     }
 
-
     public function update(Request $request, Department $department, WorkProgram $workProgram)
     {
-        if (!$this->canDoAction($department)) {
+        if (! $this->canDoAction($department)) {
             abort(403, 'Unauthorized Access of Department WorkProgram');
         }
 
@@ -150,7 +151,7 @@ class WorkProgramsController extends Controller
             'lpj_url' => 'sometimes|nullable|mimes:pdf|max:5120',
             'spg_url' => 'sometimes|nullable|mimes:pdf|max:5120',
             'proposal_url' => 'sometimes|nullable|mimes:pdf|max:5120',
-            'komnews_url' => 'sometimes|nullable|mimes:pdf|max:5120'
+            'komnews_url' => 'sometimes|nullable|mimes:pdf|max:5120',
         ]);
 
         DB::beginTransaction();
@@ -186,22 +187,22 @@ class WorkProgramsController extends Controller
 
             if ($this->isCurrentUserBph() && Auth::user()->department->id != $department->id) {
                 return redirect()->route('dashboard.modview.workprogram.show', ['workProgram' => $workProgram, 'department' => $department])
-                    ->with('success', ['message' => "Program kerja berhasil diperbarui!", 'id' => Str::ulid()->toBase32()]);
+                    ->with('success', ['message' => 'Program kerja berhasil diperbarui!', 'id' => Str::ulid()->toBase32()]);
             }
 
             return redirect()->route('dashboard.workProgram.detail', ['workProgram' => $workProgram, 'department' => $department])
                 ->with('success', ['message' => 'Program kerja berhasil diperbarui!', 'id' => Str::ulid()->toBase32()]);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return redirect()->route('dashboard.workProgram.edit', ['workProgram' => $workProgram, 'department' => $department])
-                ->with('error', ['message' => 'Terjadi kesalahan saat memperbarui data: ' . $e->getMessage(), 'id' => Str::ulid()->toBase32()]);
+                ->with('error', ['message' => 'Terjadi kesalahan saat memperbarui data: '.$e->getMessage(), 'id' => Str::ulid()->toBase32()]);
         }
     }
 
-
     public function destroy(Department $department, WorkProgram $workProgram)
     {
-        if (!$this->canDoAction($department)) {
+        if (! $this->canDoAction($department)) {
             abort(403, 'Unauthorized Access of Department WorkProgram');
         }
         try {
@@ -209,17 +210,18 @@ class WorkProgramsController extends Controller
             $workProgram->delete();
             DB::commit();
 
-            if ($this->isCurrentUserBph()  && Auth::user()->department->id != $department->id) {
+            if ($this->isCurrentUserBph() && Auth::user()->department->id != $department->id) {
                 return redirect()->route('dashboard.modview.department.show', ['department' => $department])
-                    ->with('success', ['message' => "Program kerja berhasil dihapus!", 'id' => Str::ulid()->toBase32()]);
+                    ->with('success', ['message' => 'Program kerja berhasil dihapus!', 'id' => Str::ulid()->toBase32()]);
             }
 
             return redirect()->route('dashboard.workProgram.index', ['department' => $department])
                 ->with('success', ['message' => 'Program kerja berhasil dihapus!', 'id' => Str::ulid()->toBase32()]);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return redirect()->route('dashboard.workProgram.index', ['department' => $department])
-                ->with('error', ['message' => 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage(), 'id' => Str::ulid()->toBase32()]);
+                ->with('error', ['message' => 'Terjadi kesalahan saat menghapus data: '.$e->getMessage(), 'id' => Str::ulid()->toBase32()]);
         }
     }
 }
