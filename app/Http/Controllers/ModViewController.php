@@ -25,6 +25,8 @@ class ModViewController extends Controller
     {
         $department->load(['workPrograms']);
         $department->append('managing_director');
+        $department->append('pjs');
+        $department->append('pjs_count');
 
         return view('dashboard.modview.show-department', [
             'department' => $department,

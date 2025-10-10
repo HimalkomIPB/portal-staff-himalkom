@@ -42,6 +42,28 @@
                         -
                     </p>
                 @endif
+                <h3 class="font-semibold text-[#111B5A] uppercase tracking-wide text-md md:text-lg lg:text-xl mt-3">PJS
+                </h3>
+                <div class="h-[0.5px] md:h-[1px] px-2 mt-1 mb-2 md:mb-3 bg-gray-200 w-full"></div>
+                @if ($department->pjs_count > 0)
+                    @forelse ($department->pjs as $pj)
+                        <div class="mt-1 text-[12px] md:text-sm font-semibold text-gray-500 space-y-0.5">
+                            <p>{{ $loop->iteration }}. {{ $pj->name }}</p>
+                            <p class="text-[11px] md:text-sm text-gray-400">Email:
+                                {{ $pj->email }}</p>
+                        </div>
+                    @empty
+                        <p
+                            class="text-[12px] md:text-[16px] lg:text-md trix-content font-normal text-gray-600 mt-1 md:mt-2">
+                            -
+                        </p>
+                    @endforelse
+                @else
+                    <p
+                        class="text-[12px] md:text-[16px] lg:text-md trix-content font-normal text-gray-600 mt-1 md:mt-2">
+                        -
+                    </p>
+                @endif
             </div>
 
             <div>
