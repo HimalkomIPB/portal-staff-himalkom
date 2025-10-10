@@ -13,7 +13,8 @@ class ModViewController extends Controller
             ->withCount(['workPrograms'])
             ->orderBy('name', 'ASC')
             ->get()
-            ->append('managing_director');
+            ->append('managing_director')
+            ->append('pjs_count');
 
         return view('dashboard.modview.index-department', [
             'departments' => $departments,
@@ -24,6 +25,8 @@ class ModViewController extends Controller
     {
         $department->load(['workPrograms']);
         $department->append('managing_director');
+        $department->append('pjs');
+        $department->append('pjs_count');
 
         return view('dashboard.modview.show-department', [
             'department' => $department,

@@ -73,6 +73,13 @@ class Department extends Model
             ->get();
     }
 
+    public function getPjsCountAttribute()
+    {
+        return $this->users()
+            ->whereHas('roles', fn ($q) => $q->where('name', 'pjs'))
+            ->count();
+    }
+
     public function users(): HasMany
     {
         return $this->hasMany(User::class);
