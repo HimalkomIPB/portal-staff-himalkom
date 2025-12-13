@@ -30,6 +30,9 @@
                     {{ $workProgram->name }}
                 </h1>
                 <span class="text-lg text-red-500 italic">[Archived]</span>
+                <h2 class="text-md md:text-lg text-gray-500 font-medium">
+                    {{ $department->name }} | Kabinet {{ $department->created_at->year }}/{{ $department->created_at->year + 1 }}
+                </h2>
             </div>
         </div>
 

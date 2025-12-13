@@ -25,7 +25,10 @@
             <h2 class="text-center font-bold uppercase text-[#111B5A] text-lg md:text-xl lg:text-3xl">
                 {{ $department->name }}
             </h2>
-            <h3 class="text-center italic text-gray-500 text-sm md:text-base lg:text-lg">
+            <h3 class="text-center text-gray-500 font-medium text-sm md:text-base lg:text-lg">
+                Kabinet {{ $department->created_at->year }}/{{ $department->created_at->year + 1 }}
+            </h3>
+            <h3 class="text-center italic text-red-500 text-sm md:text-base lg:text-lg">
                 [Archived]
             </h3>
 
@@ -56,8 +59,7 @@
             </div>
 
             <div>
-                <h3 class="font-semibold text-[#111B5A] uppercase tracking-wide text-md md:text-lg lg:text-xl">Archived
-                    At</h3>
+                <h3 class="font-semibold text-[#111B5A] uppercase tracking-wide text-md md:text-lg lg:text-xl">Diarsip</h3>
                 <div class="h-[0.5px] md:h-[1px] px-2 mt-1 mb-2 md:mb-3 bg-gray-200 w-full"></div>
                 <p class="text-[12px] md:text-[16px] lg:text-md trix-content font-normal text-gray-600 mt-1 md:mt-2">
                     {{ $department->deleted_at->format('d M Y H:i') }}</p>

@@ -10,13 +10,20 @@ class DepartmentArchiveController extends Controller
     public function index()
     {
         $departments = Department::onlyTrashed()
-            ->select('id', 'name', 'description', 'slug', 'deleted_at')
+            ->select('id', 'name', 'description', 'slug', 'created_at', 'deleted_at')
             ->withCount(['workPrograms'])
+            ->orderBy('created_at', 'DESC')
             ->orderBy('name', 'ASC')
             ->get()
             ->append('managing_director');
 
-        return view('dashboard.archives.index-department', ['departments' => $departments]);
+        // Group by cabinet year (e.g., 2025 -> "2025/2026")
+        $groupedDepartments = $departments->groupBy(function ($department) {
+            $year = $department->created_at->year;
+            return $year . '/' . ($year + 1);
+        });
+
+        return view('dashboard.archives.index-department', ['groupedDepartments' => $groupedDepartments]);
     }
 
     public function showDepartment(string $id)
