@@ -29,7 +29,7 @@ use Illuminate\Support\Str;
  * @property string|null $komnews_url
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\WorkProgramComment> $comments
  * @property-read int|null $comments_count
- * @property-read Department $department
+ * @property-read \App\Models\Department $department
  * @property-read mixed $timeline_range_text
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|WorkProgram newModelQuery()

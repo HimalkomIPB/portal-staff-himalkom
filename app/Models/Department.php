@@ -59,6 +59,7 @@ class Department extends Model
     public function getManagingDirectorAttribute()
     {
         return $this->users()
+            ->withTrashed()
             ->whereHas('roles', fn ($q) => $q->where('name', 'managing director'))
             ->select(['id', 'name', 'email'])
             ->first();

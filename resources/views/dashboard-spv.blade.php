@@ -61,6 +61,13 @@
                         </li>
 
                         <li>
+                            <a href="{{ route('dashboard.archive.department.index') }}"
+                                class="hover:underline hover:text-blue-900">
+                                Arsip Department Terdahulu
+                            </a>
+                        </li>
+
+                        <li>
                             <a href="{{ route('dashboard.notifications.index') }}"
                                 class="hover:underline hover:text-blue-900">
                                 Notifications

@@ -29,6 +29,20 @@ class AuthenticatedSessionController extends Controller
         $user = Auth::user()->fresh();
         $userRole = $user->pluckRoleNames();
 
+        $department = $user->department;
+        $departmentIsArchived = $department && $department->deleted_at !== null;
+
+        if ($userRole->contains('managing director') || $userRole->contains('bph')) {
+            if ($departmentIsArchived) {
+                // Logout
+                Auth::guard('web')->logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                abort(403, 'Your department is currently archived.');
+            }
+        }
+
         $request->session()->regenerate();
 
         if ($userRole->contains('managing director') || $userRole->contains('bph') || $userRole->contains('pjs')) {

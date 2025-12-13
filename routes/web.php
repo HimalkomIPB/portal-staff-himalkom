@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DepartmentArchiveController;
 use App\Http\Controllers\ModViewController;
 use App\Http\Controllers\PDFController;
 use App\Http\Controllers\ProfileController;
@@ -29,6 +30,22 @@ Route::middleware('auth')->group(function () {
         ->middleware('role:managing director|bph|pjs')
         ->name('dashboard');
 });
+
+// Archives
+Route::middleware('auth')
+    ->prefix('/dashboard/archive')
+    ->name('dashboard.archive.')
+    ->group(function () {
+        Route::get('/departments', [DepartmentArchiveController::class, 'index'])
+            ->defaults('withTrashed', true)
+            ->name('department.index');
+        Route::get('/departments/{id}', [DepartmentArchiveController::class, 'showDepartment'])
+            ->defaults('withTrashed', true)
+            ->name('department.show');
+        Route::get('/departments/{id}/workprograms/{workProgramId}', [DepartmentArchiveController::class, 'showWorkProgram'])
+            ->defaults('withTrashed', true)
+            ->name('workprogram.show');
+    });
 
 // Work Programs
 Route::middleware('auth')->prefix('/dashboard/{department:slug}/workprograms')->name('dashboard.')->group(function () {
@@ -107,4 +124,4 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

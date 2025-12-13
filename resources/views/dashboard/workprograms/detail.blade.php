@@ -76,7 +76,7 @@
 
         <div class="bg-white rounded-xl shadow-md border border-gray-200 mt-2 lg:mt-4 p-3 md:p-4 lg:p-6">
             <div class="flex flex-col justify-center">
-                <h2 class="font-bold text-[#111B5A] mb-1 text-md md:text-lg md:mb-2 lg:text-2xl">📋 Informasi Program
+                <h2 class="font-bold text-[#111B5A] mb-1 text-md md:text-lg md:mb-2 lg:text-2xl">Informasi Program
                     Kerja</h2>
                 <p class="text-[8px] md:text-[10px] text-gray-400 italic mb-0 md:mb-0 ml-2">id: {{ $workProgram->id }}
                 <p class="text-[8px] md:text-[10px] text-gray-400 italic mb-0 md:mb-0 ml-2">created at:
@@ -101,7 +101,7 @@
         </div>
 
         <div class="bg-white  rounded-xl shadow-md border border-gray-200 mt-2 md:mt-3 lg:mt-4 p-3 md:p-4 lg:p-6">
-            <h2 class="font-bold text-[#111B5A] mb-2 text-md md:text-lg md:mb-3 lg:mb-4 lg:text-2xl">📂 Dokumen Terkait
+            <h2 class="font-bold text-[#111B5A] mb-2 text-md md:text-lg md:mb-3 lg:mb-4 lg:text-2xl">Dokumen Terkait
             </h2>
 
             <div class="space-y-3 md:space-y-4">
@@ -117,7 +117,7 @@
                             </div>
                             <a href="{{ route('pdf.show', ['filename' => explode('/', $url)[1]]) }}" target="_blank"
                                 class="text-[10px] w-[140px] md:text-sm px-2 py-2 md:px-4 text-white bg-[#111B5A] hover:bg-[#14267B] rounded-md transition">
-                                📄 Lihat / Unduh
+                                Lihat / Unduh
                             </a>
                         </div>
                     @else
@@ -134,7 +134,7 @@
 
         <div class="bg-white rounded-xl shadow-md border border-gray-200 mt-2 md:mt-3 lg:mt-4 p-3 md:p-4 lg:p-6">
             <div class="mt-1 md:mt-2">
-                <h3 class="font-bold text-[#111B5A] mb-2 text-md md:text-lg md:mb-3 lg:mb-4 lg:text-2x">💬 Diskusi &
+                <h3 class="font-bold text-[#111B5A] mb-2 text-md md:text-lg md:mb-3 lg:mb-4 lg:text-2x">Diskusi &
                     Komentar</h3>
                 @if ($workProgram->comments->isNotEmpty())
                     <ul class="space-y-1 md:space-y-2">
@@ -182,8 +182,7 @@
             </div>
 
             <div class="mt-2 p-2">
-                <h4 class="font-bold text-[#111B5A] mb-2 text-[14px] md:text-[18px] md:mb-3 lg:mb-4 lg:text-xl">📝
-                    Tambah Komentar</h4>
+                <h4 class="font-bold text-[#111B5A] mb-2 text-[14px] md:text-[18px] md:mb-3 lg:mb-4 lg:text-xl">Tambah Komentar</h4>
                 <form method="POST"
                     action="{{ route('dashboard.workProgram.comment.store', ['workProgram' => $workProgram]) }}">
                     @csrf

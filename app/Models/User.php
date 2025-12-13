@@ -128,7 +128,7 @@ class User extends Authenticatable implements FilamentUser
 
     public function department(): BelongsTo
     {
-        return $this->belongsTo(Department::class);
+        return $this->belongsTo(Department::class)->withTrashed();
     }
 
     public function pluckRoleNames()
