@@ -23,6 +23,10 @@
                     @else
                     @endhasanyrole
 
+                    <x-nav-link :href="route('dashboard.archive.department.index')" :active="request()->routeIs('dashboard.archive.*')">
+                        Arsip
+                    </x-nav-link>
+
                     <x-nav-link :href="route('dashboard.notifications.index')" :active="request()->routeIs('dashboard.notifications.*')" class="relative">
                         <x-nav-link-count :title="'Notifications'" :count="$unreadNotificationsCount"> </x-nav-link-count>
                     </x-nav-link>
@@ -98,6 +102,10 @@
                 </x-responsive-nav-link>
             @else
             @endhasanyrole
+
+            <x-responsive-nav-link :href="route('dashboard.archive.department.index')" :active="request()->routeIs('dashboard.archive.*')">
+                Arsip
+            </x-responsive-nav-link>
 
             <x-responsive-nav-link :href="route('dashboard.notifications.index')" :active="request()->routeIs('dashboard.notifications.*')">
                 <x-responsive-nav-link-count :title="'Notifications'" :count="$unreadNotificationsCount"> </x-responsive-nav-link-count>
