@@ -64,8 +64,11 @@
             </div>
 
             <div>
-                <h3 class="font-semibold text-[#111B5A] uppercase tracking-wide text-md md:text-lg lg:text-xl">Program
-                    Kerja</h3>
+                <div class="flex justify-between items-center">
+                    <h3 class="font-semibold text-[#111B5A] uppercase tracking-wide text-md md:text-lg lg:text-xl">
+                        Program
+                        Kerja</h3>
+                </div>
 
                 <div class="h-[0.5px] md:h-[1px] px-2 mt-1 mb-2 md:mb-3 bg-gray-200 w-full"></div>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
@@ -77,7 +80,7 @@
                             <p class="text-sm text-gray-600 mt-1">
                                 {{ $workProgram->timeline_range_text }}
                             </p>
-                            <a href=""
+                            <a href="{{ route('dashboard.archive.workprogram.show', ['id' => $department->id, 'workProgramId' => $workProgram->id]) }}"
                                 class="inline-flex items-center gap-1 text-[#111B5A] hover:text-[#14267B] text-sm font-medium mt-3 transition">
                                 Read More →
                             </a>

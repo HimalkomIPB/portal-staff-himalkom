@@ -42,6 +42,9 @@ Route::middleware('auth')
         Route::get('/departments/{id}', [DepartmentArchiveController::class, 'showDepartment'])
             ->defaults('withTrashed', true)
             ->name('department.show');
+        Route::get('/departments/{id}/workprograms/{workProgramId}', [DepartmentArchiveController::class, 'showWorkProgram'])
+            ->defaults('withTrashed', true)
+            ->name('workprogram.show');
     });
 
 // Work Programs
@@ -121,4 +124,4 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Department;
+use App\Models\WorkProgram;
 
 class DepartmentArchiveController extends Controller
 {
@@ -29,5 +30,21 @@ class DepartmentArchiveController extends Controller
         $department->append('managing_director');
 
         return view('dashboard.archives.show-department', ['department' => $department]);
+    }
+    public function showWorkProgram(string $id, string $workProgramId)
+    {
+        $department = Department::withTrashed()->findOrFail($id);
+        if ($department->deleted_at === null) {
+            abort(404);
+        }
+
+        $workProgram = WorkProgram::where('department_id', $department->id)
+            ->with(['comments.author'])
+            ->findOrFail($workProgramId);
+
+        return view('dashboard.archives.detail-workprogram', [
+            'department' => $department,
+            'workProgram' => $workProgram,
+        ]);
     }
 }
