@@ -41,17 +41,21 @@
 
         <!-- Page Heading -->
         <div class="flex-grow ">
-            @isset($header)
+            @php
+                $pageHeader = $header ?? trim($__env->yieldContent('header'));
+            @endphp
+
+            @if (!empty($pageHeader))
                 <header class="">
                     <div class="max-w-[90dvw] mx-auto px-2 pt-4 pb-2 md:pt-6 md:px-3 ">
-                        {{ $header }}
+                        {!! $pageHeader !!}
                     </div>
                 </header>
-            @endisset
+            @endif
 
             <!-- Page Content -->
             <main class="flex-grow">
-                {{ $slot }}
+                {!! $slot ?? $__env->yieldContent('content') !!}
             </main>
         </div>
 
