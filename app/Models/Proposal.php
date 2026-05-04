@@ -39,6 +39,11 @@ class Proposal extends Model
         return $this->belongsTo(User::class, 'reviewer_id');
     }
 
+    public function workProgram()
+    {
+        return $this->hasOne(WorkProgram::class);
+    }
+
      protected static function boot()
     {
         parent::boot();

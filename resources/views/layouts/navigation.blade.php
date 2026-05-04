@@ -33,6 +33,9 @@
                                 Program Kerja
                             </x-nav-link>
                         @endunlessrole
+                        <x-nav-link :href="route('dashboard.proposals.index')" :active="request()->routeIs('dashboard.proposals.*')" class="relative">
+                            <x-nav-link-count :title="'Review Proposal'" :count="$pendingProposalsCount"> </x-nav-link-count>
+                        </x-nav-link>
                         <x-nav-link :href="route('dashboard.modview.department.index')" :active="request()->routeIs('dashboard.modview.*')">
                             Supervisi (BPH / Supervisor)
                         </x-nav-link>
@@ -120,6 +123,9 @@
             </x-responsive-nav-link>
 
             @hasanyrole('bph')
+                <x-responsive-nav-link :href="route('dashboard.proposals.index')" :active="request()->routeIs('dashboard.proposals.*')">
+                    <x-responsive-nav-link-count :title="'Review Proposal'" :count="$pendingProposalsCount"> </x-responsive-nav-link-count>
+                </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('dashboard.modview.department.index')" :active="request()->routeIs('dashboard.modview.*')">
                     Supervisi (BPH / Supervisor)
                 </x-responsive-nav-link>

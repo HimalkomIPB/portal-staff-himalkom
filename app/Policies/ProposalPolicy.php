@@ -17,7 +17,7 @@ class ProposalPolicy
     }
 
     public function create(User $user): bool {
-        return $user->hasRole('managing director');
+        return $user->hasRole('managing director') || $user->hasRole('pjs');
     }
 
     public function update(User $user, Proposal $proposal): bool {

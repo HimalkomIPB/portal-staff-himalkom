@@ -18,27 +18,6 @@
 
         @include('components.sweet-alert')
 
-        <div class="flex justify-end mb-3">
-            <a href="{{ route('dashboard.workProgram.create', ['department' => $department]) }}"
-                class="mr-2 lg:mr-0 
-                       bg-[#111B5A] 
-                       text-white 
-                       px-2 py-1 md:px-3 md:py-2 
-                       rounded-lg 
-                       shadow-md 
-                       hover:bg-[#14267B] 
-                       transition duration-200 
-                       text-[12px] md:text-sm
-                       font-semibold 
-                       tracking-wide 
-                       flex items-center gap-2">
-                <span class="text-lg md:text-xl">+</span>
-                Tambah Program Kerja
-            </a>
-        </div>
-
-
-
         <div class="mx-2 lg:mx-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
             @forelse ($department->workPrograms as $workProgram)
                 <div
