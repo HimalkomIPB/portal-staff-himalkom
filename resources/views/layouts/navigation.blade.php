@@ -17,6 +17,9 @@
                     </x-nav-link>
 
                     @hasrole('managing director|pjs')
+                        <x-nav-link :href="route('dashboard.proposals.index')" :active="request()->routeIs('dashboard.proposals.*')">
+                            Ajukan Proposal
+                        </x-nav-link>
                         <x-nav-link :href="route('dashboard.workProgram.index', ['department' => Auth::user()->department])" :active="request()->routeIs('dashboard.workProgram.*')">
                             Program Kerja
                         </x-nav-link>
@@ -37,10 +40,6 @@
 
                     <x-nav-link :href="route('dashboard.archive.department.index')" :active="request()->routeIs('dashboard.archive.*')">
                         Arsip
-                    </x-nav-link>
-
-                    <x-nav-link :href="route('dashboard.proposals.index')" :active="request()->routeIs('dashboard.proposals.*')">
-                        Proposal
                     </x-nav-link>
 
                     <x-nav-link :href="route('dashboard.notifications.index')" :active="request()->routeIs('dashboard.notifications.*')" class="relative">
@@ -112,6 +111,10 @@
                 Dashboard
             </x-responsive-nav-link>
 
+            <x-responsive-nav-link :href="route('dashboard.proposals.index')" :active="request()->routeIs('dashboard.proposals.*')">
+                Ajukan Proposal
+            </x-responsive-nav-link>
+
             <x-responsive-nav-link :href="route('dashboard.workProgram.index', ['department' => Auth::user()->department])" :active="request()->routeIs('dashboard.workProgram.*')">
                 Program Kerja
             </x-responsive-nav-link>
@@ -126,11 +129,6 @@
             <x-responsive-nav-link :href="route('dashboard.archive.department.index')" :active="request()->routeIs('dashboard.archive.*')">
                 Arsip
             </x-responsive-nav-link>
-
-            <x-responsive-nav-link :href="route('dashboard.proposals.index')" :active="request()->routeIs('dashboard.proposals.*')">
-                Proposal
-            </x-responsive-nav-link>
-
 
             <x-responsive-nav-link :href="route('dashboard.notifications.index')" :active="request()->routeIs('dashboard.notifications.*')">
                 <x-responsive-nav-link-count :title="'Notifications'" :count="$unreadNotificationsCount"> </x-responsive-nav-link-count>
