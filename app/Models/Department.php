@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
@@ -83,6 +84,15 @@ class Department extends Model
     public function users(): HasMany
     {
         return $this->hasMany(User::class);
+    }
+
+    /**
+     * BPH yang menjadi SC (Steering Committee) untuk department ini.
+     */
+    public function scMembers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'sc_assignments')
+            ->withTimestamps();
     }
 
     public function workPrograms(): HasMany
