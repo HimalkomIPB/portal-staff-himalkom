@@ -11,13 +11,15 @@ class DashboardController extends Controller
 {
     public function show(Department $department): View
     {
-        $userDepartment = Auth::user()->department;
+        $user = Auth::user();
 
         if (! $department) {
             abort(404, 'Department not found');
         }
 
-        if ($department->id != $userDepartment->id) {
+        // Hanya izinkan jika itu department utamanya, ATAU dia adalah SC untuk department itu, 
+        // ATAU dia punya permission untuk view-all (misal Super Admin)
+        if ($department->id != $user->department_id && ! $user->isSCOf($department->id) && ! $user->can('performance.view-all')) {
             abort(403, 'Unauthorized access to this department');
         }
 
