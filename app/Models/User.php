@@ -98,7 +98,7 @@ class User extends Authenticatable implements FilamentUser
     {
         $roles = $this->pluckRoleNames();
 
-        if ($roles->contains('super admin')) {
+        if ($roles->contains('supervisor')) {
             return route('filament.superadmin.pages.dashboard');
         }
 
@@ -110,11 +110,6 @@ class User extends Authenticatable implements FilamentUser
 
         if ($roles->contains('bph') || $roles->contains('sc')) {
             return route('dashboard', ['department' => $this->department]);
-        }
-
-        // Fallback: supervisor lama
-        if ($roles->contains('supervisor')) {
-            return route('dashboard.supervisor');
         }
 
         return route('welcome');
@@ -210,6 +205,6 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return str_ends_with($this->email, '@himalkom.com') && $this->hasVerifiedEmail();
+        return $this->hasRole('supervisor') || (str_ends_with($this->email, '@himalkom.com') && $this->hasVerifiedEmail());
     }
 }
