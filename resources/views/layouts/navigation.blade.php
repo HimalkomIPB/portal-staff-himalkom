@@ -35,9 +35,11 @@
                         </x-nav-link>
                     @endhasrole
 
+                    @can('archive.view')
                     <x-nav-link :href="route('dashboard.archive.department.index')" :active="request()->routeIs('dashboard.archive.*')">
                         Arsip
                     </x-nav-link>
+                    @endcan
 
                     <x-nav-link :href="route('dashboard.notifications.index')" :active="request()->routeIs('dashboard.notifications.*')" class="relative">
                         <x-nav-link-count :title="'Notifications'" :count="$unreadNotificationsCount"> </x-nav-link-count>
@@ -108,9 +110,11 @@
                 Dashboard
             </x-responsive-nav-link>
 
+            @if(Auth::user()->department)
             <x-responsive-nav-link :href="route('dashboard.workProgram.index', ['department' => Auth::user()->department])" :active="request()->routeIs('dashboard.workProgram.*')">
                 Program Kerja
             </x-responsive-nav-link>
+            @endif
 
             @hasanyrole('bph')
                 <x-responsive-nav-link :href="route('dashboard.modview.department.index')" :active="request()->routeIs('dashboard.modview.*')">
@@ -119,9 +123,11 @@
             @else
             @endhasanyrole
 
+            @can('archive.view')
             <x-responsive-nav-link :href="route('dashboard.archive.department.index')" :active="request()->routeIs('dashboard.archive.*')">
                 Arsip
             </x-responsive-nav-link>
+            @endcan
 
             <x-responsive-nav-link :href="route('dashboard.notifications.index')" :active="request()->routeIs('dashboard.notifications.*')">
                 <x-responsive-nav-link-count :title="'Notifications'" :count="$unreadNotificationsCount"> </x-responsive-nav-link-count>

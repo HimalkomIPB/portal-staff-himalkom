@@ -17,6 +17,20 @@
                     </div>
                 </div>
 
+                {{-- Tombol Kembali untuk SC/BPH yang sedang mengunjungi divisi yang diawasi --}}
+                @php
+                    $userDeptSlug = Auth::user()->department?->slug;
+                    $isVisitingOtherDept = $userDeptSlug && $userDeptSlug !== $department->slug;
+                @endphp
+                @if($isVisitingOtherDept)
+                <div class="mt-4">
+                    <a href="{{ route('dashboard', $userDeptSlug) }}"
+                        class="inline-flex items-center text-sm text-blue-600 hover:underline hover:text-blue-800">
+                        ← Kembali ke Dashboard {{ Auth::user()->department->name }}
+                    </a>
+                </div>
+                @endif
+
                 {{-- Quick Links --}}
                 <div class="mt-5">
                     <h2 class="text-2xl font-bold text-gray-800 mb-4">Quick Links</h2>
@@ -28,6 +42,10 @@
                                 Profile
                             </a>
                         </li>
+
+                        @php
+                            $isScOfThisDept = Auth::user()->isSCOf($department);
+                        @endphp
 
                         @hasanyrole('managing director|pjs')
                             <li>
@@ -69,16 +87,11 @@
 
 
                         @hasanyrole('bph')
-                            @unlessrole('managing director|pjs')
+                            @if(!$isScOfThisDept)
+                            {{-- BPH di departemen utamanya sendiri --}}
                                 <li>
                                     <span> {{ $department->name }}</span>
                                     <ul class="ml-5 mt-2 space-y-2 text-sm text-blue-600">
-                                        <li>
-                                            <a href="{{ route('dashboard.workProgram.create', $department) }}"
-                                                class="hover:underline hover:text-blue-800">
-                                                - Buat Program Kerja Baru
-                                            </a>
-                                        </li>
                                         <li>
                                             <span>- Program Kerja</span>
                                             <ul class="ml-5 mt-1 space-y-1">
@@ -104,7 +117,52 @@
                                         </li>
                                     </ul>
                                 </li>
-                            @endunlessrole
+                            @endif
+                        @endhasanyrole
+
+                        @hasanyrole('bph')
+                            {{-- Tampilan untuk SC: Melihat proker divisi yang diawasi (read-only) --}}
+                            @if($isScOfThisDept)
+                            <li>
+                                <span>{{ $department->name }} (Divisi yang Diawasi)</span>
+                                <ul class="ml-5 mt-2 space-y-2 text-sm text-blue-600">
+                                    <li>
+                                        <span>- Program Kerja</span>
+                                        <ul class="ml-5 mt-1 space-y-1">
+                                            @forelse ($departmentWorkPrograms as $workProgram)
+                                                <li>
+                                                    <a href="{{ route('dashboard.workProgram.detail', [$department, $workProgram]) }}"
+                                                        class="hover:underline hover:text-blue-800">
+                                                        - {{ $workProgram->name }}
+                                                    </a>
+                                                </li>
+                                            @empty
+                                                <li><span class="text-gray-500">No Data Available.</span></li>
+                                            @endforelse
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                            @endif
+
+                            @if(Auth::user()->scDepartments->isNotEmpty())
+                            <li>
+                                <div>
+                                    <span>Divisi yang Diawasi (SC)</span>
+                                    <ul class="ml-5 mt-2 space-y-2 text-sm text-blue-600">
+                                        @foreach (Auth::user()->scDepartments as $scDept)
+                                            <li>
+                                                <a href="{{ route('dashboard', $scDept->slug) }}"
+                                                    class="hover:underline hover:text-blue-800">
+                                                    - {{ $scDept->name }}
+                                                </a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            </li>
+                            @endif
+
                             <li>
                                 <div>
                                     <span>Supervisi Department</span>
@@ -133,12 +191,14 @@
                         @else
                         @endhasanyrole
 
+                        @can('archive.view')
                         <li>
                             <a href="{{ route('dashboard.archive.department.index') }}"
                                 class="hover:underline hover:text-blue-900">
                                 Arsip Department Terdahulu
                             </a>
                         </li>
+                        @endcan
 
                         <li>
                             <a href="{{ route('dashboard.notifications.index') }}"
