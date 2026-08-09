@@ -16,7 +16,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('sc_assignments', function (Blueprint $table) {
-            $table->ulid('id')->primary();
             $table->foreignUlid('user_id')
                 ->constrained()
                 ->onDelete('cascade');

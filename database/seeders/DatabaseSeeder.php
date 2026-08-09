@@ -13,13 +13,18 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::updateOrCreate(['email' => env('APP_FILAMENT_USER')], [
+        $user = User::updateOrCreate(['email' => env('APP_FILAMENT_USER')], [
             'name' => 'superadmin_kacow',
             'email' => env('APP_FILAMENT_USER'),
             'password' => bcrypt(env('APP_FILAMENT_PASSWORD')),
             'email_verified_at' => now(),
         ]);
 
-        $this->call([RolePermissionSeeder::class]);
+        $this->call([
+            DepartmentSeeder::class,
+            RolePermissionSeeder::class,
+        ]);
+
+        $user->assignRole('supervisor');
     }
 }
