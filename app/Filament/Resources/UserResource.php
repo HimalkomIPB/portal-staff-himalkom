@@ -63,6 +63,7 @@ class UserResource extends Resource
                             ->preload()
                             ->searchable()
                             ->required()
+                            ->live()
                             ->columnSpanFull(),
                         Select::make('department_id')
                             ->label('Departemen Utama')
@@ -77,7 +78,14 @@ class UserResource extends Resource
                             ->preload()
                             ->searchable()
                             ->helperText('Isi hanya jika user ini adalah SC (Steering Committee) dari BPH yang mengawasi departemen tertentu.')
-                            ->visible(fn () => true),
+                            ->visible(function (\Filament\Forms\Get $get) {
+                                $selectedRoles = $get('roles');
+                                if (empty($selectedRoles)) {
+                                    return false;
+                                }
+                                $bphRoleId = \Spatie\Permission\Models\Role::where('name', 'bph')->value('id');
+                                return in_array('bph', (array) $selectedRoles) || in_array((string)$bphRoleId, array_map('strval', (array) $selectedRoles));
+                            }),
                     ]),
             ]);
     }

@@ -124,8 +124,8 @@ class User extends Authenticatable implements FilamentUser
     {
         $roles = $this->pluckRoleNames();
 
-        if ($roles->contains('super admin')) {
-            return 'Super Admin';
+        if ($roles->contains('supervisor')) {
+            return 'Supervisor';
         } elseif ($roles->contains('bph')) {
             return 'Badan Pengurus Harian';
         } elseif ($roles->contains('managing director')) {

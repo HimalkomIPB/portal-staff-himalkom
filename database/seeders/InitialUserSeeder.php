@@ -36,35 +36,35 @@ class InitialUserSeeder extends Seeder
                 'name' => 'Luthfi Muharram',
                 'email' => 'luthfimuharram@apps.ipb.ac.id',
                 'department_id' => $bphDept,
-                'roles' => ['bph', 'sc'],
+                'roles' => ['bph'],
                 'sc_departments' => [] // Nanti disesuaikan dept apa yg diawasi
             ],
             [
                 'name' => 'Avriell Shianne Chrisly',
                 'email' => 'avriellshiannechrisly@apps.ipb.ac.id',
                 'department_id' => $bphDept,
-                'roles' => ['bph', 'sc'],
+                'roles' => ['bph'],
                 'sc_departments' => []
             ],
             [
                 'name' => 'Yoga Cristopher Gulo',
                 'email' => 'yogacristophergulo@apps.ipb.ac.id',
                 'department_id' => $bphDept,
-                'roles' => ['bph', 'sc'],
+                'roles' => ['bph'],
                 'sc_departments' => []
             ],
             [
                 'name' => 'Andra Firmansyah Asmoro',
                 'email' => 'derrandra@apps.ipb.ac.id',
                 'department_id' => $bphDept,
-                'roles' => ['bph', 'sc'],
+                'roles' => ['bph'],
                 'sc_departments' => [$eduDept] // Contoh: SC untuk Education
             ],
             [
                 'name' => 'M. Ibnu Fadhil',
                 'email' => 'fadhilibnu@apps.ipb.ac.id',
                 'department_id' => $bphDept,
-                'roles' => ['bph', 'sc'],
+                'roles' => ['bph'],
                 'sc_departments' => []
             ],
             // --- BP ---
@@ -136,7 +136,7 @@ class InitialUserSeeder extends Seeder
             $user->syncRoles($data['roles']);
 
             // Assign SC Departments (Pivot Table)
-            if (in_array('sc', $data['roles']) && !empty($data['sc_departments'])) {
+            if (!empty($data['sc_departments'])) {
                 $user->scDepartments()->sync($data['sc_departments']);
             }
         }

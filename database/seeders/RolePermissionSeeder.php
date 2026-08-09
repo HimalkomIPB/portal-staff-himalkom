@@ -81,7 +81,7 @@ class RolePermissionSeeder extends Seeder
         // -------------------------------------------------------
         $roles = [
 
-            'super admin' => $permissions, // semua permission
+            'supervisor' => $permissions, // semua permission
 
             'bph' => [
                 'work-program.view',
@@ -95,6 +95,8 @@ class RolePermissionSeeder extends Seeder
                 'request.manage',
                 'performance.view',
                 'performance.view-all',
+                'performance.evaluate',
+                'performance.view-self',
                 'agenda.view',
                 'agenda.create-org',
                 'finance.view',
@@ -102,22 +104,6 @@ class RolePermissionSeeder extends Seeder
                 'notification.view',
                 'archive.view',
                 'archive.view-all',
-            ],
-
-            'sc' => [
-                'work-program.view',
-                'work-program.comment',
-                'document.view',
-                'document.comment',
-                'request.view',
-                'performance.view',
-                'performance.evaluate',
-                'performance.view-self',
-                'agenda.view',
-                'finance.view',
-                'member.view',
-                'notification.view',
-                'archive.view',
             ],
 
             'managing director' => [
