@@ -37,10 +37,11 @@ class RolePermissionSeeder extends Seeder
             'document.comment',
 
             // --- Request Center ---
-            'request.view',       // lihat request masuk/keluar dept sendiri
-            'request.create',     // buat request baru
-            'request.manage',     // terima/tolak/update status (dept pengelola)
-            'request.view-all',   // lihat semua request semua dept (BPH)
+            'request.view',          // lihat request masuk/keluar dept sendiri
+            'request.create',        // buat request baru
+            'request.manage',        // terima/tolak/update status (dept pengelola)
+            'request.view-all',      // lihat semua request semua dept (BPH)
+            'request.view-status',   // lihat status pengajuan sendiri (Sekretaris, Bendahara)
 
             // --- Performance & Evaluation ---
             'performance.view',       // lihat penilaian anggota dept sendiri / diawasi
@@ -58,6 +59,9 @@ class RolePermissionSeeder extends Seeder
             // --- Finance ---
             'finance.view',        // lihat laporan keuangan
             'finance.manage',      // kelola kas, pemasukan, pengeluaran (Bendahara)
+
+            // --- Task ---
+            'task.view',           // lihat tugas yang diberikan ke user
 
             // --- Member / User ---
             'member.view',         // lihat daftar anggota dept sendiri
@@ -93,6 +97,7 @@ class RolePermissionSeeder extends Seeder
                 'request.view-all',
                 'request.create',
                 'request.manage',
+                'request.view-status',
                 'performance.view',
                 'performance.view-all',
                 'performance.evaluate',
@@ -101,6 +106,7 @@ class RolePermissionSeeder extends Seeder
                 'agenda.create-org',
                 'finance.view',
                 'member.view',
+                'task.view',
                 'notification.view',
                 'archive.view',
                 'archive.view-all',
@@ -118,6 +124,7 @@ class RolePermissionSeeder extends Seeder
                 'request.view',
                 'request.create',
                 'request.manage',
+                'request.view-status',
                 'performance.view',
                 'performance.evaluate',
                 'performance.view-self',
@@ -128,6 +135,7 @@ class RolePermissionSeeder extends Seeder
                 'finance.view',
                 'member.view',
                 'member.manage',
+                'task.view',
                 'notification.view',
                 'archive.view',
             ],
@@ -145,6 +153,7 @@ class RolePermissionSeeder extends Seeder
                 'request.view',
                 'request.create',
                 'request.manage',
+                'request.view-status',
                 'performance.view',
                 'performance.evaluate',
                 'performance.view-self',
@@ -155,6 +164,7 @@ class RolePermissionSeeder extends Seeder
                 'finance.view',
                 'member.view',
                 'member.manage',
+                'task.view',
                 'notification.view',
                 'archive.view',
             ],
@@ -166,10 +176,12 @@ class RolePermissionSeeder extends Seeder
                 'document.comment',
                 'request.view',
                 'request.create',
+                'request.view-status',
                 'performance.view-self',
                 'agenda.view',
                 'agenda.create-dept',
                 'agenda.edit-dept',
+                'task.view',
                 'member.view',
                 'notification.view',
                 'archive.view',
@@ -180,10 +192,12 @@ class RolePermissionSeeder extends Seeder
                 'document.view',
                 'request.view',
                 'request.create',
+                'request.view-status',
                 'performance.view-self',
                 'agenda.view',
                 'finance.view',
                 'finance.manage',
+                'task.view',
                 'member.view',
                 'notification.view',
                 'archive.view',
@@ -192,6 +206,7 @@ class RolePermissionSeeder extends Seeder
             'anggota' => [
                 'agenda.view',
                 'member.view',
+                'task.view',
                 'performance.view-self',
                 'notification.view',
             ],
