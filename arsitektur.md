@@ -196,4 +196,42 @@ Berikut fitur yang permission-nya sudah siap, **tinggal dibangun UI dan logika b
 
 > [!NOTE]
 > **Tentang Modul Performance:**
-> Modul Evaluasi Bulanan Anggota (`member_evaluations`) sedang dalam tahap pengembangan aktif oleh Tim Research & Technology. Tabel database dan permission-nya akan segera ditambahkan. Pastikan **tidak ada tabel atau model dengan nama `member_evaluations`** yang dibuat oleh tim lain untuk menghindari konflik.
+> Modul Evaluasi Bulanan Anggota (`member_evaluations`) telah berhasil diimplementasikan sepenuhnya oleh Tim Research & Technology. 
+
+---
+
+## 8. Modul Evaluasi Bulanan (SOTM / Performance) - Selesai
+
+Modul ini telah selesai dan mencakup fungsionalitas berikut:
+
+### Penyesuaian Bobot Penilaian
+Sistem telah diperbarui dengan 4 kriteria penilaian beserta bobot spesifiknya untuk setiap anggota:
+1. **Kehadiran** (10%)
+2. **Keaktifan Komunikasi** (30%)
+3. **Sikap Disiplin** (30%)
+4. **Inovasi Inisiatif** (30%)
+
+### Struktur Sub-Divisi Departemen
+Kini sistem mendukung pemisahan anggota berdasarkan sub-divisi per departemen, sehingga penentuan *Best Performer* dilakukan secara spesifik **di setiap sub-divisi** (masing-masing memiliki 1 best performer). Struktur sub-divisinya adalah:
+1. **Education:** Competition & Community Empowerment, Academic & Development
+2. **Finance:** Operations & Finance, Marketing & Technology
+3. **Creative:** Social Media & Content Creation, Multimedia & Visual Design
+4. **External:** Social Relation, Campus & Corporate Outreach
+5. **Internal:** Internal Harmony, Internal Celebration
+6. **Research and technology:** Web Innovation, Research & Career Development
+7. **Talent and Sports:** Talent Developement, Sport
+
+### Aturan Penilaian Khusus Departemen "Badan Pengawas"
+- Berbeda dari departemen lain yang membutuhkan nilai gabungan dari MD dan SC, departemen **Badan Pengawas** hanya dinilai oleh **MD (Managing Director)**.
+- Setelah MD selesai melakukan evaluasi, skor gabungan (*combined score*) dan *Best Performer* akan langsung terlihat oleh anggota Badan Pengawas tanpa harus menunggu SC.
+- SC di-blokir (tidak memiliki akses) untuk menilai departemen Badan Pengawas.
+
+### Fitur *Auto-Toggle* Status Aktif MD & PJS
+- Supervisor (Super Admin) dapat mengatur status aktif akun melalui *toggle* **Status Aktif** (`is_active`) di Filament panel.
+- **Validasi Unik per Departemen:** Sistem akan memastikan hanya boleh ada satu entitas (MD atau PJS) yang aktif di dalam suatu departemen pada waktu yang sama. Jika PJS diaktifkan, maka akun MD di departemen yang sama akan otomatis dinonaktifkan (dan sebaliknya).
+- Akun yang berstatus nonaktif (di-nonaktifkan karena pergeseran jabatan) tidak akan bisa login ke dalam portal.
+
+### Fitur Export PDF Laporan SOTM
+- Seluruh peran evaluator (MD, PJS, SC) serta Supervisor dapat mengunduh rekapan SOTM seluruh divisi setiap bulan dalam bentuk format **PDF**.
+- Menggunakan *library* `barryvdh/laravel-dompdf`.
+- Format ekspor memuat tabel terstruktur yang otomatis dikelompokkan berdasarkan Departemen dan Divisi, lengkap dengan rincian 4 kriteria penilaian dan total nilainya.
