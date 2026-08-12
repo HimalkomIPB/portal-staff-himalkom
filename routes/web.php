@@ -4,6 +4,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentArchiveController;
 use App\Http\Controllers\ModViewController;
 use App\Http\Controllers\PDFController;
+use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WorkProgramCommentController;
 use App\Http\Controllers\WorkProgramsController;
@@ -32,6 +33,22 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard/supervisor', [DashboardController::class, 'showSupervisor'])
         ->middleware('role:supervisor')
         ->name('dashboard.supervisor');
+
+    Route::get('/dashboard/performance', [PerformanceController::class, 'index'])
+        ->middleware('permission:performance.view|performance.view-all|performance.evaluate|performance.view-self')
+        ->name('dashboard.performance.index');
+
+    Route::post('/dashboard/performance', [PerformanceController::class, 'store'])
+        ->middleware('permission:performance.evaluate')
+        ->name('dashboard.performance.store');
+
+    Route::get('/dashboard/performance/export', [PerformanceController::class, 'export'])
+        ->middleware('permission:performance.evaluate|performance.view-all')
+        ->name('dashboard.performance.export');
+
+    Route::get('/dashboard/performance/{evaluated}/detail', [PerformanceController::class, 'show'])
+        ->middleware('permission:performance.view|performance.view-all|performance.evaluate|performance.view-self')
+        ->name('dashboard.performance.show');
 
     Route::get('/dashboard/{department:slug}', [DashboardController::class, 'show'])
         ->middleware('auth')   // cukup auth, pembatasan dept dilakukan di controller

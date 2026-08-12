@@ -200,6 +200,15 @@
                         </li>
                         @endcan
 
+                        @canany(['performance.view', 'performance.view-all', 'performance.evaluate', 'performance.view-self'])
+                        <li>
+                            <a href="{{ route('dashboard.performance.index') }}"
+                                class="hover:underline hover:text-blue-900">
+                                Performance Evaluation
+                            </a>
+                        </li>
+                        @endcanany
+
                         <li>
                             <a href="{{ route('dashboard.notifications.index') }}"
                                 class="hover:underline hover:text-blue-900">
