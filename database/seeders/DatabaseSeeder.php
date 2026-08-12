@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             DepartmentSeeder::class,
             RolePermissionSeeder::class,
+            InitialUserSeeder::class,
         ]);
 
         $user->assignRole('supervisor');
