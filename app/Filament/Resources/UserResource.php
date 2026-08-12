@@ -10,9 +10,11 @@ use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
@@ -70,7 +72,59 @@ class UserResource extends Resource
                             ->relationship('department', 'name')
                             ->searchable()
                             ->preload()
+                            ->live()
+                            ->afterStateUpdated(fn (callable $set) => $set('sub_division', null))
                             ->helperText('Departemen tempat user ini bertugas sebagai MD/PJS/Sekretaris/dll.'),
+                        Select::make('sub_division')
+                            ->label('Sub Divisi')
+                            ->options(function (\Filament\Forms\Get $get) {
+                                $departmentId = $get('department_id');
+                                if (!$departmentId) {
+                                    return [];
+                                }
+                                $department = \App\Models\Department::find($departmentId);
+                                if (!$department) {
+                                    return [];
+                                }
+                                
+                                $mapping = [
+                                    'Education' => ['Competition & Community Empowerment', 'Academic & Development'],
+                                    'Finance' => ['Operations & Finance', 'Marketing & Technology'],
+                                    'Creative' => ['Social Media & Content Creation', 'Multimedia & Visual Design'],
+                                    'External' => ['Social Relation', 'Campus & Corporate Outreach'],
+                                    'Internal' => ['Internal Harmony', 'Internal Celebration'],
+                                    'Research and Technology' => ['Web Innovation', 'Research & Career Development'],
+                                    'Talent and Sport' => ['Talent Developement', 'Sport'],
+                                ];
+                                
+                                $subs = $mapping[$department->name] ?? [];
+                                return array_combine($subs, $subs);
+                            })
+                            ->visible(function (\Filament\Forms\Get $get) {
+                                $selectedRoles = $get('roles');
+                                if (empty($selectedRoles)) {
+                                    return false;
+                                }
+                                $anggotaRoleId = \Spatie\Permission\Models\Role::where('name', 'anggota')->value('id');
+                                return in_array('anggota', (array) $selectedRoles) || in_array((string)$anggotaRoleId, array_map('strval', (array) $selectedRoles));
+                            })
+                            ->helperText('Pilih sub divisi untuk anggota ini.'),
+                        Toggle::make('is_active')
+                            ->label('Status Aktif')
+                            ->default(true)
+                            ->helperText('Hanya 1 MD/PJS yang boleh aktif dalam satu departemen. Jika diaktifkan, MD/PJS lain di departemen yang sama akan otomatis dinonaktifkan.')
+                            ->visible(function (\Filament\Forms\Get $get) {
+                                $selectedRoles = $get('roles');
+                                if (empty($selectedRoles)) {
+                                    return false;
+                                }
+                                $mdRoleId = \Spatie\Permission\Models\Role::where('name', 'managing director')->value('id');
+                                $pjsRoleId = \Spatie\Permission\Models\Role::where('name', 'pjs')->value('id');
+                                
+                                $roles = array_map('strval', (array) $selectedRoles);
+                                return in_array('managing director', $roles) || in_array((string)$mdRoleId, $roles)
+                                    || in_array('pjs', $roles) || in_array((string)$pjsRoleId, $roles);
+                            }),
                         Select::make('scDepartments')
                             ->label('SC untuk Departemen')
                             ->multiple()
@@ -98,6 +152,10 @@ class UserResource extends Resource
                     ->label('Nama')
                     ->searchable()
                     ->sortable(),
+                IconColumn::make('is_active')
+                    ->label('Aktif')
+                    ->boolean()
+                    ->sortable(),
                 TextColumn::make('email')
                     ->searchable()
                     ->sortable(),
@@ -106,6 +164,11 @@ class UserResource extends Resource
                     ->placeholder('–')
                     ->sortable()
                     ->searchable(),
+                TextColumn::make('sub_division')
+                    ->label('Sub Divisi')
+                    ->placeholder('–')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('roles.name')
                     ->label('Role')
                     ->badge()

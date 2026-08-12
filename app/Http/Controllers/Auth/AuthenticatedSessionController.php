@@ -7,6 +7,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
@@ -27,6 +28,17 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $user = Auth::user()->fresh();
+
+        if (!$user->is_active) {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            throw ValidationException::withMessages([
+                'email' => 'Akun Anda telah dinonaktifkan oleh Administrator.',
+            ]);
+        }
+
         $userRole = $user->pluckRoleNames();
 
         $department = $user->department;
@@ -45,13 +57,25 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        if ($userRole->contains('managing director') || $userRole->contains('bph') || $userRole->contains('pjs')) {
-            return redirect()->intended(route('dashboard', ['department' => $user->department->slug], absolute: false));
-        } elseif ($userRole->contains('supervisor')) {
+        if ($userRole->contains('supervisor')) {
             return redirect()->intended(route('dashboard.supervisor', absolute: false));
-        } else {
-            return redirect()->intended();
         }
+
+        if ($userRole->contains('managing director') || $userRole->contains('bph') || $userRole->contains('pjs')) {
+            if (! $user->department) {
+                Auth::guard('web')->logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                throw ValidationException::withMessages([
+                    'email' => 'Akun ini belum memiliki departemen. Tambahkan Departemen Utama di panel Super Admin.',
+                ]);
+            }
+
+            return redirect()->intended(route('dashboard', ['department' => $user->department->slug], absolute: false));
+        }
+
+        return redirect()->intended();
     }
 
     /**
