@@ -216,6 +216,9 @@ class PerformanceController extends Controller
 
             $groupedMembers = $members->groupBy(function ($member) {
                 return $member['sub_division'] ?: 'Tanpa Divisi';
+            })->map(function ($group) {
+                // Urutkan berdasarkan nilai tertinggi ke terendah, nilai kosong (null) di akhir
+                return $group->sortByDesc('combined_score')->values();
             });
 
             $bestPerformers = [];
