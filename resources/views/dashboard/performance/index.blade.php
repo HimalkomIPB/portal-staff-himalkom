@@ -105,6 +105,9 @@
     <div
         x-data="{
             sidebarOpen: false,
+            showBestOnly: false,
+            showMyDivisionOnly: false,
+            myDivisionIds: {{ json_encode($myDivisionIds) }},
 
             /* ---- Modal Isi Penilaian ---- */
             formOpen: false,
@@ -288,6 +291,20 @@
                     </button>
                 </form>
             </div>
+            <script>
+                // Remove query parameters from URL so a refresh goes back to current month
+                if (window.history.replaceState) {
+                    const url = new URL(window.location.href);
+                    // Keep the 'view' parameter so Staff/Divisions mode isn't lost,
+                    // but remove month and year so they reset on refresh
+                    const viewParam = url.searchParams.get('view');
+                    let newUrl = window.location.pathname;
+                    if (viewParam) {
+                        newUrl += '?view=' + viewParam;
+                    }
+                    window.history.replaceState(null, null, newUrl);
+                }
+            </script>
         </div>
     </aside>
 
@@ -389,6 +406,27 @@
                     </select>
                 </div>
                 <div class="flex items-center gap-2">
+                    <label class="flex items-center gap-2 cursor-pointer mr-2">
+                        <div class="relative">
+                            <input type="checkbox" x-model="showMyDivisionOnly" class="sr-only">
+                            <div class="block h-6 w-10 rounded-full transition duration-300" :class="showMyDivisionOnly ? 'bg-blue-500' : 'bg-slate-300'"></div>
+                            <div class="absolute left-1 top-1 h-4 w-4 rounded-full bg-white transition duration-300" :class="showMyDivisionOnly ? 'translate-x-4' : ''"></div>
+                        </div>
+                        <span class="text-sm font-bold" :class="showMyDivisionOnly ? 'text-blue-600' : 'text-slate-600'">My Division</span>
+                    </label>
+                    <div class="hidden sm:block h-6 w-px bg-slate-300 mr-1"></div>
+
+                    @if ($viewMode === 'staff')
+                        <label class="flex items-center gap-2 cursor-pointer mr-2">
+                            <div class="relative">
+                                <input type="checkbox" x-model="showBestOnly" class="sr-only">
+                                <div class="block h-6 w-10 rounded-full transition duration-300" :class="showBestOnly ? 'bg-amber-400' : 'bg-slate-300'"></div>
+                                <div class="absolute left-1 top-1 h-4 w-4 rounded-full bg-white transition duration-300" :class="showBestOnly ? 'translate-x-4' : ''"></div>
+                            </div>
+                            <span class="text-sm font-bold" :class="showBestOnly ? 'text-amber-500' : 'text-slate-600'">Best Only</span>
+                        </label>
+                        <div class="hidden sm:block h-6 w-px bg-slate-300 mr-1"></div>
+                    @endif
                     <span class="text-sm font-medium text-slate-600">View:</span>
                     <a href="{{ route('dashboard.performance.index', ['month' => $selectedMonth, 'year' => $selectedYear, 'view' => 'divisions']) }}"
                         class="rounded-md px-4 py-2 text-sm font-semibold transition {{ $viewMode === 'divisions' ? 'bg-[#edf3ff] text-[#0b5bd3] ring-1 ring-blue-200' : 'text-slate-500 hover:bg-slate-100' }}">
@@ -411,7 +449,7 @@
                 @else
                     <div class="space-y-10">
                         @foreach ($departmentGroups as $department)
-                            <section>
+                            <section x-show="!showMyDivisionOnly || myDivisionIds.includes('{{ $department['id'] }}')">
                                 {{-- Dept header --}}
                                 <div class="mb-5 flex items-end justify-between gap-4">
                                     <div class="flex min-w-0 items-center gap-3">
@@ -549,10 +587,11 @@
                 {{-- MOBILE VIEW: Card List --}}
                 <div class="block lg:hidden space-y-4">
                     @forelse ($departmentGroups as $dept)
-                        @foreach ($dept['grouped_members'] as $subDivisionName => $members)
+                        <div x-show="!showMyDivisionOnly || myDivisionIds.includes('{{ $dept['id'] }}')" class="space-y-4">
+                            @foreach ($dept['grouped_members'] as $subDivisionName => $members)
                             @foreach ($members as $member)
                                 @php $isBest = isset($dept['best_performers'][$subDivisionName]) && $dept['best_performers'][$subDivisionName] === $member['id'] && $member['combined_score'] !== null; @endphp
-                                <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm relative overflow-hidden">
+                                <div x-show="!showBestOnly || {{ $isBest ? 'true' : 'false' }}" class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm relative overflow-hidden">
                                     {{-- Accent bar --}}
                                     <div class="absolute inset-y-0 left-0 w-1 {{ $isBest ? 'bg-amber-400' : 'bg-blue-200' }}"></div>
                                     <div class="flex items-start justify-between gap-3 mb-3">
@@ -594,7 +633,8 @@
                                     </div>
                                 </div>
                             @endforeach
-                        @endforeach
+                            @endforeach
+                        </div>
                     @empty
                         <div class="rounded-xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center text-sm text-slate-400">
                             Tidak ada data untuk ditampilkan.
@@ -619,10 +659,11 @@
                         </thead>
                         <tbody class="divide-y divide-slate-100 bg-white">
                             @forelse ($departmentGroups as $dept)
-                                @foreach ($dept['grouped_members'] as $subDivisionName => $members)
+                                <template x-if="!showMyDivisionOnly || myDivisionIds.includes('{{ $dept['id'] }}')">
+                                    @foreach ($dept['grouped_members'] as $subDivisionName => $members)
                                     @foreach ($members as $member)
                                     @php $isBest = isset($dept['best_performers'][$subDivisionName]) && $dept['best_performers'][$subDivisionName] === $member['id'] && $member['combined_score'] !== null; @endphp
-                                    <tr class="transition hover:bg-slate-50">
+                                    <tr x-show="!showBestOnly || {{ $isBest ? 'true' : 'false' }}" class="transition hover:bg-slate-50">
                                         <td class="px-6 py-4">
                                             <div class="flex items-center gap-3">
                                                 <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full {{ $isBest ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-[#0b5bd3]' }} text-xs font-bold">
@@ -679,7 +720,8 @@
                                         </td>
                                     </tr>
                                     @endforeach
-                                @endforeach
+                                    @endforeach
+                                </template>
                             @empty
                                 <tr>
                                     <td colspan="7" class="px-6 py-12 text-center text-sm text-slate-400">

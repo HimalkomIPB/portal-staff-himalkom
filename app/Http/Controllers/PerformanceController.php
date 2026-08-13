@@ -255,16 +255,24 @@ class PerformanceController extends Controller
             ];
         });
 
+        $myDivisionIds = $actor->scDepartments->pluck('id')
+            ->push($actor->department_id)
+            ->filter()
+            ->unique()
+            ->values()
+            ->toArray();
+
         return [
             'departmentGroups'  => $departmentGroups,
             'months'            => $months,
+            'years'             => $years,
             'selectedMonth'     => $selectedMonth,
             'selectedMonthName' => $months[$selectedMonth],
             'selectedYear'      => $selectedYear,
-            'years'             => $years,
             'canEvaluate'       => $actor->can('performance.evaluate'),
             'canExport'         => $actor->can('performance.view-all') || $actor->can('performance.evaluate'),
             'viewMode'          => request('view', 'divisions') === 'staff' ? 'staff' : 'divisions',
+            'myDivisionIds'     => $myDivisionIds,
         ];
     }
 
