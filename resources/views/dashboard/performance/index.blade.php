@@ -151,13 +151,15 @@
 
     {{-- ===================== SIDEBAR ===================== --}}
     <aside
-        class="fixed inset-y-0 left-0 z-40 w-72 transform bg-white shadow-xl transition duration-200 lg:sticky lg:top-0 lg:h-screen lg:w-64 lg:translate-x-0 lg:shadow-none"
-        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
-        <div class="flex h-full flex-col border-r border-slate-200">
-            <div class="flex h-20 items-center justify-between px-5">
+        class="fixed z-40 flex flex-col transform bg-white shadow-2xl ring-1 ring-slate-900/5 transition-all duration-300
+               top-4 left-4 right-4 max-h-[calc(100vh-2rem)] rounded-2xl
+               lg:sticky lg:top-0 lg:left-auto lg:right-auto lg:h-screen lg:max-h-screen lg:w-64 lg:rounded-none lg:translate-x-0 lg:translate-y-0 lg:opacity-100 lg:scale-100 lg:shadow-none lg:ring-0"
+        :class="sidebarOpen ? 'translate-y-0 opacity-100 scale-100' : '-translate-y-8 opacity-0 scale-95 pointer-events-none lg:pointer-events-auto'">
+        <div class="flex flex-col min-h-0 lg:h-full lg:border-r lg:border-slate-200">
+            <div class="flex h-20 shrink-0 items-center justify-between px-5 lg:px-6">
                 <a href="{{ $homeHref }}" class="flex items-center gap-3">
-                    <img src="{{ asset('images/himalkom_logo.svg') }}" alt="Portal Himalkom" class="h-9 w-9">
-                    <span class="text-lg font-bold text-[#0b5bd3]">Portal Himalkom</span>
+                    <img src="{{ asset('images/himalkom_logo.svg') }}" alt="Portal Himalkom" class="h-8 w-8">
+                    <span class="text-base font-bold text-[#0b5bd3] tracking-tight">Portal Himalkom</span>
                 </a>
                 <button type="button" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 lg:hidden"
                     @click="sidebarOpen = false">
@@ -167,7 +169,7 @@
                 </button>
             </div>
 
-            <div class="px-5 pb-4">
+            <div class="px-6 pb-4 shrink-0">
                 <label class="relative block">
                     <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
                         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -179,7 +181,7 @@
                 </label>
             </div>
 
-            <nav class="flex-1 overflow-y-auto px-4 pb-4">
+            <nav class="flex-1 overflow-y-auto px-6 pb-4">
                 <div class="space-y-1">
                     <a href="{{ $homeHref }}" class="{{ $sidebarItem }} {{ $sidebarDefault }}">
                         <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -190,7 +192,7 @@
                     </a>
                 </div>
 
-                <p class="mt-7 px-4 text-xs font-medium uppercase tracking-[0.18em] text-slate-400">Workspace</p>
+                <p class="mt-7 px-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-400">Workspace</p>
                 <div class="mt-3 space-y-1">
                     @if ($programHref)
                         <a href="{{ $programHref }}" class="{{ $sidebarItem }} {{ $sidebarDefault }}">
@@ -218,7 +220,7 @@
                     </span>
                 </div>
 
-                <p class="mt-7 px-4 text-xs font-medium uppercase tracking-[0.18em] text-slate-400">Administration</p>
+                <p class="mt-7 px-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-400">Administration</p>
                 <div class="mt-3 space-y-1">
                     @if ($archiveHref)
                         <a href="{{ $archiveHref }}" class="{{ $sidebarItem }} {{ $sidebarDefault }}">
@@ -247,7 +249,7 @@
                     </span>
                 </div>
 
-                <p class="mt-7 px-4 text-xs font-medium uppercase tracking-[0.18em] text-slate-400">Organization</p>
+                <p class="mt-7 px-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-400">Organization</p>
                 <div class="mt-3 space-y-1">
                     <span class="{{ $sidebarItem }} {{ $sidebarDisabled }}">
                         <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -266,7 +268,7 @@
                 </div>
             </nav>
 
-            <div class="border-t border-slate-200 px-4 py-4">
+            <div class="border-t border-slate-200 px-6 pt-4 pb-6 lg:pb-4 space-y-1 shrink-0">
                 <a href="{{ route('profile.edit') }}" class="{{ $sidebarItem }} {{ $sidebarDefault }}">
                     <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="3" />
@@ -544,8 +546,66 @@
 
             {{-- ==================== STAFF VIEW ==================== --}}
             @else
-                <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                    <table class="min-w-full divide-y divide-slate-200">
+                {{-- MOBILE VIEW: Card List --}}
+                <div class="block lg:hidden space-y-4">
+                    @forelse ($departmentGroups as $dept)
+                        @foreach ($dept['grouped_members'] as $subDivisionName => $members)
+                            @foreach ($members as $member)
+                                @php $isBest = isset($dept['best_performers'][$subDivisionName]) && $dept['best_performers'][$subDivisionName] === $member['id'] && $member['combined_score'] !== null; @endphp
+                                <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm relative overflow-hidden">
+                                    {{-- Accent bar --}}
+                                    <div class="absolute inset-y-0 left-0 w-1 {{ $isBest ? 'bg-amber-400' : 'bg-blue-200' }}"></div>
+                                    <div class="flex items-start justify-between gap-3 mb-3">
+                                        <div class="flex items-center gap-3">
+                                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full {{ $isBest ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-[#0b5bd3]' }} text-sm font-bold">
+                                                {{ $member['initials'] }}
+                                            </div>
+                                            <div>
+                                                <h4 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                                                    {{ $member['name'] }}
+                                                    @if ($isBest)
+                                                        <span class="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700">★ BEST</span>
+                                                    @endif
+                                                </h4>
+                                                <p class="text-xs text-slate-500">{{ $member['department_name'] }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-[10px] font-medium text-slate-500">Nilai Akhir</p>
+                                            <p class="text-lg font-bold {{ $member['combined_score'] !== null ? 'text-[#0b5bd3]' : 'text-slate-300' }}">
+                                                {{ $member['combined_score'] ?? '–' }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="space-y-2 border-t border-slate-100 pt-3">
+                                        @foreach (['Kehadiran (10%)', 'Keaktifan Komunikasi (30%)', 'Sikap Disiplin (30%)', 'Inovasi Inisiatif (30%)'] as $label)
+                                            <div class="flex items-center justify-between text-xs">
+                                                <span class="text-slate-500">{{ $label }}</span>
+                                                <span class="text-amber-400 font-medium">
+                                                    @if ($member['scores'][$label] !== null)
+                                                        @php $starC = (int) round($member['scores'][$label] / 20); @endphp
+                                                        @for ($i = 1; $i <= 5; $i++)<span class="{{ $i <= $starC ? 'text-amber-400' : 'text-slate-300' }}">★</span>@endfor
+                                                    @else
+                                                        <span class="text-slate-300 font-bold">–</span>
+                                                    @endif
+                                                </span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endforeach
+                        @endforeach
+                    @empty
+                        <div class="rounded-xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center text-sm text-slate-400">
+                            Tidak ada data untuk ditampilkan.
+                        </div>
+                    @endforelse
+                </div>
+
+                {{-- DESKTOP VIEW: Table --}}
+                <div class="hidden lg:block rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-slate-200">
                         <thead class="bg-slate-50">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Nama</th>
@@ -628,7 +688,8 @@
                                 </tr>
                             @endforelse
                         </tbody>
-                    </table>
+                        </table>
+                    </div>
                 </div>
             @endif
         </section>
