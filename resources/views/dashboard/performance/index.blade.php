@@ -362,6 +362,12 @@
         @endif
 
         <section class="px-4 py-8 sm:px-8">
+            @if ($showWarning)
+                <div class="mb-6 rounded-md bg-[#e53e3e] px-4 py-3 shadow-sm">
+                    <p class="text-sm font-medium text-white">Form penilaian staff bulan ini belum diisi seluruhnya, segera isi!</p>
+                </div>
+            @endif
+
             {{-- Toolbar --}}
             <div class="mb-7 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                 <div>

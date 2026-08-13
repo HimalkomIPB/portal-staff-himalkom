@@ -262,6 +262,20 @@ class PerformanceController extends Controller
             ->values()
             ->toArray();
 
+        $showWarning = false;
+        if ($actor->can('performance.evaluate')) {
+            foreach ($departmentGroups as $dept) {
+                if (in_array($dept['id'], $myDivisionIds)) {
+                    foreach ($dept['grouped_members'] as $group) {
+                        if ($group->contains(fn($member) => $member['combined_score'] === null)) {
+                            $showWarning = true;
+                            break 2;
+                        }
+                    }
+                }
+            }
+        }
+
         return [
             'departmentGroups'  => $departmentGroups,
             'months'            => $months,
@@ -273,6 +287,7 @@ class PerformanceController extends Controller
             'canExport'         => $actor->can('performance.view-all') || $actor->can('performance.evaluate'),
             'viewMode'          => request('view', 'divisions') === 'staff' ? 'staff' : 'divisions',
             'myDivisionIds'     => $myDivisionIds,
+            'showWarning'       => $showWarning,
         ];
     }
 
