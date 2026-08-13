@@ -412,15 +412,17 @@
                     </select>
                 </div>
                 <div class="flex items-center gap-2">
-                    <label class="flex items-center gap-2 cursor-pointer mr-2">
-                        <div class="relative">
-                            <input type="checkbox" x-model="showMyDivisionOnly" class="sr-only">
-                            <div class="block h-6 w-10 rounded-full transition duration-300" :class="showMyDivisionOnly ? 'bg-blue-500' : 'bg-slate-300'"></div>
-                            <div class="absolute left-1 top-1 h-4 w-4 rounded-full bg-white transition duration-300" :class="showMyDivisionOnly ? 'translate-x-4' : ''"></div>
-                        </div>
-                        <span class="text-sm font-bold" :class="showMyDivisionOnly ? 'text-blue-600' : 'text-slate-600'">My Division</span>
-                    </label>
-                    <div class="hidden sm:block h-6 w-px bg-slate-300 mr-1"></div>
+                    @if ($viewMode === 'divisions')
+                        <label class="flex items-center gap-2 cursor-pointer mr-2">
+                            <div class="relative">
+                                <input type="checkbox" x-model="showMyDivisionOnly" class="sr-only">
+                                <div class="block h-6 w-10 rounded-full transition duration-300" :class="showMyDivisionOnly ? 'bg-blue-500' : 'bg-slate-300'"></div>
+                                <div class="absolute left-1 top-1 h-4 w-4 rounded-full bg-white transition duration-300" :class="showMyDivisionOnly ? 'translate-x-4' : ''"></div>
+                            </div>
+                            <span class="text-sm font-bold" :class="showMyDivisionOnly ? 'text-blue-600' : 'text-slate-600'">My Division</span>
+                        </label>
+                        <div class="hidden sm:block h-6 w-px bg-slate-300 mr-1"></div>
+                    @endif
 
                     @if ($viewMode === 'staff')
                         <label class="flex items-center gap-2 cursor-pointer mr-2">
@@ -665,69 +667,67 @@
                         </thead>
                         <tbody class="divide-y divide-slate-100 bg-white">
                             @forelse ($departmentGroups as $dept)
-                                <template x-if="!showMyDivisionOnly || myDivisionIds.includes('{{ $dept['id'] }}')">
-                                    @foreach ($dept['grouped_members'] as $subDivisionName => $members)
-                                    @foreach ($members as $member)
-                                    @php $isBest = isset($dept['best_performers'][$subDivisionName]) && $dept['best_performers'][$subDivisionName] === $member['id'] && $member['combined_score'] !== null; @endphp
-                                    <tr x-show="!showBestOnly || {{ $isBest ? 'true' : 'false' }}" class="transition hover:bg-slate-50">
-                                        <td class="px-6 py-4">
-                                            <div class="flex items-center gap-3">
-                                                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full {{ $isBest ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-[#0b5bd3]' }} text-xs font-bold">
-                                                    {{ $member['initials'] }}
-                                                </div>
-                                                <div>
-                                                    <p class="text-sm font-semibold text-slate-900 flex items-center gap-2">
-                                                        {{ $member['name'] }}
-                                                        @if ($isBest)
-                                                            <span class="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700">★ BEST</span>
-                                                        @endif
-                                                    </p>
-                                                    <p class="text-xs text-slate-400">{{ $member['role_title'] }}</p>
-                                                </div>
+                                @foreach ($dept['grouped_members'] as $subDivisionName => $members)
+                                @foreach ($members as $member)
+                                @php $isBest = isset($dept['best_performers'][$subDivisionName]) && $dept['best_performers'][$subDivisionName] === $member['id'] && $member['combined_score'] !== null; @endphp
+                                <tr x-show="(!showMyDivisionOnly || myDivisionIds.includes('{{ $dept['id'] }}')) && (!showBestOnly || {{ $isBest ? 'true' : 'false' }})" class="transition hover:bg-slate-50">
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full {{ $isBest ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-[#0b5bd3]' }} text-xs font-bold">
+                                                {{ $member['initials'] }}
                                             </div>
-                                        </td>
-                                        <td class="px-6 py-4 text-sm text-slate-600">{{ $member['department_name'] }}</td>
-                                        <td class="px-4 py-4 text-center text-sm">
-                                            @if ($member['scores']['Kehadiran (10%)'] !== null)
-                                                @php $starC = (int) round($member['scores']['Kehadiran (10%)'] / 20); @endphp
-                                                <span class="text-amber-400">@for ($i = 1; $i <= 5; $i++)<span>{{ $i <= $starC ? '★' : '☆' }}</span>@endfor</span>
-                                            @else
-                                                <span class="text-slate-300 font-semibold">–</span>
-                                            @endif
-                                        </td>
-                                        <td class="px-4 py-4 text-center text-sm">
-                                            @if ($member['scores']['Keaktifan Komunikasi (30%)'] !== null)
-                                                @php $starC = (int) round($member['scores']['Keaktifan Komunikasi (30%)'] / 20); @endphp
-                                                <span class="text-amber-400">@for ($i = 1; $i <= 5; $i++)<span>{{ $i <= $starC ? '★' : '☆' }}</span>@endfor</span>
-                                            @else
-                                                <span class="text-slate-300 font-semibold">–</span>
-                                            @endif
-                                        </td>
-                                        <td class="px-4 py-4 text-center text-sm">
-                                            @if ($member['scores']['Sikap Disiplin (30%)'] !== null)
-                                                @php $starC = (int) round($member['scores']['Sikap Disiplin (30%)'] / 20); @endphp
-                                                <span class="text-amber-400">@for ($i = 1; $i <= 5; $i++)<span>{{ $i <= $starC ? '★' : '☆' }}</span>@endfor</span>
-                                            @else
-                                                <span class="text-slate-300 font-semibold">–</span>
-                                            @endif
-                                        </td>
-                                        <td class="px-4 py-4 text-center text-sm">
-                                            @if ($member['scores']['Inovasi Inisiatif (30%)'] !== null)
-                                                @php $starC = (int) round($member['scores']['Inovasi Inisiatif (30%)'] / 20); @endphp
-                                                <span class="text-amber-400">@for ($i = 1; $i <= 5; $i++)<span>{{ $i <= $starC ? '★' : '☆' }}</span>@endfor</span>
-                                            @else
-                                                <span class="text-slate-300 font-semibold">–</span>
-                                            @endif
-                                        </td>
-                                        <td class="px-4 py-4 text-center">
-                                            <span class="text-lg font-bold {{ $member['combined_score'] !== null ? 'text-[#0b5bd3]' : 'text-slate-300' }}">
-                                                {{ $member['combined_score'] ?? '–' }}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                    @endforeach
-                                </template>
+                                            <div>
+                                                <p class="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                                                    {{ $member['name'] }}
+                                                    @if ($isBest)
+                                                        <span class="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700">★ BEST</span>
+                                                    @endif
+                                                </p>
+                                                <p class="text-xs text-slate-400">{{ $member['role_title'] }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-slate-600">{{ $member['department_name'] }}</td>
+                                    <td class="px-4 py-4 text-center text-sm">
+                                        @if ($member['scores']['Kehadiran (10%)'] !== null)
+                                            @php $starC = (int) round($member['scores']['Kehadiran (10%)'] / 20); @endphp
+                                            <span class="text-amber-400">@for ($i = 1; $i <= 5; $i++)<span>{{ $i <= $starC ? '★' : '☆' }}</span>@endfor</span>
+                                        @else
+                                            <span class="text-slate-300 font-semibold">–</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-4 py-4 text-center text-sm">
+                                        @if ($member['scores']['Keaktifan Komunikasi (30%)'] !== null)
+                                            @php $starC = (int) round($member['scores']['Keaktifan Komunikasi (30%)'] / 20); @endphp
+                                            <span class="text-amber-400">@for ($i = 1; $i <= 5; $i++)<span>{{ $i <= $starC ? '★' : '☆' }}</span>@endfor</span>
+                                        @else
+                                            <span class="text-slate-300 font-semibold">–</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-4 py-4 text-center text-sm">
+                                        @if ($member['scores']['Sikap Disiplin (30%)'] !== null)
+                                            @php $starC = (int) round($member['scores']['Sikap Disiplin (30%)'] / 20); @endphp
+                                            <span class="text-amber-400">@for ($i = 1; $i <= 5; $i++)<span>{{ $i <= $starC ? '★' : '☆' }}</span>@endfor</span>
+                                        @else
+                                            <span class="text-slate-300 font-semibold">–</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-4 py-4 text-center text-sm">
+                                        @if ($member['scores']['Inovasi Inisiatif (30%)'] !== null)
+                                            @php $starC = (int) round($member['scores']['Inovasi Inisiatif (30%)'] / 20); @endphp
+                                            <span class="text-amber-400">@for ($i = 1; $i <= 5; $i++)<span>{{ $i <= $starC ? '★' : '☆' }}</span>@endfor</span>
+                                        @else
+                                            <span class="text-slate-300 font-semibold">–</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-4 py-4 text-center">
+                                        <span class="text-lg font-bold {{ $member['combined_score'] !== null ? 'text-[#0b5bd3]' : 'text-slate-300' }}">
+                                            {{ $member['combined_score'] ?? '–' }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                @endforeach
+                                @endforeach
                             @empty
                                 <tr>
                                     <td colspan="7" class="px-6 py-12 text-center text-sm text-slate-400">
