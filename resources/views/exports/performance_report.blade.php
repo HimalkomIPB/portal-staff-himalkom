@@ -80,7 +80,7 @@
                             <td>
                                 {{ $member['name'] }}
                                 @if($isBest)
-                                    <span style="color: #d97706; font-weight: bold; font-size: 10px; margin-left: 5px;">★ Best Performer</span>
+                                    <span style="color: #d97706; font-weight: bold; font-size: 10px; margin-left: 5px;">(Best Performer)</span>
                                 @endif
                             </td>
                             <td class="text-center">{{ $member['scores']['Kehadiran (10%)'] ?? '-' }}</td>
