@@ -572,6 +572,11 @@
                                                         class="h-9 w-full rounded-md bg-slate-100 px-4 text-sm font-medium text-slate-400 cursor-not-allowed">
                                                         Diri Sendiri (Tidak Dinilai)
                                                     </button>
+                                                @elseif ($member['button_status'] === 'closed')
+                                                    <button type="button" disabled
+                                                        class="h-9 w-full rounded-md bg-rose-50 px-4 text-sm font-medium text-rose-400 cursor-not-allowed border border-rose-100">
+                                                        Di Luar Jadwal (Tgl 25 - 5)
+                                                    </button>
                                                 @else
                                                     {{-- view_only: belum ada nilai, user tidak bisa menilai --}}
                                                     <button type="button" disabled
