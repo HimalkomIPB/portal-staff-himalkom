@@ -206,21 +206,6 @@ class User extends Authenticatable implements FilamentUser
                 $model->id = Str::ulid()->toBase32(); // Generate ULID
             }
         });
-
-        static::saved(function ($user) {
-            // Auto deactivate the other MD or PJS in the same department if this user is activated
-            if ($user->is_active && $user->department_id) {
-                $roles = $user->roles->pluck('name')->toArray();
-                if (in_array('managing director', $roles) || in_array('pjs', $roles)) {
-                    User::where('department_id', $user->department_id)
-                        ->where('id', '!=', $user->id)
-                        ->whereHas('roles', function ($query) {
-                            $query->whereIn('name', ['managing director', 'pjs']);
-                        })
-                        ->update(['is_active' => false]);
-                }
-            }
-        });
     }
 
     public function canAccessPanel(Panel $panel): bool

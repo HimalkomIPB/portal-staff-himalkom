@@ -229,9 +229,14 @@ Kini sistem mendukung pemisahan anggota berdasarkan sub-divisi per departemen, s
 ### Fitur *Auto-Toggle* Status Aktif MD & PJS
 - Supervisor (Super Admin) dapat mengatur status aktif akun melalui *toggle* **Status Aktif** (`is_active`) di Filament panel.
 - **Validasi Unik per Departemen:** Sistem akan memastikan hanya boleh ada satu entitas (MD atau PJS) yang aktif di dalam suatu departemen pada waktu yang sama. Jika PJS diaktifkan, maka akun MD di departemen yang sama akan otomatis dinonaktifkan (dan sebaliknya).
+- *Update Arsitektur:* Pengecekan *auto-toggle* dipindahkan dari *Model Event Observer* (`saved` di `User.php`) ke dalam proses *Lifecycle Hook* Filament (`afterCreate` dan `afterSave`). Hal ini dilakukan karena sinkronisasi *role* dari `spatie/laravel-permission` terjadi **setelah** *model event* utama (sehingga peran akun belum terdeteksi saat *event* `saved` memicu logika).
 - Akun yang berstatus nonaktif (di-nonaktifkan karena pergeseran jabatan) tidak akan bisa login ke dalam portal.
 
 ### Fitur Export PDF Laporan SOTM
 - Seluruh peran evaluator (MD, PJS, SC) serta Supervisor dapat mengunduh rekapan SOTM seluruh divisi setiap bulan dalam bentuk format **PDF**.
 - Menggunakan *library* `barryvdh/laravel-dompdf`.
 - Format ekspor memuat tabel terstruktur yang otomatis dikelompokkan berdasarkan Departemen dan Divisi, lengkap dengan rincian 4 kriteria penilaian dan total nilainya.
+
+### Logika Tampilan Mahkota *Best Performer* (Validasi Kelengkapan)
+- Mahkota penghargaan *Best Performer* (SOTM) di dalam suatu sub-divisi baru akan dimunculkan ke publik **hanya setelah seluruh anggota di sub-divisi tersebut selesai dievaluasi** (memiliki *Nilai Akhir*).
+- Jika ada satu saja anggota sub-divisi yang masih belum memiliki nilai (*pending*), maka sistem akan menahan status *Best Performer* agar penentuan pemenang adil dan objektif.

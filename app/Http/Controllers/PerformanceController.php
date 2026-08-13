@@ -220,9 +220,14 @@ class PerformanceController extends Controller
 
             $bestPerformers = [];
             foreach ($groupedMembers as $subName => $group) {
-                $bestScore = $group->max('combined_score');
-                if ($bestScore !== null && $bestScore > 0) {
-                    $bestPerformers[$subName] = $group->where('combined_score', $bestScore)->first()['id'];
+                // Pastikan semua anggota di sub-divisi ini sudah memiliki Nilai Akhir
+                $allEvaluated = $group->every(fn($member) => $member['combined_score'] !== null);
+                
+                if ($allEvaluated) {
+                    $bestScore = $group->max('combined_score');
+                    if ($bestScore !== null && $bestScore > 0) {
+                        $bestPerformers[$subName] = $group->where('combined_score', $bestScore)->first()['id'];
+                    }
                 }
             }
 
