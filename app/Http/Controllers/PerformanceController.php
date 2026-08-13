@@ -122,9 +122,18 @@ class PerformanceController extends Controller
             'period_year'    => $year,
         ])->with('evaluator')->first();
 
-        // Hanya tampilkan jika kedua sudah mengisi
-        if (! $mdEval || ! $scEval) {
-            abort(403, 'Detail penilaian belum bisa dilihat karena belum semua pihak mengisi formulir.');
+        $isBadanPengawas = $evaluatedUser->department?->name === 'Badan Pengawas';
+
+        if ($isBadanPengawas) {
+            // Badan Pengawas hanya butuh mdEval
+            if (! $mdEval) {
+                abort(403, 'Detail penilaian belum bisa dilihat karena MD belum mengisi formulir.');
+            }
+        } else {
+            // Departemen lain butuh mdEval dan scEval
+            if (! $mdEval || ! $scEval) {
+                abort(403, 'Detail penilaian belum bisa dilihat karena belum semua pihak mengisi formulir.');
+            }
         }
 
         return view('dashboard.performance.show', [
