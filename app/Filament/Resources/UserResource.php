@@ -105,8 +105,25 @@ class UserResource extends Resource
                                 if (empty($selectedRoles)) {
                                     return false;
                                 }
-                                $anggotaRoleId = \Spatie\Permission\Models\Role::where('name', 'anggota')->value('id');
-                                return in_array('anggota', (array) $selectedRoles) || in_array((string)$anggotaRoleId, array_map('strval', (array) $selectedRoles));
+                                
+                                $rolesArray = array_map('strval', (array) $selectedRoles);
+                                
+                                // Ambil ID dari role-role yang tidak boleh punya sub-divisi
+                                $bannedRoles = \Spatie\Permission\Models\Role::whereIn('name', [
+                                    'supervisor', 'bph', 'managing director', 'pjs'
+                                ])->pluck('id')->map(fn($id) => (string)$id)->toArray();
+                                
+                                // Jika ada role terlarang yang dipilih (baik via nama atau ID), sembunyikan sub-divisi
+                                $hasBannedRole = count(array_intersect($rolesArray, ['supervisor', 'bph', 'managing director', 'pjs'])) > 0 
+                                              || count(array_intersect($rolesArray, $bannedRoles)) > 0;
+                                              
+                                if ($hasBannedRole) {
+                                    return false;
+                                }
+
+                                // Tampilkan jika memiliki role anggota
+                                $anggotaRoleId = (string) \Spatie\Permission\Models\Role::where('name', 'anggota')->value('id');
+                                return in_array('anggota', $rolesArray) || in_array($anggotaRoleId, $rolesArray);
                             })
                             ->helperText('Pilih sub divisi untuk anggota ini.'),
                         Toggle::make('is_active')
