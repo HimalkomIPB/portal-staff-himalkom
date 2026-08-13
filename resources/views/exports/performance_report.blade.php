@@ -73,8 +73,16 @@
                 </thead>
                 <tbody>
                     @forelse($members as $member)
-                        <tr>
-                            <td>{{ $member['name'] }}</td>
+                        @php
+                            $isBest = isset($dept['best_performers'][$subName]) && $dept['best_performers'][$subName] === $member['id'];
+                        @endphp
+                        <tr {!! $isBest ? 'style="background-color: #fdf6e3;"' : '' !!}>
+                            <td>
+                                {{ $member['name'] }}
+                                @if($isBest)
+                                    <span style="color: #d97706; font-weight: bold; font-size: 10px; margin-left: 5px;">👑 Best Performer</span>
+                                @endif
+                            </td>
                             <td class="text-center">{{ $member['scores']['Kehadiran (10%)'] ?? '-' }}</td>
                             <td class="text-center">{{ $member['scores']['Keaktifan Komunikasi (30%)'] ?? '-' }}</td>
                             <td class="text-center">{{ $member['scores']['Sikap Disiplin (30%)'] ?? '-' }}</td>
