@@ -629,7 +629,8 @@
                                                         <span class="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700">★ BEST</span>
                                                     @endif
                                                 </h4>
-                                                <p class="text-xs text-slate-500">{{ $member['department_name'] }}</p>
+                                                <p class="text-xs text-slate-700 font-medium">{{ $member['department_name'] }}</p>
+                                                <p class="text-[10px] text-slate-500">{{ $member['sub_division'] ?: 'Tanpa Divisi' }}</p>
                                             </div>
                                         </div>
                                         <div class="text-right">
@@ -672,7 +673,7 @@
                         <thead class="bg-slate-50">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Nama</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Divisi</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Departemen</th>
                                 <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-slate-500">Kehadiran (10%)</th>
                                 <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-slate-500">Keaktifan Komunikasi (30%)</th>
                                 <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-slate-500">Sikap Disiplin (30%)</th>
@@ -702,7 +703,10 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-slate-600">{{ $member['department_name'] }}</td>
+                                    <td class="px-6 py-4">
+                                        <p class="text-sm font-medium text-slate-700">{{ $member['department_name'] }}</p>
+                                        <p class="text-xs text-slate-400 mt-0.5">{{ $member['sub_division'] ?: 'Tanpa Divisi' }}</p>
+                                    </td>
                                     <td class="px-4 py-4 text-center text-sm">
                                         @if ($member['scores']['Kehadiran (10%)'] !== null)
                                             @php $starC = (int) round($member['scores']['Kehadiran (10%)'] / 20); @endphp
