@@ -27,9 +27,9 @@ class SuperadminPanelProvider extends PanelProvider
             ->id('superadmin')
             ->path('superadmin')
             ->login()
-            ->brandLogo(asset('images/himalkom_logo.svg'))
+            ->brandLogo(asset('images/himalkom_logo_bw.svg'))
             ->brandLogoHeight('40px')
-            ->favicon(asset('images/himalkom_logo.svg'))
+            ->favicon(asset('images/himalkom_logo_bw.svg'))
             ->colors([
                 'primary' => Color::Blue,
             ])
