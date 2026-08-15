@@ -26,16 +26,17 @@ class PerformanceEvaluation extends Model
     ];
 
     protected $casts = [
-        'score_attendance'   => 'integer',
-        'score_commitment'   => 'integer',
+        'score_attendance' => 'integer',
+        'score_commitment' => 'integer',
         'score_contribution' => 'integer',
-        'score_initiative'   => 'integer',
-        'final_score'        => 'decimal:2',
-        'period_month'       => 'integer',
-        'period_year'        => 'integer',
+        'score_initiative' => 'integer',
+        'final_score' => 'decimal:2',
+        'period_month' => 'integer',
+        'period_year' => 'integer',
     ];
 
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     // Hitung dan set final_score otomatis
@@ -71,12 +72,12 @@ class PerformanceEvaluation extends Model
         int $year
     ): bool {
         return static::where([
-            'evaluator_id'   => $evaluatorId,
-            'evaluated_id'   => $evaluatedId,
-            'department_id'  => $departmentId,
+            'evaluator_id' => $evaluatorId,
+            'evaluated_id' => $evaluatedId,
+            'department_id' => $departmentId,
             'evaluator_role' => $role,
-            'period_month'   => $month,
-            'period_year'    => $year,
+            'period_month' => $month,
+            'period_year' => $year,
         ])->exists();
     }
 }

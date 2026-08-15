@@ -158,6 +158,7 @@ Route::middleware(['auth', 'permission:archive.view-all'])
 // -------------------------------------------------------
 Route::get('/session/clear/{key}', function ($key) {
     session()->forget($key);
+
     return response()->noContent();
 })->name('session.clear');
 

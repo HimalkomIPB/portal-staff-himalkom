@@ -8,7 +8,7 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     * 
+     *
      * Tabel ini menyimpan relasi SC (Steering Committee) ↔ Department.
      * Setiap BPH bisa menjadi SC untuk satu atau lebih department.
      * Department utama user tetap di kolom department_id pada tabel users.

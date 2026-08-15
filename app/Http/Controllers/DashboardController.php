@@ -18,7 +18,7 @@ class DashboardController extends Controller
             abort(404, 'Department not found');
         }
 
-        // Hanya izinkan jika itu department utamanya, ATAU dia adalah SC untuk department itu, 
+        // Hanya izinkan jika itu department utamanya, ATAU dia adalah SC untuk department itu,
         // ATAU dia punya permission untuk view-all (misal Super Admin)
         if (! $user->isSuperAdmin() && $department->id != $user->department_id && ! $user->isSCOf($department) && ! $user->can('performance.view-all')) {
             abort(403, 'Unauthorized access to this department');

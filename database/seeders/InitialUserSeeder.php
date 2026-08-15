@@ -30,42 +30,42 @@ class InitialUserSeeder extends Seeder
                 'email' => 'ndayuputri@apps.ipb.ac.id',
                 'department_id' => $bphDept,
                 'roles' => ['bph'],
-                'sc_departments' => []
+                'sc_departments' => [],
             ],
             [
                 'name' => 'Luthfi Muharram',
                 'email' => 'luthfimuharram@apps.ipb.ac.id',
                 'department_id' => $bphDept,
                 'roles' => ['bph'],
-                'sc_departments' => [] // Nanti disesuaikan dept apa yg diawasi
+                'sc_departments' => [], // Nanti disesuaikan dept apa yg diawasi
             ],
             [
                 'name' => 'Avriell Shianne Chrisly',
                 'email' => 'avriellshiannechrisly@apps.ipb.ac.id',
                 'department_id' => $bphDept,
                 'roles' => ['bph'],
-                'sc_departments' => []
+                'sc_departments' => [],
             ],
             [
                 'name' => 'Yoga Cristopher Gulo',
                 'email' => 'yogacristophergulo@apps.ipb.ac.id',
                 'department_id' => $bphDept,
                 'roles' => ['bph'],
-                'sc_departments' => []
+                'sc_departments' => [],
             ],
             [
                 'name' => 'Andra Firmansyah Asmoro',
                 'email' => 'derrandra@apps.ipb.ac.id',
                 'department_id' => $bphDept,
                 'roles' => ['bph'],
-                'sc_departments' => [$eduDept] // Contoh: SC untuk Education
+                'sc_departments' => [$eduDept], // Contoh: SC untuk Education
             ],
             [
                 'name' => 'M. Ibnu Fadhil',
                 'email' => 'fadhilibnu@apps.ipb.ac.id',
                 'department_id' => $bphDept,
                 'roles' => ['bph'],
-                'sc_departments' => []
+                'sc_departments' => [],
             ],
             // --- BP ---
             [
@@ -73,7 +73,7 @@ class InitialUserSeeder extends Seeder
                 'email' => 'arradhin@apps.ipb.ac.id',
                 'department_id' => $bpDept,
                 'roles' => ['bph'], // BP pakai role bph/pjs? (Sesuaikan jika perlu)
-                'sc_departments' => []
+                'sc_departments' => [],
             ],
             // --- MD (Managing Director) ---
             [
@@ -81,42 +81,42 @@ class InitialUserSeeder extends Seeder
                 'email' => 'jeremytjahjana@apps.ipb.ac.id',
                 'department_id' => $eduDept,
                 'roles' => ['managing director'],
-                'sc_departments' => []
+                'sc_departments' => [],
             ],
             [
                 'name' => 'Nafil Khautal Budiono',
                 'email' => 'nkhautalbudiono@apps.ipb.ac.id',
                 'department_id' => $extDept,
                 'roles' => ['managing director'],
-                'sc_departments' => []
+                'sc_departments' => [],
             ],
             [
                 'name' => 'Nabil Musannif Siregar',
                 'email' => 'nabilnifsiregar@apps.ipb.ac.id',
                 'department_id' => $intDept,
                 'roles' => ['managing director'],
-                'sc_departments' => []
+                'sc_departments' => [],
             ],
             [
                 'name' => 'Fatimah Puspa Jani',
                 'email' => 'fatimahpjani@apps.ipb.ac.id',
                 'department_id' => $finDept,
                 'roles' => ['managing director'],
-                'sc_departments' => []
+                'sc_departments' => [],
             ],
             [
                 'name' => 'M. Reyhan Hermawan',
                 'email' => 'mreyhanhermawan@apps.ipb.ac.id',
                 'department_id' => $tdsDept,
                 'roles' => ['managing director'],
-                'sc_departments' => []
+                'sc_departments' => [],
             ],
             [
                 'name' => 'Faisal Mumtaz',
                 'email' => 'faisalmumtaz@apps.ipb.ac.id',
                 'department_id' => $creaDept,
                 'roles' => ['managing director'],
-                'sc_departments' => []
+                'sc_departments' => [],
             ],
         ];
 
@@ -128,7 +128,7 @@ class InitialUserSeeder extends Seeder
                     'name' => $data['name'],
                     'department_id' => $data['department_id'],
                     // Jika password belum ada, set random 12 char
-                    'password' => Hash::make(Str::random(12)), 
+                    'password' => Hash::make(Str::random(12)),
                 ]
             );
 
@@ -136,7 +136,7 @@ class InitialUserSeeder extends Seeder
             $user->syncRoles($data['roles']);
 
             // Assign SC Departments (Pivot Table)
-            if (!empty($data['sc_departments'])) {
+            if (! empty($data['sc_departments'])) {
                 $user->scDepartments()->sync($data['sc_departments']);
             }
         }

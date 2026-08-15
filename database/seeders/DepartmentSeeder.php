@@ -55,7 +55,7 @@ class DepartmentSeeder extends Seeder
                 [
                     'name' => $dept['name'],
                     'abbreviation' => $dept['abbreviation'],
-                    'description' => $dept['name'] . ' Department',
+                    'description' => $dept['name'].' Department',
                 ]
             );
         }

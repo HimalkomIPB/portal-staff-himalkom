@@ -3,10 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
-use App\Models\Department;
 use App\Models\User;
-use Filament\Forms\Components\Fieldset;
-use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -79,14 +76,14 @@ class UserResource extends Resource
                             ->label('Sub Divisi')
                             ->options(function (\Filament\Forms\Get $get) {
                                 $departmentId = $get('department_id');
-                                if (!$departmentId) {
+                                if (! $departmentId) {
                                     return [];
                                 }
                                 $department = \App\Models\Department::find($departmentId);
-                                if (!$department) {
+                                if (! $department) {
                                     return [];
                                 }
-                                
+
                                 $mapping = [
                                     'Education' => ['Competition & Community Empowerment', 'Academic & Development'],
                                     'Finance' => ['Operations & Finance', 'Marketing & Technology'],
@@ -96,8 +93,9 @@ class UserResource extends Resource
                                     'Research and Technology' => ['Web Innovation', 'Research & Career Development'],
                                     'Talent and Sport' => ['Talent Developement', 'Sport'],
                                 ];
-                                
+
                                 $subs = $mapping[$department->name] ?? [];
+
                                 return array_combine($subs, $subs);
                             })
                             ->visible(function (\Filament\Forms\Get $get) {
@@ -105,24 +103,25 @@ class UserResource extends Resource
                                 if (empty($selectedRoles)) {
                                     return false;
                                 }
-                                
+
                                 $rolesArray = array_map('strval', (array) $selectedRoles);
-                                
+
                                 // Ambil ID dari role-role yang tidak boleh punya sub-divisi
                                 $bannedRoles = \Spatie\Permission\Models\Role::whereIn('name', [
-                                    'supervisor', 'bph', 'managing director', 'pjs'
-                                ])->pluck('id')->map(fn($id) => (string)$id)->toArray();
-                                
+                                    'supervisor', 'bph', 'managing director', 'pjs',
+                                ])->pluck('id')->map(fn ($id) => (string) $id)->toArray();
+
                                 // Jika ada role terlarang yang dipilih (baik via nama atau ID), sembunyikan sub-divisi
-                                $hasBannedRole = count(array_intersect($rolesArray, ['supervisor', 'bph', 'managing director', 'pjs'])) > 0 
+                                $hasBannedRole = count(array_intersect($rolesArray, ['supervisor', 'bph', 'managing director', 'pjs'])) > 0
                                               || count(array_intersect($rolesArray, $bannedRoles)) > 0;
-                                              
+
                                 if ($hasBannedRole) {
                                     return false;
                                 }
 
                                 // Tampilkan jika memiliki role anggota
                                 $anggotaRoleId = (string) \Spatie\Permission\Models\Role::where('name', 'anggota')->value('id');
+
                                 return in_array('anggota', $rolesArray) || in_array($anggotaRoleId, $rolesArray);
                             })
                             ->helperText('Pilih sub divisi untuk anggota ini.'),
@@ -137,10 +136,11 @@ class UserResource extends Resource
                                 }
                                 $mdRoleId = \Spatie\Permission\Models\Role::where('name', 'managing director')->value('id');
                                 $pjsRoleId = \Spatie\Permission\Models\Role::where('name', 'pjs')->value('id');
-                                
+
                                 $roles = array_map('strval', (array) $selectedRoles);
-                                return in_array('managing director', $roles) || in_array((string)$mdRoleId, $roles)
-                                    || in_array('pjs', $roles) || in_array((string)$pjsRoleId, $roles);
+
+                                return in_array('managing director', $roles) || in_array((string) $mdRoleId, $roles)
+                                    || in_array('pjs', $roles) || in_array((string) $pjsRoleId, $roles);
                             }),
                         Select::make('scDepartments')
                             ->label('SC untuk Departemen')
@@ -155,7 +155,8 @@ class UserResource extends Resource
                                     return false;
                                 }
                                 $bphRoleId = \Spatie\Permission\Models\Role::where('name', 'bph')->value('id');
-                                return in_array('bph', (array) $selectedRoles) || in_array((string)$bphRoleId, array_map('strval', (array) $selectedRoles));
+
+                                return in_array('bph', (array) $selectedRoles) || in_array((string) $bphRoleId, array_map('strval', (array) $selectedRoles));
                             }),
                     ]),
             ]);
@@ -252,9 +253,9 @@ class UserResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListUsers::route('/'),
+            'index' => Pages\ListUsers::route('/'),
             'create' => Pages\CreateUser::route('/create'),
-            'edit'   => Pages\EditUser::route('/{record}/edit'),
+            'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
     }
 }
