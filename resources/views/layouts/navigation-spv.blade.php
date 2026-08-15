@@ -23,6 +23,12 @@
                     @else
                     @endhasanyrole
 
+                    @if(Auth::user()->isSuperAdmin())
+                        <x-nav-link href="/superadmin" :active="false">
+                            ⚡ Panel Superadmin
+                        </x-nav-link>
+                    @endif
+
                     <x-nav-link :href="route('dashboard.archive.department.index')" :active="request()->routeIs('dashboard.archive.*')">
                         Arsip
                     </x-nav-link>
@@ -54,6 +60,16 @@
                     </x-slot>
 
                     <x-slot name="content">
+                        @if(Auth::user()->isSuperAdmin())
+                            <x-dropdown-link href="/superadmin">
+                                ⚡ {{ __('Panel Superadmin') }}
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('dashboard.modview.department.index')">
+                                🏛️ {{ __('Mod-View Departemen') }}
+                            </x-dropdown-link>
+                            <div class="border-t border-gray-100"></div>
+                        @endif
+
                         <x-dropdown-link :href="route('profile.edit')">
                             {{ __('Profile') }}
                         </x-dropdown-link>

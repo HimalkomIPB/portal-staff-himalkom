@@ -45,12 +45,16 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        if ($userRole->contains('managing director') || $userRole->contains('bph') || $userRole->contains('pjs')) {
+        if ($user->isSuperAdmin()) {
+            return redirect()->intended($user->getDashboardRoute());
+        }
+
+        if ($user->department && ($userRole->contains('managing director') || $userRole->contains('bph') || $userRole->contains('pjs'))) {
             return redirect()->intended(route('dashboard', ['department' => $user->department->slug], absolute: false));
         } elseif ($userRole->contains('supervisor')) {
             return redirect()->intended(route('dashboard.supervisor', absolute: false));
         } else {
-            return redirect()->intended();
+            return redirect()->intended(route('welcome'));
         }
     }
 

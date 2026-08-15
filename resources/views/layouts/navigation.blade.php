@@ -16,24 +16,34 @@
                         Dashboard
                     </x-nav-link>
 
-                    @hasrole('managing director|pjs')
-                        <x-nav-link :href="route('dashboard.workProgram.index', ['department' => Auth::user()->department])" :active="request()->routeIs('dashboard.workProgram.*')">
-                            Program Kerja
-                        </x-nav-link>
-                    @else
-                    @endhasanyrole
-
-                    {{-- IF user is bph only --}}
-                    @hasrole('bph')
-                        @unlessrole('managing director|pjs')
+                    @if(Auth::user()->department)
+                        @hasrole('managing director|pjs')
                             <x-nav-link :href="route('dashboard.workProgram.index', ['department' => Auth::user()->department])" :active="request()->routeIs('dashboard.workProgram.*')">
                                 Program Kerja
                             </x-nav-link>
-                        @endunlessrole
+                        @endhasrole
+
+                        {{-- IF user is bph only --}}
+                        @hasrole('bph')
+                            @unlessrole('managing director|pjs')
+                                <x-nav-link :href="route('dashboard.workProgram.index', ['department' => Auth::user()->department])" :active="request()->routeIs('dashboard.workProgram.*')">
+                                    Program Kerja
+                                </x-nav-link>
+                            @endunlessrole
+                        @endhasrole
+                    @endif
+
+                    @hasrole('bph|supervisor')
                         <x-nav-link :href="route('dashboard.modview.department.index')" :active="request()->routeIs('dashboard.modview.*')">
                             Supervisi (BPH / Supervisor)
                         </x-nav-link>
                     @endhasrole
+
+                    @if(Auth::user()->isSuperAdmin())
+                        <x-nav-link href="/superadmin" :active="false">
+                            ⚡ Panel Superadmin
+                        </x-nav-link>
+                    @endif
 
                     <x-nav-link :href="route('dashboard.archive.department.index')" :active="request()->routeIs('dashboard.archive.*')">
                         Arsip
@@ -66,6 +76,19 @@
                     </x-slot>
 
                     <x-slot name="content">
+                        @if(Auth::user()->isSuperAdmin())
+                            <x-dropdown-link href="/superadmin">
+                                ⚡ {{ __('Panel Superadmin') }}
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('dashboard.supervisor')">
+                                👁️ {{ __('Dashboard Supervisor') }}
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('dashboard.modview.department.index')">
+                                🏛️ {{ __('Mod-View Departemen') }}
+                            </x-dropdown-link>
+                            <div class="border-t border-gray-100"></div>
+                        @endif
+
                         <x-dropdown-link :href="route('profile.edit')">
                             {{ __('Profile') }}
                         </x-dropdown-link>
@@ -108,11 +131,13 @@
                 Dashboard
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link :href="route('dashboard.workProgram.index', ['department' => Auth::user()->department])" :active="request()->routeIs('dashboard.workProgram.*')">
-                Program Kerja
-            </x-responsive-nav-link>
+            @if(Auth::user()->department)
+                <x-responsive-nav-link :href="route('dashboard.workProgram.index', ['department' => Auth::user()->department])" :active="request()->routeIs('dashboard.workProgram.*')">
+                    Program Kerja
+                </x-responsive-nav-link>
+            @endif
 
-            @hasanyrole('bph')
+            @hasanyrole('bph|supervisor')
                 <x-responsive-nav-link :href="route('dashboard.modview.department.index')" :active="request()->routeIs('dashboard.modview.*')">
                     Supervisi (BPH / Supervisor)
                 </x-responsive-nav-link>

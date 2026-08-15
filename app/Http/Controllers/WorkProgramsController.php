@@ -16,7 +16,7 @@ class WorkProgramsController extends Controller
 {
     private function canDoAction(Department $department): bool
     {
-        if ($this->isCurrentUserBph()) {
+        if (Auth::user()->isSuperAdmin() || $this->isCurrentUserBph()) {
             return true;
         }
 

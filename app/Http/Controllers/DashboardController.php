@@ -11,13 +11,14 @@ class DashboardController extends Controller
 {
     public function show(Department $department): View
     {
-        $userDepartment = Auth::user()->department;
+        $user = Auth::user();
+        $userDepartment = $user->department;
 
         if (! $department) {
             abort(404, 'Department not found');
         }
 
-        if ($department->id != $userDepartment->id) {
+        if (! $user->isSuperAdmin() && (! $userDepartment || $department->id != $userDepartment->id)) {
             abort(403, 'Unauthorized access to this department');
         }
 

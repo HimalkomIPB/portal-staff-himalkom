@@ -64,7 +64,10 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, HasRoles, HasUlids, Notifiable, SoftDeletes;
+    use HasFactory, HasRoles, HasUlids, Notifiable, SoftDeletes {
+        HasRoles::hasRole as traitHasRole;
+        HasRoles::hasAnyRole as traitHasAnyRole;
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -93,10 +96,47 @@ class User extends Authenticatable implements FilamentUser
         'remember_token',
     ];
 
+    public function isSuperAdmin(): bool
+    {
+        return (str_ends_with($this->email, '@himalkom.com') && $this->hasVerifiedEmail())
+            || $this->roles->pluck('name')->contains('superadmin');
+    }
+
+    public function hasRole($roles, ?string $guard = null): bool
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        return $this->traitHasRole($roles, $guard);
+    }
+
+    public function hasAnyRole(...$roles): bool
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        return $this->traitHasAnyRole(...$roles);
+    }
+
     public function getDashboardRoute(): string
     {
+        if ($this->isSuperAdmin()) {
+            if ($this->department) {
+                return route('dashboard', ['department' => $this->department]);
+            }
+
+            $firstDepartment = Department::orderBy('name')->first();
+            if ($firstDepartment) {
+                return route('dashboard', ['department' => $firstDepartment]);
+            }
+
+            return route('dashboard.supervisor');
+        }
+
         $roles = $this->pluckRoleNames();
-        if ($roles->contains('managing director') || $roles->contains('bph') || $roles->contains('pjs')) {
+        if ($this->department && ($roles->contains('managing director') || $roles->contains('bph') || $roles->contains('pjs'))) {
             return route('dashboard', ['department' => $this->department]);
         } elseif ($roles->contains('supervisor')) { // supervisor
             return route('dashboard.supervisor');
@@ -107,6 +147,10 @@ class User extends Authenticatable implements FilamentUser
 
     public function getRoleNameForTitle(): string
     {
+        if ($this->isSuperAdmin()) {
+            return $this->department ? 'Superadmin ('.$this->department->name.')' : 'Superadmin';
+        }
+
         $roles = $this->pluckRoleNames();
         if ($roles->contains('managing director')) {
             return 'Managing Director of '.$this->department->name;
