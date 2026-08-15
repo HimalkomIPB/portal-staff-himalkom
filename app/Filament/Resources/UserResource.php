@@ -3,43 +3,161 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
+use App\Models\Department;
 use App\Models\User;
+use Filament\Forms\Components\Fieldset;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-user';
+    protected static ?string $navigationIcon = 'heroicon-o-users';
+
+    protected static ?string $navigationLabel = 'Pengguna';
+
+    protected static ?int $navigationSort = 1;
 
     public static function getNavigationGroup(): ?string
     {
-        return 'User';
+        return 'Manajemen Pengguna';
     }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                TextInput::make('name')->placeholder('Ex. Budi Utomo')->required(),
-                TextInput::make('email')->email()->required(),
-                Select::make('roles')
-                    ->multiple()
-                    ->relationship('roles', 'name')
-                    ->preload()
-                    ->searchable(),
-                Select::make('department_id')
-                    ->label('Department')
-                    ->relationship('department', 'name')
-                    ->searchable()
-                    ->preload(),
+                Section::make('Informasi Akun')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('name')
+                            ->label('Nama Lengkap')
+                            ->placeholder('Contoh: Budi Utomo')
+                            ->required(),
+                        TextInput::make('email')
+                            ->label('Email')
+                            ->email()
+                            ->required()
+                            ->unique(ignoreRecord: true),
+                    ]),
+
+                Section::make('Role & Departemen')
+                    ->columns(2)
+                    ->schema([
+                        Select::make('roles')
+                            ->label('Role')
+                            ->multiple()
+                            ->relationship('roles', 'name')
+                            ->preload()
+                            ->searchable()
+                            ->required()
+                            ->live()
+                            ->columnSpanFull(),
+                        Select::make('department_id')
+                            ->label('Departemen Utama')
+                            ->relationship('department', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->live()
+                            ->afterStateUpdated(fn (callable $set) => $set('sub_division', null))
+                            ->helperText('Departemen tempat user ini bertugas sebagai MD/PJS/Sekretaris/dll.'),
+                        Select::make('sub_division')
+                            ->label('Sub Divisi')
+                            ->options(function (\Filament\Forms\Get $get) {
+                                $departmentId = $get('department_id');
+                                if (!$departmentId) {
+                                    return [];
+                                }
+                                $department = \App\Models\Department::find($departmentId);
+                                if (!$department) {
+                                    return [];
+                                }
+                                
+                                $mapping = [
+                                    'Education' => ['Competition & Community Empowerment', 'Academic & Development'],
+                                    'Finance' => ['Operations & Finance', 'Marketing & Technology'],
+                                    'Creative' => ['Social Media & Content Creation', 'Multimedia & Visual Design'],
+                                    'External' => ['Social Relation', 'Campus & Corporate Outreach'],
+                                    'Internal' => ['Internal Harmony', 'Internal Celebration'],
+                                    'Research and Technology' => ['Web Innovation', 'Research & Career Development'],
+                                    'Talent and Sport' => ['Talent Developement', 'Sport'],
+                                ];
+                                
+                                $subs = $mapping[$department->name] ?? [];
+                                return array_combine($subs, $subs);
+                            })
+                            ->visible(function (\Filament\Forms\Get $get) {
+                                $selectedRoles = $get('roles');
+                                if (empty($selectedRoles)) {
+                                    return false;
+                                }
+                                
+                                $rolesArray = array_map('strval', (array) $selectedRoles);
+                                
+                                // Ambil ID dari role-role yang tidak boleh punya sub-divisi
+                                $bannedRoles = \Spatie\Permission\Models\Role::whereIn('name', [
+                                    'supervisor', 'bph', 'managing director', 'pjs'
+                                ])->pluck('id')->map(fn($id) => (string)$id)->toArray();
+                                
+                                // Jika ada role terlarang yang dipilih (baik via nama atau ID), sembunyikan sub-divisi
+                                $hasBannedRole = count(array_intersect($rolesArray, ['supervisor', 'bph', 'managing director', 'pjs'])) > 0 
+                                              || count(array_intersect($rolesArray, $bannedRoles)) > 0;
+                                              
+                                if ($hasBannedRole) {
+                                    return false;
+                                }
+
+                                // Tampilkan jika memiliki role anggota
+                                $anggotaRoleId = (string) \Spatie\Permission\Models\Role::where('name', 'anggota')->value('id');
+                                return in_array('anggota', $rolesArray) || in_array($anggotaRoleId, $rolesArray);
+                            })
+                            ->helperText('Pilih sub divisi untuk anggota ini.'),
+                        Toggle::make('is_active')
+                            ->label('Status Aktif')
+                            ->default(true)
+                            ->helperText('Hanya 1 MD/PJS yang boleh aktif dalam satu departemen. Jika diaktifkan, MD/PJS lain di departemen yang sama akan otomatis dinonaktifkan.')
+                            ->visible(function (\Filament\Forms\Get $get) {
+                                $selectedRoles = $get('roles');
+                                if (empty($selectedRoles)) {
+                                    return false;
+                                }
+                                $mdRoleId = \Spatie\Permission\Models\Role::where('name', 'managing director')->value('id');
+                                $pjsRoleId = \Spatie\Permission\Models\Role::where('name', 'pjs')->value('id');
+                                
+                                $roles = array_map('strval', (array) $selectedRoles);
+                                return in_array('managing director', $roles) || in_array((string)$mdRoleId, $roles)
+                                    || in_array('pjs', $roles) || in_array((string)$pjsRoleId, $roles);
+                            }),
+                        Select::make('scDepartments')
+                            ->label('SC untuk Departemen')
+                            ->multiple()
+                            ->relationship('scDepartments', 'name')
+                            ->preload()
+                            ->searchable()
+                            ->helperText('Isi hanya jika user ini adalah SC (Steering Committee) dari BPH yang mengawasi departemen tertentu.')
+                            ->visible(function (\Filament\Forms\Get $get) {
+                                $selectedRoles = $get('roles');
+                                if (empty($selectedRoles)) {
+                                    return false;
+                                }
+                                $bphRoleId = \Spatie\Permission\Models\Role::where('name', 'bph')->value('id');
+                                return in_array('bph', (array) $selectedRoles) || in_array((string)$bphRoleId, array_map('strval', (array) $selectedRoles));
+                            }),
+                    ]),
             ]);
     }
 
@@ -47,19 +165,61 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')->searchable(),
-                TextColumn::make('email')->searchable(),
+                TextColumn::make('name')
+                    ->label('Nama')
+                    ->searchable()
+                    ->sortable(),
+                IconColumn::make('is_active')
+                    ->label('Aktif')
+                    ->boolean()
+                    ->sortable(),
+                TextColumn::make('email')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('department.name')
-                    ->placeholder('Null')
+                    ->label('Departemen Utama')
+                    ->placeholder('–')
                     ->sortable()
                     ->searchable(),
+                TextColumn::make('sub_division')
+                    ->label('Sub Divisi')
+                    ->placeholder('–')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('roles.name')
-                    ->placeholder('Null'),
-                TextColumn::make('created_at')->dateTime()->sortable(),
-                TextColumn::make('updated_at')->label('last updated')->since()->sortable(),
+                    ->label('Role')
+                    ->badge()
+                    ->separator(',')
+                    ->placeholder('–'),
+                TextColumn::make('scDepartments.name')
+                    ->label('SC Departemen')
+                    ->badge()
+                    ->color('warning')
+                    ->separator(',')
+                    ->placeholder('–'),
+                TextColumn::make('created_at')
+                    ->label('Dibuat')
+                    ->dateTime('d M Y')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')
+                    ->label('Terakhir Diperbarui')
+                    ->since()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 TrashedFilter::make(),
+                SelectFilter::make('roles')
+                    ->label('Filter Role')
+                    ->relationship('roles', 'name')
+                    ->searchable()
+                    ->preload(),
+                SelectFilter::make('department_id')
+                    ->label('Filter Departemen')
+                    ->relationship('department', 'name')
+                    ->searchable()
+                    ->preload(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -70,6 +230,8 @@ class UserResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\RestoreBulkAction::make(),
+                    Tables\Actions\ForceDeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -79,12 +241,20 @@ class UserResource extends Resource
         return [];
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
+    }
+
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListUsers::route('/'),
+            'index'  => Pages\ListUsers::route('/'),
             'create' => Pages\CreateUser::route('/create'),
-            'edit' => Pages\EditUser::route('/{record}/edit'),
+            'edit'   => Pages\EditUser::route('/{record}/edit'),
         ];
     }
 }

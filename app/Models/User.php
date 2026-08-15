@@ -9,6 +9,7 @@ use Filament\Panel;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -78,6 +79,10 @@ class User extends Authenticatable implements FilamentUser
         'name',
         'email',
         'password',
+        'department_id',
+        'sub_division',
+        'is_active',
+        'email_verified_at',
     ];
 
     protected $with = ['department', 'roles'];
@@ -136,13 +141,21 @@ class User extends Authenticatable implements FilamentUser
         }
 
         $roles = $this->pluckRoleNames();
-        if ($this->department && ($roles->contains('managing director') || $roles->contains('bph') || $roles->contains('pjs'))) {
-            return route('dashboard', ['department' => $this->department]);
-        } elseif ($roles->contains('supervisor')) { // supervisor
-            return route('dashboard.supervisor');
-        } else {
-            return route('welcome');
+        if ($roles->contains('supervisor')) {
+            return route('filament.superadmin.pages.dashboard');
         }
+
+        if ($roles->contains('managing director') || $roles->contains('pjs') ||
+            $roles->contains('sekretaris') || $roles->contains('bendahara') ||
+            $roles->contains('anggota')) {
+            return route('dashboard', ['department' => $this->department]);
+        }
+
+        if ($roles->contains('bph') || $roles->contains('sc')) {
+            return route('dashboard', ['department' => $this->department]);
+        }
+
+        return route('welcome');
     }
 
     public function getRoleNameForTitle(): string
@@ -152,12 +165,23 @@ class User extends Authenticatable implements FilamentUser
         }
 
         $roles = $this->pluckRoleNames();
-        if ($roles->contains('managing director')) {
-            return 'Managing Director of '.$this->department->name;
+
+        if ($roles->contains('supervisor')) {
+            return 'Supervisor';
         } elseif ($roles->contains('bph')) {
             return 'Badan Pengurus Harian';
+        } elseif ($roles->contains('managing director')) {
+            return 'Managing Director of '.($this->department?->name ?? '-');
         } elseif ($roles->contains('pjs')) {
-            return 'PJS of '.$this->department->name;
+            return 'PJS of '.($this->department?->name ?? '-');
+        } elseif ($roles->contains('sc')) {
+            return 'Steering Committee';
+        } elseif ($roles->contains('sekretaris')) {
+            return 'Sekretaris '.($this->department?->name ?? '');
+        } elseif ($roles->contains('bendahara')) {
+            return 'Bendahara '.($this->department?->name ?? '');
+        } elseif ($roles->contains('anggota')) {
+            return 'Anggota '.($this->department?->name ?? '');
         } elseif ($roles->contains('supervisor')) {
             return 'Supervisor';
         } else {
@@ -168,6 +192,24 @@ class User extends Authenticatable implements FilamentUser
     public function workProgramComments(): HasMany
     {
         return $this->hasMany(WorkProgramComment::class);
+    }
+
+    /**
+     * Department-department yang diawasi user ini sebagai SC.
+     * (Berbeda dari department utama yang ada di kolom department_id)
+     */
+    public function scDepartments(): BelongsToMany
+    {
+        return $this->belongsToMany(Department::class, 'sc_assignments')
+            ->withTimestamps();
+    }
+
+    /**
+     * Cek apakah user ini adalah SC untuk department tertentu.
+     */
+    public function isSCOf(Department $department): bool
+    {
+        return $this->scDepartments()->where('department_id', $department->id)->exists();
     }
 
     public function department(): BelongsTo
@@ -193,6 +235,7 @@ class User extends Authenticatable implements FilamentUser
     protected function casts(): array
     {
         return [
+            'is_active' => 'boolean',
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
@@ -210,6 +253,9 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return str_ends_with($this->email, '@himalkom.com') && $this->hasVerifiedEmail();
+        if (!$this->is_active) {
+            return false;
+        }
+        return $this->hasRole('supervisor') || (str_ends_with($this->email, '@himalkom.com') && $this->hasVerifiedEmail());
     }
 }

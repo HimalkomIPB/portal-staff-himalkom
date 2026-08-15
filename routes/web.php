@@ -4,6 +4,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentArchiveController;
 use App\Http\Controllers\ModViewController;
 use App\Http\Controllers\PDFController;
+use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WorkProgramCommentController;
 use App\Http\Controllers\WorkProgramsController;
@@ -13,7 +14,9 @@ Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
 
+// -------------------------------------------------------
 // Notification dashboard
+// -------------------------------------------------------
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard/notifications', [DashboardController::class, 'showNotifications'])
         ->name('dashboard.notifications.index');
@@ -21,18 +24,41 @@ Route::middleware('auth')->group(function () {
         ->name('dashboard.notifications.markAsRead');
 });
 
-// Main dashboard (access only by user of its department or its role)
+// -------------------------------------------------------
+// Main dashboard — semua role yang punya akun dept bisa masuk,
+// pembatasan akses per fitur dilakukan di dalam controller / view
+// -------------------------------------------------------
 Route::middleware('auth')->group(function () {
+    // Legacy supervisor (akan dihapus setelah migrasi role selesai)
     Route::get('/dashboard/supervisor', [DashboardController::class, 'showSupervisor'])
         ->middleware('role:supervisor')
         ->name('dashboard.supervisor');
+
+    Route::get('/dashboard/performance', [PerformanceController::class, 'index'])
+        ->middleware('permission:performance.view|performance.view-all|performance.evaluate|performance.view-self')
+        ->name('dashboard.performance.index');
+
+    Route::post('/dashboard/performance', [PerformanceController::class, 'store'])
+        ->middleware('permission:performance.evaluate')
+        ->name('dashboard.performance.store');
+
+    Route::get('/dashboard/performance/export', [PerformanceController::class, 'export'])
+        ->middleware('permission:performance.evaluate|performance.view-all')
+        ->name('dashboard.performance.export');
+
+    Route::get('/dashboard/performance/{evaluated}/detail', [PerformanceController::class, 'show'])
+        ->middleware('permission:performance.view|performance.view-all|performance.evaluate|performance.view-self')
+        ->name('dashboard.performance.show');
+
     Route::get('/dashboard/{department:slug}', [DashboardController::class, 'show'])
-        ->middleware('role:managing director|bph|pjs')
+        ->middleware('auth')   // cukup auth, pembatasan dept dilakukan di controller
         ->name('dashboard');
 });
 
-// Archives
-Route::middleware('auth')
+// -------------------------------------------------------
+// Archives — butuh permission archive.view
+// -------------------------------------------------------
+Route::middleware(['auth', 'permission:archive.view'])
     ->prefix('/dashboard/archive')
     ->name('dashboard.archive.')
     ->group(function () {
@@ -47,41 +73,55 @@ Route::middleware('auth')
             ->name('workprogram.show');
     });
 
-// Work Programs
-Route::middleware('auth')->prefix('/dashboard/{department:slug}/workprograms')->name('dashboard.')->group(function () {
-    Route::get('/', [WorkProgramsController::class, 'index'])
-        ->middleware('role:managing director|bph|pjs')
-        ->name('workProgram.index');
+// -------------------------------------------------------
+// Work Programs — permission-based
+// -------------------------------------------------------
+Route::middleware('auth')
+    ->prefix('/dashboard/{department:slug}/workprograms')
+    ->name('dashboard.')
+    ->group(function () {
 
-    Route::get('/create', [WorkProgramsController::class, 'create'])
-        ->middleware('role:managing director|bph|pjs')
-        ->name('workProgram.create');
+        // View — semua yang punya permission work-program.view
+        Route::get('/', [WorkProgramsController::class, 'index'])
+            ->middleware('permission:work-program.view')
+            ->name('workProgram.index');
 
-    Route::get('/{workProgram}', [WorkProgramsController::class, 'detail'])
-        ->middleware('role:managing director|bph|pjs')
-        ->name('workProgram.detail');
+        // Create — hanya yang punya permission work-program.create
+        Route::get('/create', [WorkProgramsController::class, 'create'])
+            ->middleware('permission:work-program.create')
+            ->name('workProgram.create');
 
-    Route::get('/{workProgram}/edit', [WorkProgramsController::class, 'edit'])
-        ->middleware('role:managing director|bph|pjs')
-        ->name('workProgram.edit');
+        // Detail — view permission
+        Route::get('/{workProgram}', [WorkProgramsController::class, 'detail'])
+            ->middleware('permission:work-program.view')
+            ->name('workProgram.detail');
 
-    Route::post('/', [WorkProgramsController::class, 'store'])
-        ->middleware('role:managing director|bph||pjs')
-        ->name('workProgram.store');
+        // Edit — edit permission
+        Route::get('/{workProgram}/edit', [WorkProgramsController::class, 'edit'])
+            ->middleware('permission:work-program.edit')
+            ->name('workProgram.edit');
 
-    Route::put('/{workProgram}', [WorkProgramsController::class, 'update'])
-        ->middleware('role:managing director|bph|pjs')
-        ->name('workProgram.update');
+        // Store — create permission
+        Route::post('/', [WorkProgramsController::class, 'store'])
+            ->middleware('permission:work-program.create')
+            ->name('workProgram.store');
 
-    Route::delete('/{workProgram}', [WorkProgramsController::class, 'destroy'])
-        ->middleware('role:managing director|bph|pjs')
-        ->name('workProgram.destroy');
-});
+        // Update — edit permission
+        Route::put('/{workProgram}', [WorkProgramsController::class, 'update'])
+            ->middleware('permission:work-program.edit')
+            ->name('workProgram.update');
 
-// Comment Routes
-Route::middleware('auth')->group(function () {
+        // Delete — delete permission
+        Route::delete('/{workProgram}', [WorkProgramsController::class, 'destroy'])
+            ->middleware('permission:work-program.delete')
+            ->name('workProgram.destroy');
+    });
+
+// -------------------------------------------------------
+// Work Program Comments — permission work-program.comment
+// -------------------------------------------------------
+Route::middleware(['auth', 'permission:work-program.comment'])->group(function () {
     Route::prefix('/dashboard/{workProgram}/comments')
-        ->middleware('role:managing director|bph|supervisor|pjs')
         ->name('dashboard.workProgram.')
         ->group(function () {
             Route::post('/', [WorkProgramCommentController::class, 'store'])->name('comment.store');
@@ -89,36 +129,41 @@ Route::middleware('auth')->group(function () {
         });
 });
 
-// Serving Private pdfs
+// -------------------------------------------------------
+// Serving Private PDFs
+// -------------------------------------------------------
 Route::get('/pdf/{filename}', [PDFController::class, 'showPrivatePdf'])
     ->name('pdf.show'); // auth middleware is in the controller itself
 
-// Supervisor ModView (access only by bph or supervisor)
-Route::middleware('auth')
+// -------------------------------------------------------
+// Supervisor ModView (BPH/SC view semua dept)
+// Pakai permission archive.view-all untuk BPH
+// -------------------------------------------------------
+Route::middleware(['auth', 'permission:archive.view-all'])
     ->prefix('/dashboard/mod-view')
     ->name('dashboard.modview.')
     ->group(function () {
         Route::get('/departments', [ModViewController::class, 'index'])
-            ->middleware('role:bph|supervisor')
             ->name('department.index');
 
         Route::get('/{department:slug}', [ModViewController::class, 'showDepartment'])
-            ->middleware('role:bph|supervisor')
             ->name('department.show');
 
         Route::get('/{department:slug}/workprograms/{workProgram}', [ModViewController::class, 'showWorkProgram'])
-            ->middleware('role:bph|supervisor')
             ->name('workprogram.show');
     });
 
+// -------------------------------------------------------
 // Clear Session
+// -------------------------------------------------------
 Route::get('/session/clear/{key}', function ($key) {
     session()->forget($key);
-
     return response()->noContent();
 })->name('session.clear');
 
-// Breeze profile
+// -------------------------------------------------------
+// Profile (Breeze)
+// -------------------------------------------------------
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

@@ -45,9 +45,17 @@
                         </x-nav-link>
                     @endif
 
+                    @canany(['performance.view', 'performance.view-all', 'performance.evaluate', 'performance.view-self'])
+                        <x-nav-link :href="route('dashboard.performance.index')" :active="request()->routeIs('dashboard.performance.*')">
+                            Performance
+                        </x-nav-link>
+                    @endcanany
+
+                    @can('archive.view')
                     <x-nav-link :href="route('dashboard.archive.department.index')" :active="request()->routeIs('dashboard.archive.*')">
                         Arsip
                     </x-nav-link>
+                    @endcan
 
                     <x-nav-link :href="route('dashboard.notifications.index')" :active="request()->routeIs('dashboard.notifications.*')" class="relative">
                         <x-nav-link-count :title="'Notifications'" :count="$unreadNotificationsCount"> </x-nav-link-count>
@@ -144,9 +152,17 @@
             @else
             @endhasanyrole
 
+            @canany(['performance.view', 'performance.view-all', 'performance.evaluate', 'performance.view-self'])
+                <x-responsive-nav-link :href="route('dashboard.performance.index')" :active="request()->routeIs('dashboard.performance.*')">
+                    Performance
+                </x-responsive-nav-link>
+            @endcanany
+
+            @can('archive.view')
             <x-responsive-nav-link :href="route('dashboard.archive.department.index')" :active="request()->routeIs('dashboard.archive.*')">
                 Arsip
             </x-responsive-nav-link>
+            @endcan
 
             <x-responsive-nav-link :href="route('dashboard.notifications.index')" :active="request()->routeIs('dashboard.notifications.*')">
                 <x-responsive-nav-link-count :title="'Notifications'" :count="$unreadNotificationsCount"> </x-responsive-nav-link-count>
