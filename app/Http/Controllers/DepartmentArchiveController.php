@@ -20,7 +20,8 @@ class DepartmentArchiveController extends Controller
         // Group by cabinet year (e.g., 2025 -> "2025/2026")
         $groupedDepartments = $departments->groupBy(function ($department) {
             $year = $department->created_at->year;
-            return $year . '/' . ($year + 1);
+
+            return $year.'/'.($year + 1);
         });
 
         return view('dashboard.archives.index-department', ['groupedDepartments' => $groupedDepartments]);
@@ -38,6 +39,7 @@ class DepartmentArchiveController extends Controller
 
         return view('dashboard.archives.show-department', ['department' => $department]);
     }
+
     public function showWorkProgram(string $id, string $workProgramId)
     {
         $department = Department::withTrashed()->findOrFail($id);

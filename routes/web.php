@@ -124,4 +124,4 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 });
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';

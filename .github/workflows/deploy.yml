@@ -1,0 +1,148 @@
+name: CD Deploy (Build on GitHub Actions)
+
+on:
+  push:
+    branches:
+      - staging
+      - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Select deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  build-and-deploy:
+    name: Build & Deploy to ${{ github.event.inputs.environment || (github.ref_name == 'main' && 'production' || 'staging') }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Determine Target Path & Environment
+        id: target
+        run: |
+          if [ "${{ github.event.inputs.environment }}" = "production" ] || [ "${{ github.ref_name }}" = "main" ]; then
+            echo "ENV_NAME=production" >> $GITHUB_OUTPUT
+            echo "DEPLOY_PATH=${{ secrets.PROD_DEPLOY_PATH }}" >> $GITHUB_OUTPUT
+          else
+            echo "ENV_NAME=staging" >> $GITHUB_OUTPUT
+            echo "DEPLOY_PATH=${{ secrets.STAGING_DEPLOY_PATH }}" >> $GITHUB_OUTPUT
+          fi
+
+      # 1. Setup PHP & Build Production Dependencies
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo, mysql, pdo_mysql, bcmath, fileinfo, zip
+          coverage: none
+
+      - name: Install Production Composer Dependencies
+        run: composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+
+      # 2. Setup Node & Compile Frontend Assets
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Build Frontend Assets
+        run: |
+          npm ci
+          npm run build
+
+      # 3. Package Release Bundle
+      - name: Create Release Archive
+        run: |
+          tar -czf release.tar.gz \
+            --exclude='.git*' \
+            --exclude='.github' \
+            --exclude='node_modules' \
+            --exclude='tests' \
+            --exclude='.env*' \
+            --exclude='storage/app/public/*' \
+            --exclude='storage/logs/*' \
+            --exclude='storage/framework/cache/*' \
+            --exclude='storage/framework/sessions/*' \
+            --exclude='storage/framework/views/*' \
+            app bootstrap config database public resources routes vendor \
+            artisan composer.json composer.lock package.json
+
+      # 4. Deploy via Native OpenSSH / SCP
+      - name: Deploy to Server
+        env:
+          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          DEPLOY_PATH: ${{ steps.target.outputs.DEPLOY_PATH }}
+          ENV_NAME: ${{ steps.target.outputs.ENV_NAME }}
+        run: |
+          if [ -z "$SSH_HOST" ] || [ -z "$SSH_KEY" ] || [ -z "$SSH_USER" ] || [ -z "$DEPLOY_PATH" ]; then
+            echo "❌ Required GitHub Secrets are missing. Please verify SSH_HOST, SSH_PRIVATE_KEY, SSH_USER, and deployment paths in repository secrets."
+            exit 1
+          fi
+
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          echo "📤 Uploading release bundle..."
+          scp -P $SSH_PORT -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no release.tar.gz $SSH_USER@$SSH_HOST:$DEPLOY_PATH/release.tar.gz
+
+          echo "🚀 Extracting release and executing post-deploy tasks..."
+          ssh -p $SSH_PORT -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "
+            set -e
+            export PATH=/bin:/usr/bin:/usr/local/bin:/opt/alt/php84/usr/bin:\$HOME/bin:\$PATH
+            
+            echo \"Deploying to $ENV_NAME environment...\"
+            cd $DEPLOY_PATH
+            
+            # Put app in maintenance mode
+            php artisan down || true
+            
+            # Extract the pre-built release package
+            tar -xzf release.tar.gz
+            rm -f release.tar.gz
+            
+            # Ensure complete Laravel storage & cache directory structure exists
+            mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs storage/app/public bootstrap/cache
+            chmod -R 775 storage bootstrap/cache 2>/dev/null || true
+            
+            # Create pre-deployment database backup if .env exists
+            if [ -f .env ]; then
+              mkdir -p ~/db_backups
+              DB_NAME=\$(grep '^DB_DATABASE=' .env | cut -d '=' -f2 | tr -d '\"' | tr -d \"'\")
+              DB_USER=\$(grep '^DB_USERNAME=' .env | cut -d '=' -f2 | tr -d '\"' | tr -d \"'\")
+              DB_PASS=\$(grep '^DB_PASSWORD=' .env | cut -d '=' -f2 | tr -d '\"' | tr -d \"'\")
+              if [ -n \"\$DB_NAME\" ] && [ -n \"\$DB_USER\" ]; then
+                echo '📦 Creating database snapshot...'
+                mysqldump -u \"\$DB_USER\" -p\"\$DB_PASS\" \"\$DB_NAME\" 2>/dev/null | gzip > ~/db_backups/predeploy_\${DB_NAME}_\$(date +%Y%m%d_%H%M%S).sql.gz || echo '⚠️ DB backup skipped'
+                ls -t ~/db_backups/predeploy_\${DB_NAME}_*.sql.gz 2>/dev/null | tail -n +11 | xargs -r rm -f 2>/dev/null || true
+              fi
+            fi
+            
+            # Run migrations
+            php artisan migrate --force
+            
+            # Ensure storage symlink exists
+            php artisan storage:link || true
+            
+            # Clear and rebuild caches
+            php artisan optimize:clear
+            php artisan optimize
+            php artisan view:cache
+            
+            # Bring application back online
+            php artisan up
+            
+            echo \"✅ Deployment to $ENV_NAME completed successfully!\"
+          "
