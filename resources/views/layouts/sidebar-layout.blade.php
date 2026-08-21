@@ -71,6 +71,11 @@
         // Performance
         $performanceHref = route('dashboard.performance.index');
 
+        // Calendar
+        $calendarHref = $authUser->can('agenda.view')
+            ? route('dashboard.calendar.index')
+            : null;
+
         // Unread notifications count
         $unreadCount = $authUser->unreadNotifications()->count();
 
@@ -187,14 +192,24 @@
                         </span>
                     @endif
 
-                    {{-- Calendar — always disabled --}}
-                    <span class="{{ $sidebarItem }} {{ $sidebarDisabled }}">
-                        <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M8 2v4M16 2v4M3 10h18" stroke-linecap="round" />
-                            <rect x="3" y="4" width="18" height="18" rx="2" />
-                        </svg>
-                        Calendar
-                    </span>
+                    {{-- Calendar --}}
+                    @if ($calendarHref)
+                        <a href="{{ $calendarHref }}" class="{{ $navClass('dashboard.calendar.*') }}">
+                            <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M8 2v4M16 2v4M3 10h18" stroke-linecap="round" />
+                                <rect x="3" y="4" width="18" height="18" rx="2" />
+                            </svg>
+                            Calendar
+                        </a>
+                    @else
+                        <span class="{{ $sidebarItem }} {{ $sidebarDisabled }}">
+                            <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M8 2v4M16 2v4M3 10h18" stroke-linecap="round" />
+                                <rect x="3" y="4" width="18" height="18" rx="2" />
+                            </svg>
+                            Calendar
+                        </span>
+                    @endif
                 </div>
 
                 <p class="mt-7 px-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-400">Administration</p>
@@ -408,6 +423,7 @@
     </div>{{-- end Alpine x-data wrapper --}}
 
     @include('components.sweet-alert')
+    @stack('scripts')
 
 </body>
 

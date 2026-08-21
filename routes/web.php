@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AgendaController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentArchiveController;
 use App\Http\Controllers\ModViewController;
@@ -69,6 +70,35 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard/performance/{evaluated}/detail', [PerformanceController::class, 'show'])
         ->middleware('permission:performance.view|performance.view-all|performance.evaluate|performance.view-self')
         ->name('dashboard.performance.show');
+
+    // -------------------------------------------------------
+    // Calendar / Agenda
+    // -------------------------------------------------------
+
+    // Halaman utama kalender — semua role dengan agenda.view
+    Route::get('/dashboard/calendar', [AgendaController::class, 'index'])
+        ->middleware('permission:agenda.view')
+        ->name('dashboard.calendar.index');
+
+    // JSON events untuk Alpine.js
+    Route::get('/dashboard/calendar/events', [AgendaController::class, 'events'])
+        ->middleware('permission:agenda.view')
+        ->name('dashboard.calendar.events');
+
+    // Tambah agenda — hanya MD/PJS/Sekretaris/BPH/Supervisor
+    Route::post('/dashboard/calendar', [AgendaController::class, 'store'])
+        ->middleware('permission:agenda.create-dept|agenda.create-org')
+        ->name('dashboard.calendar.store');
+
+    // Update agenda
+    Route::put('/dashboard/calendar/{agenda}', [AgendaController::class, 'update'])
+        ->middleware('permission:agenda.edit-dept|agenda.create-org')
+        ->name('dashboard.calendar.update');
+
+    // Hapus agenda
+    Route::delete('/dashboard/calendar/{agenda}', [AgendaController::class, 'destroy'])
+        ->middleware('permission:agenda.delete-dept|agenda.create-org')
+        ->name('dashboard.calendar.destroy');
 
     Route::get('/dashboard/{department:slug}', [DashboardController::class, 'show'])
         ->middleware('auth')   // cukup auth, pembatasan dept dilakukan di controller
