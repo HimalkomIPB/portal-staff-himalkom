@@ -1,4 +1,4 @@
-<x-app-layout :navigation="Auth::user()->hasRole('supervisor') ? 'layouts.navigation-spv' : 'layouts.navigation'">
+<x-sidebar-layout>
     <x-slot name="header">
         <div class="flex flex-row items-center">
             <div class="text-[12px]  text-gray-500 font-medium md:text-sm">
@@ -77,4 +77,4 @@
             </div>
         @endforelse
     </div>
-</x-app-layout>
+</x-sidebar-layout>

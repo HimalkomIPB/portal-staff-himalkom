@@ -1,8 +1,4 @@
-@php
-    $navigationLayout = auth()->user()->hasRole('supervisor') ? 'layouts.navigation-spv' : 'layouts.navigation';
-@endphp
-
-<x-app-layout navigation="{{ $navigationLayout }}">
+<x-sidebar-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             Notifications
@@ -70,4 +66,4 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+</x-sidebar-layout>

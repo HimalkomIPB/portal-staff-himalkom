@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-sidebar-layout>
     <x-slot name="header">
         <div class="flex flex-row items-center">
             <div class="text-[12px]  text-gray-500 font-medium md:text-sm">
@@ -90,4 +90,4 @@
             @endforelse
         </div>
     </div>
-</x-app-layout>
+</x-sidebar-layout>

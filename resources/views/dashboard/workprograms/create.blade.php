@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-sidebar-layout>
     <x-slot name="header">
         <div class="flex flex-row items-center">
             <div class="text-gray-500 font-medium text-[11px] md:text-sm ">
@@ -162,7 +162,7 @@
             </form>
         </div>
     </div>
-</x-app-layout>
+</x-sidebar-layout>
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {

@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-sidebar-layout>
 
     <x-slot name="header">
         <div class="flex flex-row items-center">
@@ -203,4 +203,4 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/trix/1.3.1/trix.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/trix/1.3.1/trix.css">
-</x-app-layout>
+</x-sidebar-layout>

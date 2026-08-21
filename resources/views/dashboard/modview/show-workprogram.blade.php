@@ -1,4 +1,4 @@
-<x-app-layout :navigation="Auth::user()->hasRole('supervisor') ? 'layouts.navigation-spv' : 'layouts.navigation'">
+<x-sidebar-layout>
     <x-slot name="header">
         <div class="flex flex-row items-center">
             <div class="text-[11px] text-gray-500 font-medium md:text-sm">
@@ -209,4 +209,4 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/trix/1.3.1/trix.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/trix/1.3.1/trix.css">
-</x-app-layout>
+</x-sidebar-layout>
