@@ -1,18 +1,6 @@
 <x-sidebar-layout>
     <x-slot name="header">
-        <div class="flex flex-row items-center">
-            <div class="text-[12px]  text-gray-500 font-medium md:text-sm">
-                <nav class="flex items-center space-x-1 md:space-x-2">
-                    <span>
-                        Program Kerja
-                    </span>
-                    <span class="text-gray-400">/</span>
-                    <span class="text-gray-800 font-semibold">
-                        {{ $department->name }}
-                    </span>
-                </nav>
-            </div>
-        </div>
+        <x-breadcrumb :links="['Dashboard' => auth()->user()->getDashboardRoute(), 'Program Kerja' => null, $department->name => null]" />
     </x-slot>
     <div class="max-w-6xl mx-auto py-2 px-2">
 

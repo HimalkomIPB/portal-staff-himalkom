@@ -194,6 +194,21 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(WorkProgramComment::class);
     }
 
+    public function serviceRequests(): HasMany
+    {
+        return $this->hasMany(ServiceRequest::class, 'requester_id');
+    }
+
+    public function assignedServiceRequests(): HasMany
+    {
+        return $this->hasMany(ServiceRequest::class, 'assigned_to');
+    }
+
+    public function serviceRequestComments(): HasMany
+    {
+        return $this->hasMany(ServiceRequestComment::class);
+    }
+
     /**
      * Department-department yang diawasi user ini sebagai SC.
      * (Berbeda dari department utama yang ada di kolom department_id)

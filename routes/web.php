@@ -6,6 +6,8 @@ use App\Http\Controllers\ModViewController;
 use App\Http\Controllers\PDFController;
 use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ServiceRequestCommentController;
+use App\Http\Controllers\ServiceRequestController;
 use App\Http\Controllers\WorkProgramCommentController;
 use App\Http\Controllers\WorkProgramsController;
 use Illuminate\Support\Facades\Route;
@@ -22,6 +24,24 @@ Route::middleware('auth')->group(function () {
         ->name('dashboard.notifications.index');
     Route::patch('/dashboard/notifications/{id}/read', [DashboardController::class, 'readNotification'])
         ->name('dashboard.notifications.markAsRead');
+    Route::patch('/dashboard/notifications/read-all', [DashboardController::class, 'markAllAsRead'])
+        ->name('dashboard.notifications.markAllAsRead');
+});
+
+// -------------------------------------------------------
+// Service Requests
+// -------------------------------------------------------
+Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(function () {
+    Route::resource('services', ServiceRequestController::class);
+    Route::patch('services/{service}/status', [ServiceRequestController::class, 'updateStatus'])->name('services.status.update');
+    Route::patch('services/{service}/assign', [ServiceRequestController::class, 'assign'])->name('services.assign');
+    Route::post('services/{service}/upload-final', [ServiceRequestController::class, 'uploadFinal'])->name('services.upload-final');
+    Route::patch('services/{service}/approve-final', [ServiceRequestController::class, 'approveFinal'])->name('services.approve-final');
+    Route::patch('services/{service}/reject-final', [ServiceRequestController::class, 'rejectFinal'])->name('services.reject-final');
+    Route::patch('services/{service}/accept-manager', [ServiceRequestController::class, 'acceptByManager'])->name('services.accept-manager');
+    Route::patch('services/{service}/reject-manager', [ServiceRequestController::class, 'rejectByManager'])->name('services.reject-manager');
+    
+    Route::post('services/{service}/comments', [ServiceRequestCommentController::class, 'store'])->name('services.comments.store');
 });
 
 // -------------------------------------------------------
@@ -169,5 +189,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 });
+
+
 
 require __DIR__.'/auth.php';

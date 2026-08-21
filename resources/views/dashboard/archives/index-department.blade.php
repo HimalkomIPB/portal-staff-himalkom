@@ -1,15 +1,6 @@
 <x-sidebar-layout>
     <x-slot name="header">
-        <div class="flex flex-row items-center">
-            <div class="text-[12px]  text-gray-500 font-medium md:text-sm">
-                <nav class="flex items-center space-x-1 md:space-x-2">
-                    <span class="text-gray-800 font-semibold">
-                        [Archive] Department
-                    </span>
-                    <span class="text-gray-400">/</span>
-                </nav>
-            </div>
-        </div>
+        <x-breadcrumb :links="['Dashboard' => auth()->user()->getDashboardRoute(), 'Arsip Department' => null]" />
     </x-slot>
     <div class="max-w-6xl mx-auto py-2 px-2">
         @forelse ($groupedDepartments as $cabinetYear => $departments)

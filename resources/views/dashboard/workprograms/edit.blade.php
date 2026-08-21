@@ -1,40 +1,19 @@
 <x-sidebar-layout>
     <x-slot name="header">
-        <div class="flex flex-row items-center">
-            <div class="text-gray-500 font-medium text-[11px] md:text-sm ">
-                <nav class="flex items-center space-x-1 md:space-x-2">
-                    @if (Auth::user()->hasRole('bph') && Auth::user()->department->id !== $workProgram->department->id)
-                        <a href="{{ route('dashboard.modview.department.index') }}"
-                            class="hover:underline hover:text-[#111B5A] cursor-pointer">
-                            Supervisi Department
-                        </a>
-                        <span class="text-gray-400">/</span>
-                        <a href="{{ route('dashboard.modview.department.show', ['department' => $workProgram->department]) }}"
-                            class="hover:underline hover:text-[#111B5A] cursor-pointer">
-                            {{ $workProgram->department->name }}
-                        </a>
-                        <span class="text-gray-400">/</span>
-                        <span class="text-gray-800 font-semibold">
-                            Edit
-                        </span>
-                    @else
-                        <a href="{{ route('dashboard.workProgram.index', ['department' => $workProgram->department]) }}"
-                            class="hover:underline hover:text-[#111B5A] cursor-pointer">
-                            Program Kerja
-                        </a>
-                        <span class="text-gray-400">/</span>
-                        <a href="{{ route('dashboard.workProgram.index', ['department' => $workProgram->department]) }}"
-                            class="hover:underline hover:text-[#111B5A] cursor-pointer">
-                            {{ $workProgram->department->name }}
-                        </a>
-                        <span class="text-gray-400">/</span>
-                        <span class="text-gray-800 font-semibold">
-                            Edit
-                        </span>
-                    @endif
-                </nav>
-            </div>
-        </div>
+        @php
+            $isBphSupervising = Auth::user()->hasRole('bph') && Auth::user()->department->id !== $workProgram->department->id;
+            
+            $links = ['Dashboard' => auth()->user()->getDashboardRoute()];
+            if ($isBphSupervising) {
+                $links['Supervisi Department'] = route('dashboard.modview.department.index');
+                $links[$workProgram->department->name] = route('dashboard.modview.department.show', ['department' => $workProgram->department]);
+            } else {
+                $links['Program Kerja'] = route('dashboard.workProgram.index', ['department' => $workProgram->department]);
+                $links[$workProgram->department->name] = route('dashboard.workProgram.index', ['department' => $workProgram->department]);
+            }
+            $links['Edit'] = null;
+        @endphp
+        <x-breadcrumb :links="$links" />
     </x-slot>
     <div
         class="relative max-w-[90dvw] lg:max-w-6xl mx-auto mt-2 mb-8 p-2 bg-white rounded-xl md:rounded-2xl lg:rounded-3xl shadow-lg 

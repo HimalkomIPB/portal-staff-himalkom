@@ -1,7 +1,7 @@
 <x-sidebar-layout title="Performance Evaluation - {{ config('app.name', 'Portal Himalkom') }}">
     <x-slot name="header">
-        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Performance</p>
-        <h1 class="text-xl font-bold text-slate-900">{{ $selectedMonthName }} {{ $selectedYear }}</h1>
+        <x-breadcrumb :links="['Dashboard' => auth()->user()->getDashboardRoute(), 'Performance' => null]" />
+        <h1 class="mt-2 text-xl font-bold text-slate-900">{{ $selectedMonthName }} {{ $selectedYear }}</h1>
     </x-slot>
 
     <style>

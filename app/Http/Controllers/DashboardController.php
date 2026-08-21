@@ -53,6 +53,13 @@ class DashboardController extends Controller
         return redirect()->back()->with('success', 'Notification marked as read.');
     }
 
+    public function markAllAsRead(): RedirectResponse
+    {
+        Auth::user()->unreadNotifications->markAsRead();
+
+        return redirect()->back()->with('success', 'Semua notifikasi telah ditandai sebagai dibaca.');
+    }
+
     public function showSupervisor(): View
     {
         $departmentSlugs = Department::orderBy('name')

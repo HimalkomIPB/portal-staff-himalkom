@@ -1,25 +1,7 @@
 <x-sidebar-layout>
 
     <x-slot name="header">
-        <div class="flex flex-row items-center">
-            <div class="text-[11px] text-gray-500 font-medium md:text-sm">
-                <nav class="flex items-center space-x-1 md:space-x-2">
-                    <a href="{{ route('dashboard.archive.department.index') }}"
-                        class="hover:underline hover:text-[#111B5A] cursor-pointer">
-                        [Archived] Departments
-                    </a>
-                    <span class="text-gray-400">/</span>
-                    <a href="{{ route('dashboard.archive.department.show', ['id' => $department->id]) }}"
-                        class="hover:underline hover:text-[#111B5A] cursor-pointer">
-                        {{ $department->name }}
-                    </a>
-                    <span class="text-gray-400">/</span>
-                    <span class="text-gray-800 font-semibold">
-                        {{ $workProgram->name }}
-                    </span>
-                </nav>
-            </div>
-        </div>
+        <x-breadcrumb :links="['Dashboard' => auth()->user()->getDashboardRoute(), 'Arsip Department' => route('dashboard.archive.department.index'), $department->name => route('dashboard.archive.department.show', ['id' => $department->id]), $workProgram->name => null]" />
     </x-slot>
 
     <div class="relative max-w-[90dvw] mx-auto rounded-lg px-2 py-1 md:px-4 md:py-1.5 lg:px-6 lg:py-2">

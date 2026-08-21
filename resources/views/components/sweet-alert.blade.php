@@ -1,6 +1,13 @@
 @php
     $successData = session('success');
+    if (is_string($successData)) {
+        $successData = ['id' => uniqid(), 'message' => $successData];
+    }
+
     $errorData = session('error');
+    if (is_string($errorData)) {
+        $errorData = ['id' => uniqid(), 'message' => $errorData];
+    }
 @endphp
 
 @if ($successData)

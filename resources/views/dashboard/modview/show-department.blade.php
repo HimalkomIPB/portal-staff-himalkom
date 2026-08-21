@@ -1,20 +1,6 @@
 <x-sidebar-layout>
     <x-slot name="header">
-        <div class="flex flex-row items-center">
-            <div class="text-[12px]  text-gray-500 font-medium md:text-sm">
-                <nav class="flex items-center space-x-1 md:space-x-2">
-                    <a href="{{ route('dashboard.modview.department.index') }}"
-                        class="hover:underline hover:text-[#111B5A] cursor-pointer">
-                        Supervisi Department
-                    </a>
-                    <span class="text-gray-400">/</span>
-                    <span class="text-gray-800 font-semibold">
-                        {{ $department->name }}
-                    </span>
-
-                </nav>
-            </div>
-        </div>
+        <x-breadcrumb :links="['Dashboard' => auth()->user()->getDashboardRoute(), 'Supervisi Department' => route('dashboard.modview.department.index'), $department->name => null]" />
     </x-slot>
 
     @include('components.sweet-alert')

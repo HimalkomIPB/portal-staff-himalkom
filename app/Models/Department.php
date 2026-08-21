@@ -100,6 +100,11 @@ class Department extends Model
         return $this->hasMany(WorkProgram::class);
     }
 
+    public function serviceRequests(): HasMany
+    {
+        return $this->hasMany(ServiceRequest::class);
+    }
+
     protected static function boot()
     {
         parent::boot();

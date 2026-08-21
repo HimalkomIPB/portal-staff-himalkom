@@ -1,8 +1,6 @@
 <x-sidebar-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Profile') }}
-        </h2>
+        <x-breadcrumb :links="['Dashboard' => auth()->user()->getDashboardRoute(), __('Profile') => null]" />
     </x-slot>
 
     <div class="py-12 px-4 sm:px-4 md:px-4 lg:px-0">

@@ -1,12 +1,26 @@
 <x-sidebar-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Notifications
-        </h2>
+        <x-breadcrumb :links="['Dashboard' => auth()->user()->getDashboardRoute(), 'Notifications' => null]" />
     </x-slot>
 
     <div class="py-12 px-4 sm:px-4 md:px-4 lg:px-0">
         <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
+            
+            @if(auth()->user()->unreadNotifications->count() > 0)
+                <div class="mb-4 flex justify-end">
+                    <form action="{{ route('dashboard.notifications.markAllAsRead') }}" method="POST">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="inline-flex h-9 items-center justify-center gap-2 rounded-md bg-blue-600 px-4 text-sm font-semibold text-white transition hover:bg-blue-700">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                            </svg>
+                            Tandai Semua Dibaca
+                        </button>
+                    </form>
+                </div>
+            @endif
+
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 @forelse ($notifications as $notification)
                     <div class="p-4 border-b border-gray-200 hover:bg-gray-50 transition">

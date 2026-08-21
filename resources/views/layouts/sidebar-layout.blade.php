@@ -170,6 +170,23 @@
                         </span>
                     @endif
 
+                    {{-- Layanan Antar Divisi --}}
+                    @if ($authUser->department_id)
+                        <a href="{{ route('dashboard.services.index') }}" class="{{ $navClass('dashboard.services.*') }}">
+                            <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            Layanan Antar Divisi
+                        </a>
+                    @else
+                        <span class="{{ $sidebarItem }} {{ $sidebarDisabled }}">
+                            <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            Layanan Antar Divisi
+                        </span>
+                    @endif
+
                     {{-- Calendar — always disabled --}}
                     <span class="{{ $sidebarItem }} {{ $sidebarDisabled }}">
                         <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -367,7 +384,7 @@
                 <svg class="h-5 w-5 shrink-0 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M20 6 9 17l-5-5" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
-                {{ session('success') }}
+                {{ is_array(session('success')) ? session('success')['message'] : session('success') }}
             </div>
         @endif
 
@@ -377,7 +394,7 @@
                     <circle cx="12" cy="12" r="10" />
                     <path d="M12 8v4M12 16h.01" stroke-linecap="round" />
                 </svg>
-                {{ session('error') }}
+                {{ is_array(session('error')) ? session('error')['message'] : session('error') }}
             </div>
         @endif
 
