@@ -394,22 +394,36 @@
         </header>
 
         {{-- Flash messages --}}
-        @if (session('success'))
+        @php
+            $successFlash = session('success');
+            $successMessage = is_array($successFlash) ? ($successFlash['message'] ?? null) : $successFlash;
+        @endphp
+
+        @if ($successMessage)
             <div class="mx-4 mt-4 flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700 sm:mx-8">
                 <svg class="h-5 w-5 shrink-0 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M20 6 9 17l-5-5" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
-                {{ is_array(session('success')) ? session('success')['message'] : session('success') }}
+                {{ $successMessage }}
             </div>
         @endif
 
-        @if (session('error'))
+        @php
+            $errorFlash = session('error');
+            $errorMessage = is_array($errorFlash) ? ($errorFlash['message'] ?? null) : $errorFlash;
+        @endphp
+
+        @if ($errorMessage)
             <div class="mx-4 mt-4 flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 sm:mx-8">
                 <svg class="h-5 w-5 shrink-0 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="12" cy="12" r="10" />
                     <path d="M12 8v4M12 16h.01" stroke-linecap="round" />
                 </svg>
+<<<<<<< HEAD
                 {{ is_array(session('error')) ? session('error')['message'] : session('error') }}
+=======
+                {{ $errorMessage }}
+>>>>>>> b8b2ed0 (refactor: improve flash message handling and update notification links for clarity)
             </div>
         @endif
 

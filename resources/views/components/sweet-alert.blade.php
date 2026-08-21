@@ -8,18 +8,24 @@
     if (is_string($errorData)) {
         $errorData = ['id' => uniqid(), 'message' => $errorData];
     }
+
+    $successMessage = is_array($successData) ? ($successData['message'] ?? null) : $successData;
+    $successId = is_array($successData) ? ($successData['id'] ?? $successMessage) : $successMessage;
+
+    $errorMessage = is_array($errorData) ? ($errorData['message'] ?? null) : $errorData;
+    $errorId = is_array($errorData) ? ($errorData['id'] ?? $errorMessage) : $errorMessage;
 @endphp
 
-@if ($successData)
+@if ($successMessage)
     <script>
         const successId = sessionStorage.getItem('success_id');
-        const currentSuccessId = @json($successData['id']);
+        const currentSuccessId = @json($successId);
 
         if (!successId || successId !== currentSuccessId) {
             Swal.fire({
                 icon: 'success',
                 title: 'Sukses!',
-                text: @json($successData['message']),
+                text: @json($successMessage),
                 confirmButtonText: 'OK'
             }).then(() => {
                 sessionStorage.setItem('success_id', currentSuccessId);
@@ -29,16 +35,16 @@
     </script>
 @endif
 
-@if ($errorData)
+@if ($errorMessage)
     <script>
         const errorId = sessionStorage.getItem('error_id');
-        const currentErrorId = @json($errorData['id']);
+        const currentErrorId = @json($errorId);
 
         if (!errorId || errorId !== currentErrorId) {
             Swal.fire({
                 icon: 'error',
                 title: 'Gagal!',
-                text: @json($errorData['message']),
+                text: @json($errorMessage),
                 confirmButtonText: 'OK'
             }).then(() => {
                 sessionStorage.setItem('error_id', currentErrorId);

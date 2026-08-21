@@ -42,19 +42,19 @@
         <div class="rounded-2xl bg-white ring-1 ring-slate-200 shadow-sm overflow-hidden mb-8">
 
             {{-- Toolbar: navigasi bulan + filter + view toggle --}}
-            <div class="flex flex-wrap items-center gap-3 px-4 sm:px-5 py-4 border-b border-slate-100">
+            <div class="flex flex-col gap-3 px-4 sm:px-5 py-4 border-b border-slate-100 sm:flex-row sm:flex-wrap sm:items-center">
 
                 {{-- Navigasi bulan --}}
-                <div class="flex items-center gap-2">
-                    <button @click="prevMonth()"
+                <div class="flex items-center gap-2 min-w-0">
+                    <button @click="prevPeriod()"
                         class="flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 transition">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18 9 12l6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
-                    <button @click="nextMonth()"
+                    <button @click="nextPeriod()"
                         class="flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 transition">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18 15 12 9 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
-                    <span class="text-base font-bold text-slate-800 min-w-[130px]" x-text="monthYearLabel"></span>
+                    <span class="min-w-0 text-sm font-bold text-slate-800 sm:text-base sm:min-w-[180px]" x-text="viewMode === 'month' ? monthYearLabel : weekRangeLabel"></span>
                     <button @click="goToToday()"
                         class="ml-1 rounded-lg border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition">
                         Today
@@ -65,7 +65,7 @@
                 <div class="flex-1"></div>
 
                 {{-- Filter Semua / Departemen / General --}}
-                <div class="flex items-center rounded-xl border border-slate-200 bg-slate-50 p-1 text-xs font-semibold">
+                <div class="flex w-full items-center rounded-xl border border-slate-200 bg-slate-50 p-1 text-xs font-semibold sm:w-auto">
                     <button @click="activeFilter = 'all'"
                         :class="activeFilter === 'all' ? 'bg-white shadow text-slate-800' : 'text-slate-500 hover:text-slate-700'"
                         class="rounded-lg px-3 py-1.5 transition">Semua</button>
@@ -87,39 +87,40 @@
                 <div class="flex items-center rounded-xl border border-slate-200 bg-slate-50 p-1 text-xs font-semibold">
                     <button @click="viewMode = 'month'"
                         :class="viewMode === 'month' ? 'bg-white shadow text-slate-800' : 'text-slate-500 hover:text-slate-700'"
-                        class="rounded-lg px-3 py-1.5 transition">Month</button>
+                        class="w-1/2 rounded-lg px-3 py-1.5 transition sm:w-auto">Month</button>
                     <button @click="viewMode = 'week'"
                         :class="viewMode === 'week' ? 'bg-white shadow text-slate-800' : 'text-slate-500 hover:text-slate-700'"
-                        class="rounded-lg px-3 py-1.5 transition">Week</button>
+                        class="w-1/2 rounded-lg px-3 py-1.5 transition sm:w-auto">Week</button>
                 </div>
             </div>
 
             {{-- ===== MONTH VIEW ===== --}}
             <div x-show="viewMode === 'month'" class="overflow-x-auto">
                 {{-- Header hari --}}
-                <div class="grid grid-cols-7 border-b border-slate-100">
+                <div class="grid grid-cols-7 border-b border-slate-200 bg-slate-50/80">
                     <template x-for="day in ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']">
-                        <div class="py-2.5 text-center text-xs font-semibold text-slate-400 uppercase tracking-wide" x-text="day"></div>
+                        <div class="py-2 sm:py-3 text-center text-[10px] sm:text-[11px] font-semibold text-slate-500 uppercase tracking-[0.15em] sm:tracking-[0.2em]" x-text="day"></div>
                     </template>
                 </div>
 
                 {{-- Grid tanggal --}}
-                <div class="grid grid-cols-7">
+                <div class="grid grid-cols-7 bg-white">
                     <template x-for="(cell, idx) in calendarCells" :key="idx">
                         <div
-                            class="min-h-[110px] border-b border-r border-slate-100 p-1.5 last:border-r-0 transition"
+                            class="min-h-[108px] border-b border-r border-slate-100 p-1.5 sm:min-h-[140px] sm:p-2 last:border-r-0 transition hover:bg-slate-50/70 cursor-pointer"
                             :class="{
                                 'bg-slate-50 text-slate-300': !cell.currentMonth,
                                 'bg-white': cell.currentMonth,
                             }"
+                            @click="focusWeekDay(cell.date)"
                         >
                             {{-- Nomor tanggal --}}
-                            <div class="flex justify-start mb-1">
+                            <div class="flex items-start justify-between mb-1.5 sm:mb-2">
                                 <span
-                                    class="inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold"
+                                    class="inline-flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-full text-[11px] sm:text-xs font-semibold ring-1 ring-transparent"
                                     :class="{
-                                        'bg-[#0b5bd3] text-white': cell.isToday,
-                                        'text-slate-700': cell.currentMonth && !cell.isToday,
+                                        'bg-[#0b5bd3] text-white shadow-md shadow-blue-700/20': cell.isToday,
+                                        'text-slate-800': cell.currentMonth && !cell.isToday,
                                         'text-slate-300': !cell.currentMonth,
                                     }"
                                     x-text="cell.day"
@@ -127,19 +128,19 @@
                             </div>
 
                             {{-- Events --}}
-                            <template x-for="(event, ei) in cell.events.slice(0, 3)" :key="ei">
+                            <template x-for="(event, ei) in cell.events.slice(0, 2)" :key="ei">
                                 <div
-                                    class="mb-0.5 cursor-pointer rounded px-1.5 py-0.5 text-[11px] font-medium leading-tight truncate transition hover:opacity-80"
+                                    class="mb-1 cursor-pointer rounded-md border px-1.5 py-1 text-[10px] sm:px-2 sm:py-1 text-slate-800 font-medium leading-tight truncate transition hover:shadow-sm"
                                     :class="event.skala === 'departemen'
-                                        ? 'bg-blue-100 text-blue-800'
-                                        : 'bg-slate-200 text-slate-700'"
+                                        ? 'border-blue-100 bg-blue-50 text-blue-800'
+                                        : 'border-slate-200 bg-slate-100 text-slate-700'"
                                     :title="event.title"
                                     @click="openDetailModal(event)"
                                     x-text="event.title"
                                 ></div>
                             </template>
-                            <template x-if="cell.events.length > 3">
-                                <div class="text-[10px] text-slate-400 mt-0.5 pl-1">+<span x-text="cell.events.length - 3"></span> lainnya</div>
+                            <template x-if="cell.events.length > 2">
+                                <div class="text-[10px] font-semibold text-slate-400 mt-0.5 pl-1">+<span x-text="cell.events.length - 2"></span> lainnya</div>
                             </template>
                         </div>
                     </template>
@@ -147,31 +148,124 @@
             </div>
 
             {{-- ===== WEEK VIEW ===== --}}
-            <div x-show="viewMode === 'week'" class="overflow-x-auto">
-                <div class="grid grid-cols-7 border-b border-slate-100">
-                    <template x-for="(wd, i) in weekDays" :key="i">
-                        <div class="py-3 text-center">
-                            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide" x-text="wd.label"></div>
-                            <div
-                                class="mx-auto mt-1 inline-flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold"
-                                :class="wd.isToday ? 'bg-[#0b5bd3] text-white' : 'text-slate-700'"
-                                x-text="wd.day"
-                            ></div>
+            <div x-show="viewMode === 'week'" class="bg-white">
+                <div class="flex flex-col gap-3 px-4 sm:px-5 py-4 border-b border-slate-100 bg-white sm:flex-row sm:items-center">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Week View</p>
+                        <h3 class="text-sm sm:text-base font-bold text-slate-800" x-text="weekRangeLabel"></h3>
+                    </div>
+                    <div class="flex-1"></div>
+                    <div class="flex items-center gap-2 self-start sm:self-auto">
+                        <button @click="moveWeek(-1)"
+                            class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition"
+                            aria-label="Previous week">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18 9 12l6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </button>
+                        <button @click="goToToday()"
+                            class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition">
+                            Hari Ini
+                        </button>
+                        <button @click="moveWeek(1)"
+                            class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition"
+                            aria-label="Next week">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18 15 12 9 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="px-3 py-3 sm:hidden">
+                    <template x-for="(wd, i) in weekDays" :key="'mobile-' + i">
+                        <div class="mb-3 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                            <div class="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-4 py-3">
+                                <div>
+                                    <div class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400" x-text="wd.label"></div>
+                                    <div class="mt-1 text-sm font-bold text-slate-800" x-text="wd.day + ' ' + wd.monthShort + ' ' + wd.year"></div>
+                                </div>
+                                <div class="rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide" :class="wd.isToday ? 'bg-[#0b5bd3] text-white' : 'bg-slate-100 text-slate-500'" x-text="wd.isToday ? 'Today' : (wd.events.length + ' event')"></div>
+                            </div>
+
+                            <div class="p-3 space-y-2">
+                                <template x-if="wd.events.length === 0">
+                                    <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-3 py-4 text-center text-sm text-slate-400">
+                                        Tidak ada jadwal rapat
+                                    </div>
+                                </template>
+
+                                <template x-for="(event, ei) in wd.events" :key="ei">
+                                    <div
+                                        class="cursor-pointer rounded-xl border-l-4 bg-white px-3 py-3 shadow-sm transition active:scale-[0.99]"
+                                        :class="event.skala === 'departemen' ? 'border-l-blue-500' : 'border-l-orange-500'"
+                                        @click="openDetailModal(event)"
+                                    >
+                                        <div class="flex items-start justify-between gap-3">
+                                            <div class="min-w-0">
+                                                <div class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400" x-text="event.skala === 'departemen' ? 'Departemen' : 'General'"></div>
+                                                <div class="mt-1 text-sm font-semibold text-slate-800 line-clamp-2" x-text="event.title"></div>
+                                            </div>
+                                            <div class="shrink-0 text-right text-xs font-semibold text-slate-500" x-text="formatTime(event.start_time) + ' - ' + formatTime(event.end_time)"></div>
+                                        </div>
+                                        <template x-if="event.lokasi">
+                                            <div class="mt-2 text-xs text-slate-500 line-clamp-1" x-text="event.lokasi"></div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
                         </div>
                     </template>
                 </div>
-                <div class="grid grid-cols-7 min-h-[200px]">
+
+                <div class="hidden sm:grid border-b border-slate-200 bg-slate-50/90" style="grid-template-columns: 72px repeat(7, minmax(0, 1fr));">
+                    <div class="flex h-[84px] items-end justify-end border-r border-slate-200 px-3 pb-3 text-[10px] font-semibold uppercase tracking-[0.25em] text-slate-400">
+                        GMT+1
+                    </div>
                     <template x-for="(wd, i) in weekDays" :key="i">
-                        <div class="border-r border-slate-100 last:border-r-0 p-2 space-y-1">
+                        <div class="py-3 text-center border-r border-slate-200 last:border-r-0">
+                            <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.22em]" x-text="wd.label"></div>
+                            <div
+                                class="mx-auto mt-1 inline-flex h-9 min-w-9 items-center justify-center rounded-full px-2 text-sm font-bold"
+                                :class="wd.isToday ? 'bg-[#0b5bd3] text-white shadow-md shadow-blue-700/20' : 'bg-slate-100 text-slate-700'"
+                                x-text="wd.day"
+                            ></div>
+                            <div class="mt-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400" x-text="wd.monthShort"></div>
+                        </div>
+                    </template>
+                </div>
+                <div class="hidden sm:grid" style="grid-template-columns: 72px repeat(7, minmax(0, 1fr));">
+                    <div class="relative border-r border-slate-200 bg-white" style="height: 1536px;">
+                        <template x-for="hour in 24" :key="hour">
+                            <div class="absolute left-0 right-0 border-t border-slate-100" :style="'top: ' + ((hour - 1) * 64) + 'px'"></div>
+                        </template>
+                        <template x-for="hour in 24" :key="'label-' + hour">
+                            <div class="absolute left-0 right-0 pr-3 text-right text-[11px] text-slate-400" :style="'top: ' + ((hour - 1) * 64 - 6) + 'px'" x-text="formatHourLabel(hour - 1)"></div>
+                        </template>
+                    </div>
+
+                    <template x-for="(wd, i) in weekColumns" :key="i">
+                        <div class="relative border-r border-slate-200 last:border-r-0 bg-white" style="height: 1536px;">
+                            <div class="absolute inset-0" style="background-image: repeating-linear-gradient(to bottom, rgba(226, 232, 240, 0) 0, rgba(226, 232, 240, 0) 63px, #e2e8f0 64px);"></div>
+
+                            <template x-if="wd.events.length === 0">
+                                <div class="absolute inset-x-3 top-6 rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 px-3 py-4 text-center text-xs text-slate-400">
+                                    Tidak ada jadwal rapat
+                                </div>
+                            </template>
+
                             <template x-for="(event, ei) in wd.events" :key="ei">
                                 <div
-                                    class="cursor-pointer rounded px-1.5 py-1 text-[11px] font-medium leading-tight transition hover:opacity-80"
+                                    class="absolute cursor-pointer rounded-xl px-3 py-2 text-[11px] font-medium leading-tight shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                                     :class="event.skala === 'departemen'
-                                        ? 'bg-blue-100 text-blue-800'
-                                        : 'bg-slate-200 text-slate-700'"
+                                        ? 'bg-blue-500 text-white ring-1 ring-blue-300'
+                                        : 'bg-orange-500 text-white ring-1 ring-orange-300'"
+                                    :style="eventStyle(event)"
                                     @click="openDetailModal(event)"
-                                    x-text="event.title"
-                                ></div>
+                                >
+                                    <div class="flex items-center justify-between gap-2 mb-1">
+                                        <span class="text-[10px] font-semibold uppercase tracking-[0.2em] opacity-90" x-text="event.skala === 'departemen' ? 'Dept' : 'General'"></span>
+                                        <span class="text-[10px] font-semibold opacity-90" x-text="formatTime(event.start_time)"></span>
+                                    </div>
+                                    <div class="line-clamp-2 font-semibold" x-text="event.title"></div>
+                                    <div class="mt-1 text-[10px] opacity-90" x-text="event.lokasi || 'Tanpa lokasi'"></div>
+                                </div>
                             </template>
                         </div>
                     </template>
@@ -576,6 +670,7 @@
             today: new Date(),
             currentYear: new Date().getFullYear(),
             currentMonth: new Date().getMonth(), // 0-indexed
+            selectedDate: @json(now()->format('Y-m-d')),
             viewMode: 'month',
             activeFilter: 'all',
 
@@ -615,6 +710,49 @@
                 const months = ['January','February','March','April','May','June',
                                 'July','August','September','October','November','December'];
                 return months[this.currentMonth] + ' ' + this.currentYear;
+            },
+
+            get weekRangeLabel() {
+                const first = this.weekDays[0];
+                const last = this.weekDays[6];
+                return `${first.day} ${first.monthShort} - ${last.day} ${last.monthShort} ${last.year}`;
+            },
+
+            get weekColumns() {
+                return this.weekDays.map(day => {
+                    const events = this.filteredEvents
+                        .filter(event => event.date === day.date)
+                        .map(event => ({
+                            ...event,
+                            startMinutes: this.timeToMinutes(event.start_time),
+                            endMinutes: this.timeToMinutes(event.end_time) || (this.timeToMinutes(event.start_time) + 60),
+                        }))
+                        .sort((left, right) => left.startMinutes - right.startMinutes || left.endMinutes - right.endMinutes);
+
+                    const laneEnds = [];
+
+                    const laidOutEvents = events.map(event => {
+                        const laneIndex = laneEnds.findIndex(endMinutes => endMinutes <= event.startMinutes);
+
+                        if (laneIndex === -1) {
+                            laneEnds.push(event.endMinutes);
+                            return { ...event, laneIndex: laneEnds.length - 1 };
+                        }
+
+                        laneEnds[laneIndex] = event.endMinutes;
+                        return { ...event, laneIndex };
+                    });
+
+                    const laneCount = Math.max(1, laneEnds.length);
+
+                    return {
+                        ...day,
+                        events: laidOutEvents.map(event => ({
+                            ...event,
+                            laneCount,
+                        })),
+                    };
+                });
             },
 
             get filteredEvents() {
@@ -685,13 +823,14 @@
             },
 
             get weekDays() {
-                // Find Monday of current week relative to today / viewed month
-                const ref   = new Date(this.currentYear, this.currentMonth, 1);
-                const dow   = (ref.getDay() + 6) % 7; // Monday=0
+                // Find Monday of the selected week
+                const ref = new Date(this.selectedDate + 'T00:00:00');
+                const dow = (ref.getDay() + 6) % 7; // Monday=0
                 const monday = new Date(ref);
                 monday.setDate(ref.getDate() - dow);
 
                 const labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+                const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
                 const days = [];
                 for (let i = 0; i < 7; i++) {
                     const d    = new Date(monday);
@@ -700,6 +839,8 @@
                     days.push({
                         label: labels[i],
                         day: d.getDate(),
+                        monthShort: months[d.getMonth()],
+                        year: d.getFullYear(),
                         date,
                         isToday: date === this.formatDate(this.today),
                         events: this.filteredEvents.filter(e => e.date === date),
@@ -720,6 +861,24 @@
                 }
             },
 
+            prevPeriod() {
+                if (this.viewMode === 'week') {
+                    this.moveWeek(-1);
+                    return;
+                }
+
+                this.prevMonth();
+            },
+
+            nextPeriod() {
+                if (this.viewMode === 'week') {
+                    this.moveWeek(1);
+                    return;
+                }
+
+                this.nextMonth();
+            },
+
             nextMonth() {
                 if (this.currentMonth === 11) {
                     this.currentMonth = 0;
@@ -732,6 +891,15 @@
             goToToday() {
                 this.currentYear  = this.today.getFullYear();
                 this.currentMonth = this.today.getMonth();
+                this.selectedDate = this.formatDate(this.today);
+            },
+
+            moveWeek(offset) {
+                const d = new Date(this.selectedDate + 'T00:00:00');
+                d.setDate(d.getDate() + (offset * 7));
+                this.selectedDate = this.formatDate(d);
+                this.currentYear = d.getFullYear();
+                this.currentMonth = d.getMonth();
             },
 
             // -------------------------------------------------------
@@ -766,6 +934,14 @@
                 this.detailModalOpen = true;
             },
 
+            focusWeekDay(date) {
+                this.selectedDate = date;
+                const d = new Date(date + 'T00:00:00');
+                this.currentYear = d.getFullYear();
+                this.currentMonth = d.getMonth();
+                this.viewMode = 'week';
+            },
+
             submitForm() {
                 document.getElementById('agenda-form').submit();
             },
@@ -792,6 +968,30 @@
                 if (!t) return '';
                 const parts = t.split(':');
                 return parts[0] + ':' + parts[1];
+            },
+
+            formatHourLabel(hour) {
+                const suffix = hour >= 12 ? 'PM' : 'AM';
+                const normalized = hour % 12 === 0 ? 12 : hour % 12;
+                return `${normalized} ${suffix}`;
+            },
+
+            timeToMinutes(timeStr) {
+                if (!timeStr) return 0;
+
+                const [hours, minutes] = timeStr.split(':').map(Number);
+                return (hours * 60) + (minutes || 0);
+            },
+
+            eventStyle(event) {
+                const startMinutes = event.startMinutes ?? this.timeToMinutes(event.start_time);
+                const endMinutes = event.endMinutes ?? (this.timeToMinutes(event.end_time) || (startMinutes + 60));
+                const top = (startMinutes / 60) * 64 + 2;
+                const height = Math.max(((endMinutes - startMinutes) / 60) * 64 - 4, 42);
+                const laneWidth = 100 / (event.laneCount || 1);
+                const left = laneWidth * (event.laneIndex || 0);
+
+                return `top: ${top}px; height: ${height}px; left: calc(${left}% + 4px); width: calc(${laneWidth}% - 8px);`;
             },
 
             formatUpcomingDate(dateStr) {

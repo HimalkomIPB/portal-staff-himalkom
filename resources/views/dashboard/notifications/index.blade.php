@@ -46,11 +46,11 @@
                             </span>
                         @endif
 
-                        @if ($notification->type === \App\Notifications\WorkProgramCommentNotification::class)
+                        @if (!empty($notification->data['url'] ?? null))
                             <div class="mt-2">
                                 <a href="{{ $notification->data['url'] }}"
                                     class="text-blue-500 hover:underline text-sm sm:text-base">
-                                    Lihat Komentar
+                                    Lihat Detail
                                 </a>
                             </div>
                         @endif
