@@ -25,7 +25,7 @@ class ServiceRequestController extends Controller
         $tab = $request->query('tab', 'my_requests'); // 'my_requests' or 'incoming'
         $statusFilter = $request->query('status', 'all');
         
-        $query = ServiceRequest::with(['requester', 'assignee', 'department']);
+        $query = ServiceRequest::with(['requester', 'assignees', 'department']);
         
         if ($tab === 'incoming') {
             // For incoming requests, user must be from Kreatif or RnT
@@ -41,7 +41,9 @@ class ServiceRequestController extends Controller
 
             // Anggota biasa hanya bisa melihat request yang di-assign ke dia
             if ($user->hasRole('anggota')) {
-                $query->where('assigned_to', $user->id);
+                $query->whereHas('assignees', function($q) use ($user) {
+                    $q->where('users.id', $user->id);
+                });
             }
         } else {
             // My Requests
@@ -158,7 +160,7 @@ class ServiceRequestController extends Controller
     {
         $this->authorize('view', $service);
         
-        $service->load(['requester', 'assignee', 'department', 'comments.user']);
+        $service->load(['requester', 'assignees', 'department', 'comments.user']);
         
         return view('dashboard.services.show', compact('service'));
     }
@@ -190,21 +192,24 @@ class ServiceRequestController extends Controller
         $this->authorize('update', $service);
         
         $request->validate([
-            'assigned_to' => 'nullable|exists:users,id'
+            'assigned_to' => 'nullable|array',
+            'assigned_to.*' => 'exists:users,id'
         ]);
         
         // Validation to ensure assignee is from the same department as the manager
         if ($request->assigned_to) {
-            $assignee = User::findOrFail($request->assigned_to);
-            if ($assignee->department_id !== $request->user()->department_id) {
-                return back()->with('error', [
-                    'id' => uniqid(),
-                    'message' => 'Hanya bisa menugaskan ke anggota divisi yang sama.'
-                ]);
+            $assignees = User::whereIn('id', $request->assigned_to)->get();
+            foreach ($assignees as $assignee) {
+                if ($assignee->department_id !== $request->user()->department_id) {
+                    return back()->with('error', [
+                        'id' => uniqid(),
+                        'message' => 'Hanya bisa menugaskan ke anggota divisi yang sama.'
+                    ]);
+                }
             }
         }
 
-        $service->update(['assigned_to' => $request->assigned_to]);
+        $service->assignees()->sync($request->assigned_to ?? []);
 
         return back()->with('success', [
             'id' => uniqid(),

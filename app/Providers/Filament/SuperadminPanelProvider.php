@@ -43,6 +43,18 @@ class SuperadminPanelProvider extends PanelProvider
                 Widgets\AccountWidget::class,
                 Widgets\FilamentInfoWidget::class,
             ])
+            ->userMenuItems([
+                \Filament\Navigation\MenuItem::make()
+                    ->label('Kembali ke Dashboard')
+                    ->url(fn (): string => auth()->user()->getDashboardRoute())
+                    ->icon('heroicon-o-arrow-left'),
+            ])
+            ->navigationItems([
+                \Filament\Navigation\NavigationItem::make('Kembali ke Dashboard')
+                    ->url(fn (): string => auth()->user()->getDashboardRoute())
+                    ->icon('heroicon-o-arrow-left-on-rectangle')
+                    ->sort(-1),
+            ])
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

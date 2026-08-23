@@ -128,6 +128,11 @@ class User extends Authenticatable implements FilamentUser
     public function getDashboardRoute(): string
     {
         if ($this->isSuperAdmin()) {
+            $bp = Department::where('slug', 'badan-pengawas')->first();
+            if ($bp) {
+                return route('dashboard', ['department' => $bp]);
+            }
+
             if ($this->department) {
                 return route('dashboard', ['department' => $this->department]);
             }

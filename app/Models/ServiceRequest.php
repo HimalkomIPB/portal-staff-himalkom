@@ -36,11 +36,11 @@ class ServiceRequest extends Model
     }
 
     /**
-     * Get the assigned MD for this service.
+     * Get the assigned MDs for this service.
      */
-    public function assignee(): BelongsTo
+    public function assignees(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->belongsTo(User::class, 'assigned_to');
+        return $this->belongsToMany(User::class, 'service_request_assignees');
     }
 
     /**

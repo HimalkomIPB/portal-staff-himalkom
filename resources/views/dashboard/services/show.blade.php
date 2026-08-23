@@ -43,6 +43,18 @@
                                     </span>
                                 </div>
                             @endif
+                            @if($service->assignees->count() > 0)
+                                <div>
+                                    <span class="block text-xs font-semibold uppercase tracking-wider text-slate-400">Ditugaskan Ke</span>
+                                    <div class="flex flex-wrap gap-1 mt-0.5">
+                                        @foreach($service->assignees as $assignee)
+                                            <span class="inline-flex items-center gap-1.5 rounded-md bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 border border-blue-100">
+                                                {{ $assignee->name }}
+                                            </span>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
                     
@@ -211,19 +223,20 @@
                             {{-- Assign MD --}}
                             <div>
                                 <h3 class="mb-2 text-sm font-semibold text-slate-700">Tugaskan ke (Assignee)</h3>
-                                <form action="{{ route('dashboard.services.assign', $service) }}" method="POST" class="flex items-center gap-3">
+                                <form action="{{ route('dashboard.services.assign', $service) }}" method="POST" class="flex flex-col gap-3">
                                     @csrf
                                     @method('PATCH')
-                                    <select name="assigned_to" class="block w-full rounded-xl border-slate-300 py-2.5 text-sm text-slate-700 shadow-sm focus:border-[#0b5bd3] focus:ring-[#0b5bd3]">
-                                        <option value="">-- Belum Ditugaskan --</option>
-                                        @foreach(auth()->user()->department->users as $deptUser)
-                                            <option value="{{ $deptUser->id }}" {{ $service->assigned_to === $deptUser->id ? 'selected' : '' }}>
-                                                {{ $deptUser->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    <button type="submit" class="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#0b5bd3] px-4 text-sm font-semibold text-white transition hover:bg-blue-700">
-                                        Tugaskan
+                                    <div class="w-full">
+                                        <select name="assigned_to[]" multiple="multiple" class="select2-assignees w-full">
+                                            @foreach(auth()->user()->department->users as $deptUser)
+                                                <option value="{{ $deptUser->id }}" {{ $service->assignees->contains('id', $deptUser->id) ? 'selected' : '' }}>
+                                                    {{ $deptUser->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="inline-flex h-10 w-fit items-center justify-center gap-2 rounded-md bg-[#0b5bd3] px-4 text-sm font-semibold text-white transition hover:bg-blue-700">
+                                        Perbarui Penugasan
                                     </button>
                                 </form>
                             </div>
@@ -380,4 +393,29 @@
 
         </div>
     </div>
+    
+    @push('scripts')
+    <script>
+        $(document).ready(function() {
+            $('.select2-assignees').select2({
+                placeholder: "-- Pilih Anggota --",
+                allowClear: true,
+                width: '100%',
+                theme: 'classic'
+            });
+        });
+    </script>
+    <style>
+        .select2-container--classic .select2-selection--multiple {
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 0.75rem !important;
+            padding: 0.25rem !important;
+            min-height: 44px !important;
+        }
+        .select2-container--classic.select2-container--focus .select2-selection--multiple {
+            border-color: #0b5bd3 !important;
+            box-shadow: 0 0 0 1px #0b5bd3 !important;
+        }
+    </style>
+    @endpush
 </x-sidebar-layout>
