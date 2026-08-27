@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\User;
 use App\Models\Department;
-use Spatie\Permission\Models\Permission;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Permission;
 
 uses(RefreshDatabase::class);
 
@@ -11,7 +11,7 @@ test('dashboard utama merender tanpa duplikasi', function () {
     $dept = Department::create(['name' => 'Test Department', 'slug' => 'test-department', 'description' => 'Test', 'abbreviation' => 'TEST']);
     $user = User::factory()->create(['department_id' => $dept->id]);
 
-    $response = $this->actingAs($user)->get('/dashboard/' . $dept->slug);
+    $response = $this->actingAs($user)->get('/dashboard/'.$dept->slug);
     $response->assertOk();
 
     $html = $response->getContent();
@@ -26,7 +26,7 @@ test('halaman work programs merender tanpa duplikasi', function () {
     Permission::firstOrCreate(['name' => 'work-program.view', 'guard_name' => 'web']);
     $user->givePermissionTo('work-program.view');
 
-    $response = $this->actingAs($user)->get('/dashboard/' . $dept->slug . '/workprograms');
+    $response = $this->actingAs($user)->get('/dashboard/'.$dept->slug.'/workprograms');
     $response->assertOk();
 
     $html = $response->getContent();

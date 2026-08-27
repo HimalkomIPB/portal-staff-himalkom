@@ -34,7 +34,7 @@ class ServiceRequestPolicy
         if ($serviceRequest->isRnTService() && $user->department?->slug === 'research-and-technology') {
             return true;
         }
-        
+
         // Superadmin/Supervisor handled by AuthServiceProvider or User model typically
         if ($user->hasRole('supervisor')) {
             return true;
@@ -68,7 +68,7 @@ class ServiceRequestPolicy
 
         return false;
     }
-    
+
     /**
      * Determine whether the user can upload a temporary attachment/comment.
      */
@@ -78,11 +78,11 @@ class ServiceRequestPolicy
         if ($user->department_id === $serviceRequest->department_id) {
             return true;
         }
-        
+
         // Manager side
         return $this->update($user, $serviceRequest);
     }
-    
+
     /**
      * Determine whether the user can approve the final result.
      */

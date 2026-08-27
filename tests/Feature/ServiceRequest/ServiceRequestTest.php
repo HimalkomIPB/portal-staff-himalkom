@@ -6,7 +6,6 @@ use App\Models\Department;
 use App\Models\ServiceRequest;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class ServiceRequestTest extends TestCase
@@ -16,27 +15,27 @@ class ServiceRequestTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Seed departments manually for the test
         $this->deptCreative = Department::create([
-            'name' => 'Creative', 
+            'name' => 'Creative',
             'slug' => 'creative',
             'abbreviation' => 'Cr',
-            'description' => 'Creative Department'
+            'description' => 'Creative Department',
         ]);
-        
+
         $this->deptRnT = Department::create([
-            'name' => 'Research and Technology', 
+            'name' => 'Research and Technology',
             'slug' => 'research-and-technology',
             'abbreviation' => 'RnT',
-            'description' => 'RnT Department'
+            'description' => 'RnT Department',
         ]);
-        
+
         $this->deptOther = Department::create([
-            'name' => 'Education', 
+            'name' => 'Education',
             'slug' => 'education',
             'abbreviation' => 'Edu',
-            'description' => 'Education Department'
+            'description' => 'Education Department',
         ]);
 
         $this->creativeUser = User::factory()->create(['department_id' => $this->deptCreative->id]);
@@ -79,10 +78,10 @@ class ServiceRequestTest extends TestCase
 
         // Creative user can update status
         $response = $this->actingAs($this->creativeUser)->patch(route('dashboard.services.status.update', $service), [
-            'status' => 'accepted'
+            'status' => 'accepted',
         ]);
         $response->assertSessionHas('success');
-        
+
         $this->assertEquals('accepted', $service->fresh()->status);
     }
 
@@ -99,12 +98,12 @@ class ServiceRequestTest extends TestCase
 
         // Creative user cannot manage komnews
         $response = $this->actingAs($this->creativeUser)->patch(route('dashboard.services.status.update', $service), [
-            'status' => 'accepted'
+            'status' => 'accepted',
         ]);
-        
+
         $response->assertForbidden();
     }
-    
+
     public function test_rnt_user_can_manage_komnews()
     {
         $service = ServiceRequest::create([
@@ -118,9 +117,9 @@ class ServiceRequestTest extends TestCase
 
         // RnT user can manage komnews
         $response = $this->actingAs($this->rntUser)->patch(route('dashboard.services.status.update', $service), [
-            'status' => 'accepted'
+            'status' => 'accepted',
         ]);
-        
+
         $response->assertSessionHas('success');
     }
 }

@@ -2,15 +2,16 @@
 
 namespace App\Notifications;
 
+use App\Models\ServiceRequest;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
-use App\Models\ServiceRequest;
 
 class ServiceRequestNotification extends Notification
 {
     use Queueable;
 
     public $serviceRequest;
+
     public $message;
 
     /**
@@ -41,7 +42,7 @@ class ServiceRequestNotification extends Notification
     {
         return [
             'service_request_id' => $this->serviceRequest->id,
-            'title' => 'Layanan: ' . $this->serviceRequest->title,
+            'title' => 'Layanan: '.$this->serviceRequest->title,
             'message' => $this->message,
             'url' => route('dashboard.services.show', $this->serviceRequest->id),
             'icon' => 'document-text',

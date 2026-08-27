@@ -34,16 +34,16 @@ use App\Models\User;
  * muncul verbatim di dalam output HTML.
  */
 dataset('slot content strings', [
-    'simple text'                     => ['Hello Himalkom'],
-    'unique sentinel'                 => ['UNIQUE_SLOT_SENTINEL_XJ9K'],
-    'html entities text'              => ['Program Kerja &amp; Evaluasi'],
-    'number content'                  => ['42'],
-    'sentence'                        => ['Ini adalah konten halaman dashboard.'],
-    'html tag content'                => ['<p class="test-slot-para">Paragraf slot</p>'],
-    'multiword unique string'         => ['sentinel-propty-one-test-abc123'],
-    'unicode text'                    => ['Pengumuman: Rapat Pleno Divisi'],
-    'slug-like string'                => ['work-program-index-page'],
-    'numeric with words'              => ['Periode 2024-2025'],
+    'simple text' => ['Hello Himalkom'],
+    'unique sentinel' => ['UNIQUE_SLOT_SENTINEL_XJ9K'],
+    'html entities text' => ['Program Kerja &amp; Evaluasi'],
+    'number content' => ['42'],
+    'sentence' => ['Ini adalah konten halaman dashboard.'],
+    'html tag content' => ['<p class="test-slot-para">Paragraf slot</p>'],
+    'multiword unique string' => ['sentinel-propty-one-test-abc123'],
+    'unicode text' => ['Pengumuman: Rapat Pleno Divisi'],
+    'slug-like string' => ['work-program-index-page'],
+    'numeric with words' => ['Periode 2024-2025'],
 ]);
 
 test(
@@ -73,16 +73,16 @@ test(
  * harus muncul di dalam area header di output HTML.
  */
 dataset('header slot strings', [
-    'simple header text'         => ['Program Kerja'],
-    'unique sentinel'            => ['UNIQUE_HEADER_SENTINEL_YZ8M'],
-    'page title text'            => ['Performance Evaluation'],
-    'breadcrumb style'           => ['Dashboard / Arsip'],
-    'short label'                => ['Notifikasi'],
-    'sentence header'            => ['Daftar Program Kerja Departemen'],
-    'slug-like'                  => ['header-sentinel-test-xyz'],
-    'uppercase label'            => ['DOKUMEN ARSIP'],
-    'period in text'             => ['Periode 2024/2025'],
-    'html in header'             => ['<span>Halaman Profil</span>'],
+    'simple header text' => ['Program Kerja'],
+    'unique sentinel' => ['UNIQUE_HEADER_SENTINEL_YZ8M'],
+    'page title text' => ['Performance Evaluation'],
+    'breadcrumb style' => ['Dashboard / Arsip'],
+    'short label' => ['Notifikasi'],
+    'sentence header' => ['Daftar Program Kerja Departemen'],
+    'slug-like' => ['header-sentinel-test-xyz'],
+    'uppercase label' => ['DOKUMEN ARSIP'],
+    'period in text' => ['Periode 2024/2025'],
+    'html in header' => ['<span>Halaman Profil</span>'],
 ]);
 
 test(
@@ -94,7 +94,7 @@ test(
 
         // Render the layout with the header slot via Blade component rendering
         $html = view('layouts.sidebar-layout', [
-            'slot'   => new \Illuminate\Support\HtmlString(''),
+            'slot' => new \Illuminate\Support\HtmlString(''),
             'header' => new \Illuminate\Support\HtmlString($headerContent),
         ])->render();
 
@@ -114,16 +114,16 @@ test(
  * string tersebut harus muncul di dalam tag <title> pada output HTML.
  */
 dataset('title strings', [
-    'simple title'           => ['Program Kerja'],
-    'unique sentinel'        => ['TITLE_SENTINEL_PQ7R'],
-    'app specific title'     => ['Portal Himalkom'],
-    'page name'              => ['Performance Evaluation'],
-    'archive page'           => ['Arsip Dokumen'],
-    'profile page'           => ['Profil Saya'],
-    'notification page'      => ['Notifikasi'],
-    'alphanumeric title'     => ['Dashboard2024'],
-    'title with separator'   => ['Program Kerja | Portal Himalkom'],
-    'indonesian title'       => ['Beranda Departemen'],
+    'simple title' => ['Program Kerja'],
+    'unique sentinel' => ['TITLE_SENTINEL_PQ7R'],
+    'app specific title' => ['Portal Himalkom'],
+    'page name' => ['Performance Evaluation'],
+    'archive page' => ['Arsip Dokumen'],
+    'profile page' => ['Profil Saya'],
+    'notification page' => ['Notifikasi'],
+    'alphanumeric title' => ['Dashboard2024'],
+    'title with separator' => ['Program Kerja | Portal Himalkom'],
+    'indonesian title' => ['Beranda Departemen'],
 ]);
 
 test(
@@ -134,7 +134,7 @@ test(
         $this->actingAs($user);
 
         $html = view('layouts.sidebar-layout', [
-            'slot'  => new \Illuminate\Support\HtmlString(''),
+            'slot' => new \Illuminate\Support\HtmlString(''),
             'title' => $title,
         ])->render();
 
