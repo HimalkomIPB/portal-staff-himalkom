@@ -69,7 +69,7 @@
     <div
         x-data="{
             showBestOnly: false,
-            showMyDivisionOnly: false,
+            showAllDivision: false,
             myDivisionIds: {{ json_encode($myDivisionIds) }},
 
             /* ---- Modal Isi Penilaian ---- */
@@ -137,7 +137,7 @@
                         <h2 class="text-2xl font-bold text-slate-900">Performance Evaluation</h2>
                         @if ($canEvaluate)
                             <span class="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
-                                MD / PJS / SC Roles Only
+                                MD / PJS Roles Only
                             </span>
                         @endif
                     </div>
@@ -177,11 +177,11 @@
                     @if ($viewMode === 'divisions')
                         <label class="flex items-center gap-2 cursor-pointer mr-2">
                             <div class="relative">
-                                <input type="checkbox" x-model="showMyDivisionOnly" class="sr-only">
-                                <div class="block h-6 w-10 rounded-full transition duration-300" :class="showMyDivisionOnly ? 'bg-blue-500' : 'bg-slate-300'"></div>
-                                <div class="absolute left-1 top-1 h-4 w-4 rounded-full bg-white transition duration-300" :class="showMyDivisionOnly ? 'translate-x-4' : ''"></div>
+                                <input type="checkbox" x-model="showAllDivision" class="sr-only">
+                                <div class="block h-6 w-10 rounded-full transition duration-300" :class="showAllDivision ? 'bg-blue-500' : 'bg-slate-300'"></div>
+                                <div class="absolute left-1 top-1 h-4 w-4 rounded-full bg-white transition duration-300" :class="showAllDivision ? 'translate-x-4' : ''"></div>
                             </div>
-                            <span class="text-sm font-bold" :class="showMyDivisionOnly ? 'text-blue-600' : 'text-slate-600'">My Division</span>
+                            <span class="text-sm font-bold" :class="showAllDivision ? 'text-blue-600' : 'text-slate-600'">All Division</span>
                         </label>
                         <div class="hidden sm:block h-6 w-px bg-slate-300 mr-1"></div>
                     @endif
@@ -219,7 +219,7 @@
                 @else
                     <div class="space-y-10">
                         @foreach ($departmentGroups as $department)
-                            <section x-show="!showMyDivisionOnly || myDivisionIds.includes('{{ $department['id'] }}')">
+                            <section x-show="showAllDivision || myDivisionIds.includes('{{ $department['id'] }}')">
                                 {{-- Dept header --}}
                                 <div class="mb-5 flex items-end justify-between gap-4">
                                     <div class="flex min-w-0 items-center gap-3">
@@ -384,7 +384,7 @@
                                 @foreach ($dept['grouped_members'] as $subDivisionName => $members)
                                 @foreach ($members as $member)
                                 @php $isBest = isset($dept['best_performers'][$subDivisionName]) && $dept['best_performers'][$subDivisionName] === $member['id'] && $member['combined_score'] !== null; @endphp
-                                <tr x-show="(!showMyDivisionOnly || myDivisionIds.includes('{{ $dept['id'] }}')) && (!showBestOnly || {{ $isBest ? 'true' : 'false' }})" class="transition hover:bg-slate-50">
+                                <tr x-show="(showAllDivision || myDivisionIds.includes('{{ $dept['id'] }}')) && (!showBestOnly || {{ $isBest ? 'true' : 'false' }})" class="transition hover:bg-slate-50">
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-3">
                                             <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full {{ $isBest ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-[#0b5bd3]' }} text-xs font-bold">

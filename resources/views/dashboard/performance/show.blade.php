@@ -28,20 +28,11 @@
     </div>
 
     @php
-        $isBadanPengawas = optional($evaluatedUser->department)->name === 'Badan Pengawas';
-        if ($isBadanPengawas) {
-            $combinedScore = $mdEval ? $mdEval->final_score : 0;
-            $combinedAttendance = $mdEval ? $mdEval->score_attendance : 0;
-            $combinedCommitment = $mdEval ? $mdEval->score_commitment : 0;
-            $combinedContribution = $mdEval ? $mdEval->score_contribution : 0;
-            $combinedInitiative = $mdEval ? $mdEval->score_initiative : 0;
-        } else {
-            $combinedScore = round(($mdEval->final_score + $scEval->final_score) / 2, 1);
-            $combinedAttendance = round(($mdEval->score_attendance + $scEval->score_attendance) / 2);
-            $combinedCommitment = round(($mdEval->score_commitment + $scEval->score_commitment) / 2);
-            $combinedContribution = round(($mdEval->score_contribution + $scEval->score_contribution) / 2);
-            $combinedInitiative = round(($mdEval->score_initiative + $scEval->score_initiative) / 2);
-        }
+        $combinedScore = $mdEval ? $mdEval->final_score : 0;
+        $combinedAttendance = $mdEval ? $mdEval->score_attendance : 0;
+        $combinedCommitment = $mdEval ? $mdEval->score_commitment : 0;
+        $combinedContribution = $mdEval ? $mdEval->score_contribution : 0;
+        $combinedInitiative = $mdEval ? $mdEval->score_initiative : 0;
         $starCount = (int) round($combinedAttendance / 20);
     @endphp
 
@@ -49,9 +40,9 @@
     <div class="mb-8 overflow-hidden rounded-2xl bg-gradient-to-br from-[#0b5bd3] to-[#1e3fc2] p-6 text-white shadow-lg">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-                <p class="text-sm font-semibold opacity-75">{{ $isBadanPengawas ? 'Nilai Akhir (MD)' : 'Nilai Akhir Gabungan (MD + SC)' }}</p>
+                <p class="text-sm font-semibold opacity-75">Nilai Akhir (MD / PJS)</p>
                 <p class="text-6xl font-extrabold tracking-tight mt-1">{{ $combinedScore }}</p>
-                <p class="text-xs opacity-60 mt-1">{{ $isBadanPengawas ? 'Penilaian tunggal oleh MD' : 'Rata-rata dari penilaian MD dan SC' }}</p>
+                <p class="text-xs opacity-60 mt-1">Penilaian oleh Managing Director / PJS</p>
             </div>
             <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 @foreach ([
@@ -69,14 +60,14 @@
         </div>
     </div>
 
-    {{-- Two cards: MD vs SC --}}
-    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+    {{-- Evaluation Cards --}}
+    <div class="grid grid-cols-1 gap-6 {{ $scEval ? 'lg:grid-cols-2' : 'max-w-3xl' }}">
         @php
             $cards = [
                 ['label' => 'Penilaian dari MD / PJS', 'eval' => $mdEval, 'color' => 'blue', 'badge_bg' => 'bg-blue-100', 'badge_text' => 'text-blue-700', 'accent' => 'bg-[#0b5bd3]'],
             ];
-            if (!$isBadanPengawas) {
-                $cards[] = ['label' => 'Penilaian dari SC', 'eval' => $scEval, 'color' => 'amber', 'badge_bg' => 'bg-amber-100', 'badge_text' => 'text-amber-700', 'accent' => 'bg-amber-400'];
+            if ($scEval) {
+                $cards[] = ['label' => 'Penilaian dari SC (Arsip)', 'eval' => $scEval, 'color' => 'amber', 'badge_bg' => 'bg-amber-100', 'badge_text' => 'text-amber-700', 'accent' => 'bg-amber-400'];
             }
         @endphp
         @foreach ($cards as $card)

@@ -122,32 +122,15 @@ class PerformanceController extends Controller
             'period_year' => $year,
         ])->with('evaluator')->first();
 
-        $scEval = PerformanceEvaluation::where([
-            'evaluated_id' => $evaluated,
-            'department_id' => $evaluatedUser->department_id,
-            'evaluator_role' => 'sc',
-            'period_month' => $month,
-            'period_year' => $year,
-        ])->with('evaluator')->first();
-
-        $isBadanPengawas = $evaluatedUser->department?->name === 'Badan Pengawas';
-
-        if ($isBadanPengawas) {
-            // Badan Pengawas hanya butuh mdEval
-            if (! $mdEval) {
-                abort(403, 'Detail penilaian belum bisa dilihat karena MD belum mengisi formulir.');
-            }
-        } else {
-            // Departemen lain butuh mdEval dan scEval
-            if (! $mdEval || ! $scEval) {
-                abort(403, 'Detail penilaian belum bisa dilihat karena belum semua pihak mengisi formulir.');
-            }
+        // SC dihapus dari sistem penilaian — cukup mdEval
+        if (! $mdEval) {
+            abort(403, 'Detail penilaian belum bisa dilihat karena MD belum mengisi formulir.');
         }
 
         return view('dashboard.performance.show', [
             'evaluatedUser' => $evaluatedUser,
             'mdEval' => $mdEval,
-            'scEval' => $scEval,
+            'scEval' => null, // SC dihapus, tetap kirim null agar blade tidak error
             'month' => $month,
             'year' => $year,
             'monthName' => $this->monthName($month),
@@ -210,7 +193,7 @@ class PerformanceController extends Controller
                 if ($viewSelfOnly) {
                     $query->where('id', $actor->id);
                 } else {
-                    $query->whereDoesntHave('roles', fn ($rq) => $rq->whereIn('name', ['supervisor', 'managing director', 'pjs']));
+                    $query->whereDoesntHave('roles', fn ($rq) => $rq->whereIn('name', ['supervisor', 'bph', 'managing director', 'pjs']));
                 }
             }])
             ->when($viewSelfOnly, function ($query) use ($actor) {
@@ -315,19 +298,10 @@ class PerformanceController extends Controller
         $evals = $allEvaluations->get($key, collect());
 
         $mdEval = $evals->firstWhere('evaluator_role', 'md');
-        $scEval = $evals->firstWhere('evaluator_role', 'sc');
 
-        // Nilai gabungan
-        $isBadanPengawas = $department->name === 'Badan Pengawas';
-        if ($isBadanPengawas) {
-            $bothFilled = (bool) $mdEval; // Badan pengawas hanya butuh MD
-            $combinedScore = $bothFilled ? (float) $mdEval->final_score : null;
-        } else {
-            $bothFilled = $mdEval && $scEval; // Departemen lain butuh MD dan SC
-            $combinedScore = $bothFilled
-                ? round(($mdEval->final_score + $scEval->final_score) / 2, 1)
-                : null;
-        }
+        // SC dihapus — cukup mdEval untuk semua departemen
+        $bothFilled = (bool) $mdEval;
+        $combinedScore = $bothFilled ? round((float) $mdEval->final_score, 1) : null;
 
         $actorRole = $this->resolveEvaluatorRole($actor, $department);
         $actorHasFilled = $evals->contains(fn ($e) => $e->evaluator_id === $actor->id);
@@ -348,10 +322,10 @@ class PerformanceController extends Controller
             'department_name' => $department->name,
             'sub_division' => $member->sub_division,
             'scores' => [
-                'Kehadiran (10%)' => $bothFilled ? ($isBadanPengawas ? $mdEval->score_attendance : round(($mdEval->score_attendance + $scEval->score_attendance) / 2)) : null,
-                'Keaktifan Komunikasi (30%)' => $bothFilled ? ($isBadanPengawas ? $mdEval->score_commitment : round(($mdEval->score_commitment + $scEval->score_commitment) / 2)) : null,
-                'Sikap Disiplin (30%)' => $bothFilled ? ($isBadanPengawas ? $mdEval->score_contribution : round(($mdEval->score_contribution + $scEval->score_contribution) / 2)) : null,
-                'Inovasi Inisiatif (30%)' => $bothFilled ? ($isBadanPengawas ? $mdEval->score_initiative : round(($mdEval->score_initiative + $scEval->score_initiative) / 2)) : null,
+                'Kehadiran (10%)' => $bothFilled ? $mdEval->score_attendance : null,
+                'Keaktifan Komunikasi (30%)' => $bothFilled ? $mdEval->score_commitment : null,
+                'Sikap Disiplin (30%)' => $bothFilled ? $mdEval->score_contribution : null,
+                'Inovasi Inisiatif (30%)' => $bothFilled ? $mdEval->score_initiative : null,
             ],
             'combined_score' => $combinedScore,
             'both_filled' => $bothFilled,
@@ -360,8 +334,8 @@ class PerformanceController extends Controller
             'button_status' => $buttonStatus, // 'evaluate' | 'waiting' | 'detail' | 'view_only'
             'period_month' => $month,
             'period_year' => $year,
-            // Untuk bintang Kehadiran
-            'star_count' => $bothFilled ? (int) round(($isBadanPengawas ? $mdEval->score_attendance : (($mdEval->score_attendance + $scEval->score_attendance) / 2)) / 20) : 0,
+            // Untuk bintang Kehadiran (dari MD saja)
+            'star_count' => $bothFilled ? (int) round($mdEval->score_attendance / 20) : 0,
         ];
     }
 
@@ -430,12 +404,28 @@ class PerformanceController extends Controller
         if ($actor->can('user.manage')) {
             return true;
         }
-        if ($department->name === 'Badan Pengawas' && $actor->isSCOf($department)) {
-            // SC tidak bisa menilai member Badan Pengawas
+
+        // Hanya MD atau PJS dari departemen yang sama yang bisa menilai (BPH/SC diblokir dari menilai)
+        if ($actor->department_id !== $department->id) {
             return false;
         }
 
-        return $actor->department_id === $department->id || $actor->isSCOf($department);
+        // BPH / SC tidak boleh menilai
+        if ($actor->hasRole('bph')) {
+            return false;
+        }
+
+        // PJS hanya bisa menilai jika tidak ada MD aktif di departemen tersebut
+        if ($actor->hasRole('pjs')) {
+            $activeMD = User::where('department_id', $department->id)
+                ->where('is_active', true)
+                ->whereHas('roles', fn ($q) => $q->where('name', 'managing director'))
+                ->exists();
+
+            return ! $activeMD;
+        }
+
+        return $actor->hasRole('managing director');
     }
 
     // -------------------------------------------------------
@@ -448,13 +438,20 @@ class PerformanceController extends Controller
         }
 
         if ($actor->department_id === $department->id && $actor->can('performance.evaluate')) {
+            // PJS hanya bisa menilai jika tidak ada MD aktif
+            if ($actor->hasRole('pjs')) {
+                $activeMD = User::where('department_id', $department->id)
+                    ->where('is_active', true)
+                    ->whereHas('roles', fn ($q) => $q->where('name', 'managing director'))
+                    ->exists();
+
+                return $activeMD ? null : 'md';
+            }
+
             return 'md';
         }
 
-        if ($actor->isSCOf($department)) {
-            return 'sc';
-        }
-
+        // SC tidak lagi memiliki hak menilai
         return null;
     }
 
