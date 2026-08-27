@@ -611,81 +611,19 @@
 
             {{-- ==================== STAFF VIEW ==================== --}}
             @else
-                {{-- MOBILE VIEW: Card List --}}
-                <div class="block lg:hidden space-y-4">
-                    @forelse ($departmentGroups as $dept)
-                        <div x-show="!showMyDivisionOnly || myDivisionIds.includes('{{ $dept['id'] }}')" class="space-y-4">
-                            @foreach ($dept['grouped_members'] as $subDivisionName => $members)
-                            @foreach ($members as $member)
-                                @php $isBest = isset($dept['best_performers'][$subDivisionName]) && $dept['best_performers'][$subDivisionName] === $member['id'] && $member['combined_score'] !== null; @endphp
-                                <div x-show="!showBestOnly || {{ $isBest ? 'true' : 'false' }}" class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm relative overflow-hidden">
-                                    {{-- Accent bar --}}
-                                    <div class="absolute inset-y-0 left-0 w-1 {{ $isBest ? 'bg-amber-400' : 'bg-blue-200' }}"></div>
-                                    <div class="flex items-start justify-between gap-3 mb-3">
-                                        <div class="flex items-center gap-3">
-                                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full {{ $isBest ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-[#0b5bd3]' }} text-sm font-bold">
-                                                {{ $member['initials'] }}
-                                            </div>
-                                            <div>
-                                                <h4 class="text-sm font-bold text-slate-900 flex items-center gap-2">
-                                                    {{ $member['name'] }}
-                                                    @if ($isBest)
-                                                        <span class="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700">★ BEST</span>
-                                                    @endif
-                                                </h4>
-                                                <p class="text-xs text-slate-700 font-medium">{{ $member['department_name'] }}</p>
-                                                <p class="text-[10px] text-slate-500">{{ $member['sub_division'] ?: 'Tanpa Divisi' }}</p>
-                                            </div>
-                                        </div>
-                                        <div class="text-right">
-                                            <p class="text-[10px] font-medium text-slate-500">Nilai Akhir</p>
-                                            <p class="text-lg font-bold {{ $member['combined_score'] !== null ? 'text-[#0b5bd3]' : 'text-slate-300' }}">
-                                                {{ $member['combined_score'] ?? '–' }}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div class="space-y-2 border-t border-slate-100 pt-3">
-                                        @foreach (['Kehadiran (10%)', 'Keaktifan Komunikasi (30%)', 'Sikap Disiplin (30%)', 'Inovasi Inisiatif (30%)'] as $label)
-                                            <div class="flex items-center justify-between text-xs">
-                                                <span class="text-slate-500">{{ $label }}</span>
-                                                <span class="font-medium">
-                                                    @if ($member['scores'][$label] !== null)
-                                                        @if ($label === 'Kehadiran (10%)')
-                                                            @php $starC = (int) round($member['scores'][$label] / 20); @endphp
-                                                            @for ($i = 1; $i <= 5; $i++)<span class="{{ $i <= $starC ? 'text-amber-400' : 'text-slate-300' }}">★</span>@endfor
-                                                        @else
-                                                            <span class="text-slate-700">{{ $member['scores'][$label] }}</span>
-                                                        @endif
-                                                    @else
-                                                        <span class="text-slate-300 font-bold">–</span>
-                                                    @endif
-                                                </span>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endforeach
-                            @endforeach
-                        </div>
-                    @empty
-                        <div class="rounded-xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center text-sm text-slate-400">
-                            Tidak ada data untuk ditampilkan.
-                        </div>
-                    @endforelse
-                </div>
 
-                {{-- DESKTOP VIEW: Table --}}
-                <div class="hidden lg:block rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+                {{-- VIEW: Table (Responsive) --}}
+                <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-slate-200">
                         <thead class="bg-slate-50">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Nama</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Departemen</th>
-                                <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-slate-500">Kehadiran (10%)</th>
-                                <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-slate-500">Keaktifan Komunikasi (30%)</th>
-                                <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-slate-500">Sikap Disiplin (30%)</th>
-                                <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-slate-500">Inovasi Inisiatif (30%)</th>
+                                <th class="hidden md:table-cell px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-slate-500">Kehadiran (10%)</th>
+                                <th class="hidden md:table-cell px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-slate-500">Keaktifan Komunikasi (30%)</th>
+                                <th class="hidden md:table-cell px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-slate-500">Sikap Disiplin (30%)</th>
+                                <th class="hidden md:table-cell px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-slate-500">Inovasi Inisiatif (30%)</th>
                                 <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-slate-500">Nilai Akhir</th>
                             </tr>
                         </thead>
@@ -715,7 +653,7 @@
                                         <p class="text-sm font-medium text-slate-700">{{ $member['department_name'] }}</p>
                                         <p class="text-xs text-slate-400 mt-0.5">{{ $member['sub_division'] ?: 'Tanpa Divisi' }}</p>
                                     </td>
-                                    <td class="px-4 py-4 text-center text-sm">
+                                    <td class="hidden md:table-cell px-4 py-4 text-center text-sm">
                                         @if ($member['scores']['Kehadiran (10%)'] !== null)
                                             @php $starC = (int) round($member['scores']['Kehadiran (10%)'] / 20); @endphp
                                             <span class="text-amber-400">@for ($i = 1; $i <= 5; $i++)<span>{{ $i <= $starC ? '★' : '☆' }}</span>@endfor</span>
@@ -723,21 +661,21 @@
                                             <span class="text-slate-300 font-semibold">–</span>
                                         @endif
                                     </td>
-                                    <td class="px-4 py-4 text-center text-sm">
+                                    <td class="hidden md:table-cell px-4 py-4 text-center text-sm">
                                         @if ($member['scores']['Keaktifan Komunikasi (30%)'] !== null)
                                             <span class="font-bold text-slate-700">{{ $member['scores']['Keaktifan Komunikasi (30%)'] }}</span>
                                         @else
                                             <span class="text-slate-300 font-semibold">–</span>
                                         @endif
                                     </td>
-                                    <td class="px-4 py-4 text-center text-sm">
+                                    <td class="hidden md:table-cell px-4 py-4 text-center text-sm">
                                         @if ($member['scores']['Sikap Disiplin (30%)'] !== null)
                                             <span class="font-bold text-slate-700">{{ $member['scores']['Sikap Disiplin (30%)'] }}</span>
                                         @else
                                             <span class="text-slate-300 font-semibold">–</span>
                                         @endif
                                     </td>
-                                    <td class="px-4 py-4 text-center text-sm">
+                                    <td class="hidden md:table-cell px-4 py-4 text-center text-sm">
                                         @if ($member['scores']['Inovasi Inisiatif (30%)'] !== null)
                                             <span class="font-bold text-slate-700">{{ $member['scores']['Inovasi Inisiatif (30%)'] }}</span>
                                         @else
