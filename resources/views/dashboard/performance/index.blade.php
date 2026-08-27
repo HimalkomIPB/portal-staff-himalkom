@@ -15,6 +15,10 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         [x-cloak] { display: none !important; }
+        /* Prevent sidebar flash on mobile while keeping it visible on desktop before Alpine loads */
+        @media (min-width: 1024px) {
+            aside[x-cloak] { display: flex !important; }
+        }
 
         /* Best Performer ribbon */
         .ribbon {
@@ -153,7 +157,7 @@
     >
 
     {{-- ===================== SIDEBAR ===================== --}}
-    <aside
+    <aside x-cloak
         class="fixed z-40 flex flex-col transform bg-white shadow-2xl ring-1 ring-slate-900/5 transition-all duration-300
                top-4 left-4 right-4 max-h-[calc(100vh-2rem)] rounded-2xl
                lg:sticky lg:top-0 lg:left-auto lg:right-auto lg:h-screen lg:max-h-screen lg:w-64 lg:rounded-none lg:translate-x-0 lg:translate-y-0 lg:opacity-100 lg:scale-100 lg:shadow-none lg:ring-0"
