@@ -534,12 +534,16 @@
                                                 @foreach ($member['scores'] as $label => $score)
                                                     <div class="flex items-center justify-between gap-4 text-sm">
                                                         <span class="min-w-0 text-slate-500">{{ $label }}</span>
-                                                        <span class="shrink-0 text-base tracking-tight">
+                                                        <span class="shrink-0 text-base tracking-tight font-medium">
                                                             @if ($score !== null)
-                                                                @php $starC = (int) round($score / 20); @endphp
-                                                                @for ($i = 1; $i <= 5; $i++)
-                                                                    <span class="{{ $i <= $starC ? 'text-amber-400' : 'text-slate-300' }}">★</span>
-                                                                @endfor
+                                                                @if ($label === 'Kehadiran (10%)')
+                                                                    @php $starC = (int) round($score / 20); @endphp
+                                                                    @for ($i = 1; $i <= 5; $i++)
+                                                                        <span class="{{ $i <= $starC ? 'text-amber-400' : 'text-slate-300' }}">★</span>
+                                                                    @endfor
+                                                                @else
+                                                                    <span class="text-slate-700">{{ $score }}</span>
+                                                                @endif
                                                             @else
                                                                 <span class="text-slate-300 font-bold">–</span>
                                                             @endif
@@ -644,10 +648,14 @@
                                         @foreach (['Kehadiran (10%)', 'Keaktifan Komunikasi (30%)', 'Sikap Disiplin (30%)', 'Inovasi Inisiatif (30%)'] as $label)
                                             <div class="flex items-center justify-between text-xs">
                                                 <span class="text-slate-500">{{ $label }}</span>
-                                                <span class="text-amber-400 font-medium">
+                                                <span class="font-medium">
                                                     @if ($member['scores'][$label] !== null)
-                                                        @php $starC = (int) round($member['scores'][$label] / 20); @endphp
-                                                        @for ($i = 1; $i <= 5; $i++)<span class="{{ $i <= $starC ? 'text-amber-400' : 'text-slate-300' }}">★</span>@endfor
+                                                        @if ($label === 'Kehadiran (10%)')
+                                                            @php $starC = (int) round($member['scores'][$label] / 20); @endphp
+                                                            @for ($i = 1; $i <= 5; $i++)<span class="{{ $i <= $starC ? 'text-amber-400' : 'text-slate-300' }}">★</span>@endfor
+                                                        @else
+                                                            <span class="text-slate-700">{{ $member['scores'][$label] }}</span>
+                                                        @endif
                                                     @else
                                                         <span class="text-slate-300 font-bold">–</span>
                                                     @endif
@@ -717,24 +725,21 @@
                                     </td>
                                     <td class="px-4 py-4 text-center text-sm">
                                         @if ($member['scores']['Keaktifan Komunikasi (30%)'] !== null)
-                                            @php $starC = (int) round($member['scores']['Keaktifan Komunikasi (30%)'] / 20); @endphp
-                                            <span class="text-amber-400">@for ($i = 1; $i <= 5; $i++)<span>{{ $i <= $starC ? '★' : '☆' }}</span>@endfor</span>
+                                            <span class="font-bold text-slate-700">{{ $member['scores']['Keaktifan Komunikasi (30%)'] }}</span>
                                         @else
                                             <span class="text-slate-300 font-semibold">–</span>
                                         @endif
                                     </td>
                                     <td class="px-4 py-4 text-center text-sm">
                                         @if ($member['scores']['Sikap Disiplin (30%)'] !== null)
-                                            @php $starC = (int) round($member['scores']['Sikap Disiplin (30%)'] / 20); @endphp
-                                            <span class="text-amber-400">@for ($i = 1; $i <= 5; $i++)<span>{{ $i <= $starC ? '★' : '☆' }}</span>@endfor</span>
+                                            <span class="font-bold text-slate-700">{{ $member['scores']['Sikap Disiplin (30%)'] }}</span>
                                         @else
                                             <span class="text-slate-300 font-semibold">–</span>
                                         @endif
                                     </td>
                                     <td class="px-4 py-4 text-center text-sm">
                                         @if ($member['scores']['Inovasi Inisiatif (30%)'] !== null)
-                                            @php $starC = (int) round($member['scores']['Inovasi Inisiatif (30%)'] / 20); @endphp
-                                            <span class="text-amber-400">@for ($i = 1; $i <= 5; $i++)<span>{{ $i <= $starC ? '★' : '☆' }}</span>@endfor</span>
+                                            <span class="font-bold text-slate-700">{{ $member['scores']['Inovasi Inisiatif (30%)'] }}</span>
                                         @else
                                             <span class="text-slate-300 font-semibold">–</span>
                                         @endif
@@ -829,80 +834,104 @@
                             </div>
                         </div>
 
-                        {{-- Komitmen – Rating Bintang --}}
+                        {{-- Komitmen – Number Input --}}
                         <div>
                             <label class="mb-2 block text-sm font-semibold text-slate-700">
                                 Keaktifan Komunikasi
-                                <span class="ml-1 text-xs font-normal text-slate-400">(1 bintang = 20 poin, bobot 30%)</span>
+                                <span class="ml-1 text-xs font-normal text-slate-400">(0 - 100 poin, bobot 30%)</span>
                             </label>
                             <div class="flex items-center gap-4 rounded-xl bg-slate-50 p-4 border border-slate-100">
-                                <div class="flex flex-1 justify-around">
-                                    <template x-for="star in 5" :key="star">
-                                        <button type="button"
-                                            @click="formData.score_commitment = star * 20"
-                                            class="p-1 transition-all hover:scale-110 focus:outline-none"
-                                            :class="formData.score_commitment >= (star * 20) ? 'text-amber-400 drop-shadow-sm' : 'text-slate-300'">
-                                            <svg class="h-9 w-9 fill-current" viewBox="0 0 24 24">
-                                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                                            </svg>
-                                        </button>
-                                    </template>
+                                <div class="flex flex-1 items-center justify-between px-2 sm:px-6">
+                                    <button type="button" 
+                                        @click="formData.score_commitment = Math.max(0, parseInt(formData.score_commitment || 0) - 5)"
+                                        class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-slate-500 shadow-sm border border-slate-200 transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0b5bd3]">
+                                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M5 12h14" stroke-linecap="round"/>
+                                        </svg>
+                                    </button>
+                                    
+                                    <input type="number" min="0" max="100" x-model.number="formData.score_commitment" 
+                                        class="w-24 rounded-lg border-slate-200 text-center text-2xl font-bold text-[#0b5bd3] focus:border-[#0b5bd3] focus:ring-[#0b5bd3] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+
+                                    <button type="button" 
+                                        @click="formData.score_commitment = Math.min(100, parseInt(formData.score_commitment || 0) + 5)"
+                                        class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-slate-500 shadow-sm border border-slate-200 transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0b5bd3]">
+                                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M12 5v14M5 12h14" stroke-linecap="round"/>
+                                        </svg>
+                                    </button>
                                 </div>
-                                <div class="w-16 text-center">
-                                    <p class="text-xl font-bold text-[#0b5bd3]" x-text="formData.score_commitment"></p>
-                                    <p class="text-[10px] text-slate-400">poin</p>
+                                <div class="w-16 shrink-0 text-center flex flex-col justify-center">
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Maks</p>
+                                    <p class="text-sm font-bold text-slate-600">100</p>
                                 </div>
                             </div>
                         </div>
 
-                        {{-- Kontribusi – Rating Bintang --}}
+                        {{-- Kontribusi – Number Input --}}
                         <div>
                             <label class="mb-2 block text-sm font-semibold text-slate-700">
                                 Sikap Disiplin
-                                <span class="ml-1 text-xs font-normal text-slate-400">(1 bintang = 20 poin, bobot 30%)</span>
+                                <span class="ml-1 text-xs font-normal text-slate-400">(0 - 100 poin, bobot 30%)</span>
                             </label>
                             <div class="flex items-center gap-4 rounded-xl bg-slate-50 p-4 border border-slate-100">
-                                <div class="flex flex-1 justify-around">
-                                    <template x-for="star in 5" :key="star">
-                                        <button type="button"
-                                            @click="formData.score_contribution = star * 20"
-                                            class="p-1 transition-all hover:scale-110 focus:outline-none"
-                                            :class="formData.score_contribution >= (star * 20) ? 'text-amber-400 drop-shadow-sm' : 'text-slate-300'">
-                                            <svg class="h-9 w-9 fill-current" viewBox="0 0 24 24">
-                                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                                            </svg>
-                                        </button>
-                                    </template>
+                                <div class="flex flex-1 items-center justify-between px-2 sm:px-6">
+                                    <button type="button" 
+                                        @click="formData.score_contribution = Math.max(0, parseInt(formData.score_contribution || 0) - 5)"
+                                        class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-slate-500 shadow-sm border border-slate-200 transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0b5bd3]">
+                                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M5 12h14" stroke-linecap="round"/>
+                                        </svg>
+                                    </button>
+                                    
+                                    <input type="number" min="0" max="100" x-model.number="formData.score_contribution" 
+                                        class="w-24 rounded-lg border-slate-200 text-center text-2xl font-bold text-[#0b5bd3] focus:border-[#0b5bd3] focus:ring-[#0b5bd3] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+
+                                    <button type="button" 
+                                        @click="formData.score_contribution = Math.min(100, parseInt(formData.score_contribution || 0) + 5)"
+                                        class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-slate-500 shadow-sm border border-slate-200 transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0b5bd3]">
+                                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M12 5v14M5 12h14" stroke-linecap="round"/>
+                                        </svg>
+                                    </button>
                                 </div>
-                                <div class="w-16 text-center">
-                                    <p class="text-xl font-bold text-[#0b5bd3]" x-text="formData.score_contribution"></p>
-                                    <p class="text-[10px] text-slate-400">poin</p>
+                                <div class="w-16 shrink-0 text-center flex flex-col justify-center">
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Maks</p>
+                                    <p class="text-sm font-bold text-slate-600">100</p>
                                 </div>
                             </div>
                         </div>
 
-                        {{-- Inisiatif – Rating Bintang --}}
+                        {{-- Inisiatif – Number Input --}}
                         <div>
                             <label class="mb-2 block text-sm font-semibold text-slate-700">
                                 Inovasi Inisiatif
-                                <span class="ml-1 text-xs font-normal text-slate-400">(1 bintang = 20 poin, bobot 30%)</span>
+                                <span class="ml-1 text-xs font-normal text-slate-400">(0 - 100 poin, bobot 30%)</span>
                             </label>
                             <div class="flex items-center gap-4 rounded-xl bg-slate-50 p-4 border border-slate-100">
-                                <div class="flex flex-1 justify-around">
-                                    <template x-for="star in 5" :key="star">
-                                        <button type="button"
-                                            @click="formData.score_initiative = star * 20"
-                                            class="p-1 transition-all hover:scale-110 focus:outline-none"
-                                            :class="formData.score_initiative >= (star * 20) ? 'text-amber-400 drop-shadow-sm' : 'text-slate-300'">
-                                            <svg class="h-9 w-9 fill-current" viewBox="0 0 24 24">
-                                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                                            </svg>
-                                        </button>
-                                    </template>
+                                <div class="flex flex-1 items-center justify-between px-2 sm:px-6">
+                                    <button type="button" 
+                                        @click="formData.score_initiative = Math.max(0, parseInt(formData.score_initiative || 0) - 5)"
+                                        class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-slate-500 shadow-sm border border-slate-200 transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0b5bd3]">
+                                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M5 12h14" stroke-linecap="round"/>
+                                        </svg>
+                                    </button>
+                                    
+                                    <input type="number" min="0" max="100" x-model.number="formData.score_initiative" 
+                                        class="w-24 rounded-lg border-slate-200 text-center text-2xl font-bold text-[#0b5bd3] focus:border-[#0b5bd3] focus:ring-[#0b5bd3] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+
+                                    <button type="button" 
+                                        @click="formData.score_initiative = Math.min(100, parseInt(formData.score_initiative || 0) + 5)"
+                                        class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-slate-500 shadow-sm border border-slate-200 transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0b5bd3]">
+                                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M12 5v14M5 12h14" stroke-linecap="round"/>
+                                        </svg>
+                                    </button>
                                 </div>
-                                <div class="w-16 text-center">
-                                    <p class="text-xl font-bold text-[#0b5bd3]" x-text="formData.score_initiative"></p>
-                                    <p class="text-[10px] text-slate-400">poin</p>
+                                <div class="w-16 shrink-0 text-center flex flex-col justify-center">
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Maks</p>
+                                    <p class="text-sm font-bold text-slate-600">100</p>
                                 </div>
                             </div>
                         </div>
