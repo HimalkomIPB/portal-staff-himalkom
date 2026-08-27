@@ -65,7 +65,8 @@ class PerformanceController extends Controller
         }
 
         // Cek apakah periode penilaian masih dibuka
-        if (!$this->isEvaluationPeriodOpen($validated['period_month'], $validated['period_year'])) {
+        $periodStatus = $this->getEvaluationPeriodStatus($validated['period_month'], $validated['period_year']);
+        if ($periodStatus !== 'open') {
             throw ValidationException::withMessages([
                 'evaluated_id' => 'Form penilaian untuk periode ini sedang ditutup. (Hanya dibuka tanggal 25 hingga 5 bulan berikutnya)',
             ]);
@@ -295,6 +296,7 @@ class PerformanceController extends Controller
             'viewMode'          => request('view', 'divisions') === 'staff' ? 'staff' : 'divisions',
             'myDivisionIds'     => $myDivisionIds,
             'showWarning'       => $showWarning,
+            'periodStatus'      => $this->getEvaluationPeriodStatus($selectedMonth, $selectedYear),
         ];
     }
 
@@ -333,8 +335,8 @@ class PerformanceController extends Controller
 
         // Tentukan status tombol
         $canEvaluate   = $this->canEvaluateMember($actor, $department, $member);
-        $isPeriodOpen  = $this->isEvaluationPeriodOpen($month, $year);
-        $buttonStatus  = $this->resolveButtonStatus($canEvaluate, $actorHasFilled, $bothFilled, $isSelf, $isPeriodOpen);
+        $periodStatus  = $this->getEvaluationPeriodStatus($month, $year);
+        $buttonStatus  = $this->resolveButtonStatus($canEvaluate, $actorHasFilled, $bothFilled, $isSelf, $periodStatus);
 
         return [
             'id'             => $member->id,
@@ -366,7 +368,7 @@ class PerformanceController extends Controller
     // -------------------------------------------------------
     // Helper: tentukan status tombol
     // -------------------------------------------------------
-    private function resolveButtonStatus(bool $canEvaluate, bool $actorHasFilled, bool $bothFilled, bool $isSelf, bool $isPeriodOpen): string
+    private function resolveButtonStatus(bool $canEvaluate, bool $actorHasFilled, bool $bothFilled, bool $isSelf, string $periodStatus): string
     {
         // Keduanya sudah isi -> bisa lihat detail (terlepas dari role, asalkan diizinkan view)
         if ($bothFilled) {
@@ -383,8 +385,11 @@ class PerformanceController extends Controller
         }
 
         if (! $actorHasFilled) {
-            if (!$isPeriodOpen) {
-                return 'closed'; // Di luar jadwal
+            if ($periodStatus === 'past') {
+                return 'closed_past'; // Di luar jadwal (terlambat)
+            }
+            if ($periodStatus === 'future') {
+                return 'closed_future'; // Di luar jadwal (kecepatan)
             }
             return 'evaluate'; // Belum isi, tampilkan "Isi Penilaian"
         }
@@ -395,11 +400,22 @@ class PerformanceController extends Controller
     // -------------------------------------------------------
     // Helper: cek apakah jadwal pengisian masih dibuka (Tgl 25 - 5)
     // -------------------------------------------------------
-    private function isEvaluationPeriodOpen(int $month, int $year): bool
+    private function getEvaluationPeriodStatus(int $month, int $year): string
     {
         $startDate = \Carbon\Carbon::create($year, $month, 25, 0, 0, 0);
         $endDate = $startDate->copy()->addMonth()->startOfMonth()->addDays(4)->endOfDay();
-        return now()->between($startDate, $endDate);
+        
+        $now = now();
+        
+        if ($now->lt($startDate)) {
+            return 'future';
+        }
+        
+        if ($now->gt($endDate)) {
+            return 'past';
+        }
+        
+        return 'open';
     }
 
     // -------------------------------------------------------

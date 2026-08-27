@@ -363,9 +363,19 @@
 
         <section class="px-4 py-8 sm:px-8">
             @if ($showWarning)
-                <div class="mb-6 rounded-md bg-[#e53e3e] px-4 py-3 shadow-sm">
-                    <p class="text-sm font-medium text-white">Form penilaian staff bulan ini belum diisi seluruhnya, segera isi!</p>
-                </div>
+                @if ($periodStatus === 'past')
+                    <div class="mb-6 rounded-md bg-slate-100 border border-slate-200 px-4 py-3 shadow-sm">
+                        <p class="text-sm font-medium text-slate-600">Waktu penilaian untuk bulan ini telah berlalu. Ada form anggota yang belum diselesaikan.</p>
+                    </div>
+                @elseif ($periodStatus === 'future')
+                    <div class="mb-6 rounded-md bg-blue-50 border border-blue-200 px-4 py-3 shadow-sm">
+                        <p class="text-sm font-medium text-blue-700">Jadwal pengisian form bulan ini belum dibuka (hanya dapat diakses mulai tanggal 25 hingga tanggal 5 bulan berikutnya).</p>
+                    </div>
+                @else
+                    <div class="mb-6 rounded-md bg-[#e53e3e] px-4 py-3 shadow-sm">
+                        <p class="text-sm font-medium text-white">Form penilaian staff bulan ini belum diisi seluruhnya, segera isi sebelum batas waktu (tanggal 5)!</p>
+                    </div>
+                @endif
             @endif
 
             {{-- Toolbar --}}
@@ -572,7 +582,7 @@
                                                         class="h-9 w-full rounded-md bg-slate-100 px-4 text-sm font-medium text-slate-400 cursor-not-allowed">
                                                         Diri Sendiri (Tidak Dinilai)
                                                     </button>
-                                                @elseif ($member['button_status'] === 'closed')
+                                                @elseif (in_array($member['button_status'], ['closed_past', 'closed_future']))
                                                     <button type="button" disabled
                                                         class="h-9 w-full rounded-md bg-rose-50 px-4 text-sm font-medium text-rose-400 cursor-not-allowed border border-rose-100">
                                                         Di Luar Jadwal (Tgl 25 - 5)
