@@ -41,7 +41,7 @@ Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(functi
     Route::patch('services/{service}/reject-final', [ServiceRequestController::class, 'rejectFinal'])->name('services.reject-final');
     Route::patch('services/{service}/accept-manager', [ServiceRequestController::class, 'acceptByManager'])->name('services.accept-manager');
     Route::patch('services/{service}/reject-manager', [ServiceRequestController::class, 'rejectByManager'])->name('services.reject-manager');
-    
+
     Route::post('services/{service}/comments', [ServiceRequestCommentController::class, 'store'])->name('services.comments.store');
 });
 

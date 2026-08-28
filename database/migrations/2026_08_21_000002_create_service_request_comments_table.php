@@ -15,10 +15,10 @@ return new class extends Migration
             $table->id();
             $table->foreignUlid('service_request_id')->constrained('service_requests')->cascadeOnDelete();
             $table->foreignUlid('user_id')->constrained('users')->cascadeOnDelete();
-            
+
             $table->text('content');
             $table->string('attachment_path')->nullable();
-            
+
             $table->timestamps();
         });
     }

@@ -35,10 +35,10 @@ function createUnreadNotifications(User $user, int $count): void
 // Dataset: [unreadCount, shouldContain]
 // ---------------------------------------------------------------------------
 dataset('unread counts', [
-    'zero unread'         => [0,  false],
-    'one unread'          => [1,  true],
-    'five unread'         => [5,  true],
-    'ninety-nine unread'  => [99, true],
+    'zero unread' => [0,  false],
+    'one unread' => [1,  true],
+    'five unread' => [5,  true],
+    'ninety-nine unread' => [99, true],
 ]);
 
 // ---------------------------------------------------------------------------

@@ -12,15 +12,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property \Illuminate\Support\Carbon $date
  * @property string $start_time
  * @property string $end_time
- * @property string $jenis         offline|online
+ * @property string $jenis offline|online
  * @property string|null $lokasi
- * @property string $skala         departemen|general
+ * @property string $skala departemen|general
  * @property string|null $deskripsi
  * @property string|null $department_id
  * @property string $created_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- *
  * @property-read \App\Models\Department|null $department
  * @property-read \App\Models\User $creator
  */

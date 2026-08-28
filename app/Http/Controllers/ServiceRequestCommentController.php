@@ -3,9 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\ServiceRequest;
-use App\Models\ServiceRequestComment;
-use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\Request;
 
 class ServiceRequestCommentController extends Controller
 {
@@ -17,7 +16,7 @@ class ServiceRequestCommentController extends Controller
     public function store(Request $request, ServiceRequest $service)
     {
         $this->authorize('comment', $service);
-        
+
         $request->validate([
             'content' => 'required|string',
             'attachment' => 'nullable|file|max:10240', // 10MB max
@@ -33,13 +32,13 @@ class ServiceRequestCommentController extends Controller
             'content' => $request->content,
             'attachment_path' => $path,
         ]);
-        
+
         // If the requester commented, maybe change status to 'pending' if it was rejected or revision?
         // Let's leave status changing to the manager or explicit actions.
 
         return back()->with('success', [
             'id' => uniqid(),
-            'message' => 'Komentar berhasil ditambahkan.'
+            'message' => 'Komentar berhasil ditambahkan.',
         ]);
     }
 }

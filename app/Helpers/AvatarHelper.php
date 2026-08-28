@@ -19,7 +19,7 @@ class AvatarHelper
      *   "Bob  Smith"      → "BS"  (double-space normalised by preg_split)
      *
      * @param  string  $name  The user's full name.
-     * @return string         One or two uppercase initials.
+     * @return string One or two uppercase initials.
      */
     public static function getInitials(string $name): string
     {

@@ -17,30 +17,30 @@ use App\Helpers\AvatarHelper;
 // ---------------------------------------------------------------------------
 
 dataset('single_word_names', [
-    'lowercase'       => ['alice', 'A'],
-    'uppercase'       => ['ALICE', 'A'],
-    'mixed case'      => ['Alice', 'A'],
-    'single char'     => ['X', 'X'],
+    'lowercase' => ['alice', 'A'],
+    'uppercase' => ['ALICE', 'A'],
+    'mixed case' => ['Alice', 'A'],
+    'single char' => ['X', 'X'],
     'single char low' => ['x', 'X'],
 ]);
 
 dataset('two_word_names', [
-    'typical'          => ['John Doe', 'JD'],
-    'lowercase words'  => ['john doe', 'JD'],
+    'typical' => ['John Doe', 'JD'],
+    'lowercase words' => ['john doe', 'JD'],
     'mixed case words' => ['Maria clara', 'MC'],
 ]);
 
 dataset('long_names', [
-    'three words'  => ['Maria Clara Souza', 'MC'],
-    'four words'   => ['Ana Paula Santos Lima', 'AP'],
-    'five words'   => ['Jose Carlos da Silva Junior', 'JC'],
+    'three words' => ['Maria Clara Souza', 'MC'],
+    'four words' => ['Ana Paula Santos Lima', 'AP'],
+    'five words' => ['Jose Carlos da Silva Junior', 'JC'],
 ]);
 
 dataset('double_space_names', [
     'double space between words' => ['Bob  Smith', 'BS'],
-    'leading spaces'             => ['  Carol  White', 'CW'],
-    'triple space'               => ['Dave   Jones', 'DJ'],
-    'tabs as whitespace'         => ["Eve\tFox", 'EF'],
+    'leading spaces' => ['  Carol  White', 'CW'],
+    'triple space' => ['Dave   Jones', 'DJ'],
+    'tabs as whitespace' => ["Eve\tFox", 'EF'],
 ]);
 
 // ---------------------------------------------------------------------------

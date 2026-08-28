@@ -18,8 +18,8 @@ class AgendaController extends Controller
 
     public function index(Request $request): View
     {
-        $user     = Auth::user();
-        $agendas  = Agenda::with('department')
+        $user = Auth::user();
+        $agendas = Agenda::with('department')
             ->visibleTo($user)
             ->orderBy('date')
             ->orderBy('start_time')
@@ -28,17 +28,17 @@ class AgendaController extends Controller
         // Helper: map agenda ke array JS-friendly
         $mapEvent = function ($a) use ($user) {
             return [
-                'id'         => $a->id,
-                'title'      => $a->title,
-                'date'       => $a->date->format('Y-m-d'),
+                'id' => $a->id,
+                'title' => $a->title,
+                'date' => $a->date->format('Y-m-d'),
                 'start_time' => $a->start_time,
-                'end_time'   => $a->end_time,
-                'jenis'      => $a->jenis,
-                'lokasi'     => $a->lokasi,
-                'skala'      => $a->skala,
-                'deskripsi'  => $a->deskripsi,
+                'end_time' => $a->end_time,
+                'jenis' => $a->jenis,
+                'lokasi' => $a->lokasi,
+                'skala' => $a->skala,
+                'deskripsi' => $a->deskripsi,
                 'department' => $a->department->abbreviation ?? 'General',
-                'can_edit'   => $this->canManage($user, $a),
+                'can_edit' => $this->canManage($user, $a),
                 'can_delete' => $this->canManage($user, $a),
             ];
         };
@@ -48,7 +48,9 @@ class AgendaController extends Controller
 
         // Upcoming: agenda hari ini ke depan, maks 10
         $upcomingJson = $agendas
-            ->filter(function ($a) { return $a->date->gte(now()->startOfDay()); })
+            ->filter(function ($a) {
+                return $a->date->gte(now()->startOfDay());
+            })
             ->take(10)
             ->map($mapEvent)
             ->values();
@@ -65,8 +67,8 @@ class AgendaController extends Controller
 
     public function events(Request $request): JsonResponse
     {
-        $user  = Auth::user();
-        $year  = (int) $request->query('year', now()->year);
+        $user = Auth::user();
+        $year = (int) $request->query('year', now()->year);
         $month = (int) $request->query('month', now()->month);
 
         $agendas = Agenda::with('department')
@@ -77,17 +79,17 @@ class AgendaController extends Controller
             ->orderBy('start_time')
             ->get()
             ->map(fn ($a) => [
-                'id'         => $a->id,
-                'title'      => $a->title,
-                'date'       => $a->date->format('Y-m-d'),
+                'id' => $a->id,
+                'title' => $a->title,
+                'date' => $a->date->format('Y-m-d'),
                 'start_time' => $a->start_time,
-                'end_time'   => $a->end_time,
-                'jenis'      => $a->jenis,
-                'lokasi'     => $a->lokasi,
-                'skala'      => $a->skala,
-                'deskripsi'  => $a->deskripsi,
+                'end_time' => $a->end_time,
+                'jenis' => $a->jenis,
+                'lokasi' => $a->lokasi,
+                'skala' => $a->skala,
+                'deskripsi' => $a->deskripsi,
                 'department' => $a->department?->abbreviation ?? 'General',
-                'can_edit'   => $this->canManage($user, $a),
+                'can_edit' => $this->canManage($user, $a),
                 'can_delete' => $this->canManage($user, $a),
             ]);
 
@@ -103,20 +105,20 @@ class AgendaController extends Controller
         $user = Auth::user();
 
         $validated = $request->validate([
-            'title'         => 'required|string|max:255',
-            'date'          => 'required|date',
-            'start_time'    => ['required', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
-            'end_time'      => ['required', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
-            'jenis'         => 'required|in:offline,online',
-            'lokasi'        => 'nullable|string|max:255',
-            'skala'         => 'required|in:departemen,general',
-            'deskripsi'     => 'nullable|string|max:2000',
+            'title' => 'required|string|max:255',
+            'date' => 'required|date',
+            'start_time' => ['required', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
+            'end_time' => ['required', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
+            'jenis' => 'required|in:offline,online',
+            'lokasi' => 'nullable|string|max:255',
+            'skala' => 'required|in:departemen,general',
+            'deskripsi' => 'nullable|string|max:2000',
             'department_id' => 'nullable|exists:departments,id',
         ]);
 
         // Normalize waktu ke HH:MM
         $validated['start_time'] = substr($validated['start_time'], 0, 5);
-        $validated['end_time']   = substr($validated['end_time'], 0, 5);
+        $validated['end_time'] = substr($validated['end_time'], 0, 5);
 
         // Tentukan department_id
         // - BPH / Supervisor bisa pilih department_id (bisa null = general)
@@ -133,16 +135,16 @@ class AgendaController extends Controller
         $lokasi = ($validated['jenis'] === 'online') ? $validated['lokasi'] : $validated['lokasi'];
 
         Agenda::create([
-            'title'         => $validated['title'],
-            'date'          => $validated['date'],
-            'start_time'    => $validated['start_time'],
-            'end_time'      => $validated['end_time'],
-            'jenis'         => $validated['jenis'],
-            'lokasi'        => $validated['lokasi'] ?? null,
-            'skala'         => $validated['skala'],
-            'deskripsi'     => $validated['deskripsi'] ?? null,
+            'title' => $validated['title'],
+            'date' => $validated['date'],
+            'start_time' => $validated['start_time'],
+            'end_time' => $validated['end_time'],
+            'jenis' => $validated['jenis'],
+            'lokasi' => $validated['lokasi'] ?? null,
+            'skala' => $validated['skala'],
+            'deskripsi' => $validated['deskripsi'] ?? null,
             'department_id' => $deptId,
-            'created_by'    => $user->id,
+            'created_by' => $user->id,
         ]);
 
         return redirect()->route('dashboard.calendar.index')
@@ -162,19 +164,19 @@ class AgendaController extends Controller
         }
 
         $validated = $request->validate([
-            'title'      => 'required|string|max:255',
-            'date'       => 'required|date',
+            'title' => 'required|string|max:255',
+            'date' => 'required|date',
             'start_time' => ['required', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
-            'end_time'   => ['required', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
-            'jenis'      => 'required|in:offline,online',
-            'lokasi'     => 'nullable|string|max:255',
-            'skala'      => 'required|in:departemen,general',
-            'deskripsi'  => 'nullable|string|max:2000',
+            'end_time' => ['required', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
+            'jenis' => 'required|in:offline,online',
+            'lokasi' => 'nullable|string|max:255',
+            'skala' => 'required|in:departemen,general',
+            'deskripsi' => 'nullable|string|max:2000',
         ]);
 
         // Normalize waktu ke HH:MM
         $validated['start_time'] = substr($validated['start_time'], 0, 5);
-        $validated['end_time']   = substr($validated['end_time'], 0, 5);
+        $validated['end_time'] = substr($validated['end_time'], 0, 5);
 
         $agenda->update($validated);
 

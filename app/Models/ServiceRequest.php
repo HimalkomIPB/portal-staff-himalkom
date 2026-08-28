@@ -56,7 +56,7 @@ class ServiceRequest extends Model
      */
     public function getStatusLabelAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'pending' => 'Menunggu',
             'accepted' => 'Diterima',
             'rejected' => 'Ditolak',
@@ -74,7 +74,7 @@ class ServiceRequest extends Model
      */
     public function getStatusColorAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'pending' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
             'accepted' => 'bg-blue-100 text-blue-800 border-blue-200',
             'rejected' => 'bg-red-100 text-red-800 border-red-200',
@@ -86,7 +86,7 @@ class ServiceRequest extends Model
             default => 'bg-gray-100 text-gray-800 border-gray-200',
         };
     }
-    
+
     /**
      * Check if this service type belongs to Divisi Kreatif.
      */
@@ -94,7 +94,7 @@ class ServiceRequest extends Model
     {
         return in_array($this->type, ['copm', 'codm']);
     }
-    
+
     /**
      * Check if this service type belongs to Divisi RnT.
      */

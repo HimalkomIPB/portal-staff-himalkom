@@ -2,9 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -45,7 +44,7 @@ return new class extends Migration
         Schema::table('service_requests', function (Blueprint $table) {
             $table->foreignUlid('assigned_to')->nullable()->constrained('users')->nullOnDelete();
         });
-        
+
         $assignees = DB::table('service_request_assignees')->get();
         foreach ($assignees as $assignee) {
             DB::table('service_requests')->where('id', $assignee->service_request_id)->update(['assigned_to' => $assignee->user_id]);
