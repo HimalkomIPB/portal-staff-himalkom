@@ -23,6 +23,8 @@ use Illuminate\Support\Str;
  * @property string|null $lpj_url
  * @property string|null $spg_url
  * @property string $department_id
+ * @property string $status
+ * @property string|null $proposal_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property string|null $proposal_url
@@ -30,6 +32,7 @@ use Illuminate\Support\Str;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\WorkProgramComment> $comments
  * @property-read int|null $comments_count
  * @property-read \App\Models\Department $department
+ * @property-read \App\Models\Proposal|null $proposal
  * @property-read mixed $timeline_range_text
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|WorkProgram newModelQuery()
@@ -72,13 +75,15 @@ class WorkProgram extends Model
         'participation_total',
         'participation_coverage',
         'department_id',
+        'status',
+        'proposal_id',
         'proposal_url',
         'lpj_url',
         'spg_url',
         'komnews_url',
     ];
 
-    protected $with = ['department'];
+    protected $with = ['department', 'proposal'];
 
     public function comments(): HasMany
     {
@@ -88,6 +93,11 @@ class WorkProgram extends Model
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
+    }
+
+    public function proposal(): BelongsTo
+    {
+        return $this->belongsTo(Proposal::class);
     }
 
     // example output: 29 Mar 2025 - 31 Mar 2025 (2 Days)

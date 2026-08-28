@@ -2,8 +2,6 @@
     <x-slot name="header">
         <x-breadcrumb :links="['Dashboard' => null]" />
     </x-slot>
-
-
     <div class="py-4 px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl mx-auto">
             <div class="bg-white shadow rounded-lg p-6 sm:p-8">

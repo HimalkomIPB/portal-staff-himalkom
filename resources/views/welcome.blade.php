@@ -47,6 +47,12 @@
                                         class="block w-[120px] text-center mt-2 font-bold rounded-md px-3 py-2 bg-green-500 text-white transition hover:bg-green-700 hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500">
                                         {{ $linkText }}
                                     </a>
+                                    @if(Auth::user()->hasAnyRole(['supervisor']) || Auth::user()->department_id === 'research_technology')
+                                        <a href="/superadmin"
+                                            class="block w-[120px] text-center mt-2 font-bold rounded-md px-3 py-2 bg-blue-500 text-white transition hover:bg-blue-700 hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                                            Superadmin
+                                        </a>
+                                    @endif
                                 </div>
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf

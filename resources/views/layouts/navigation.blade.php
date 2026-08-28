@@ -16,22 +16,26 @@
                         Dashboard
                     </x-nav-link>
 
-                    @if(Auth::user()->department)
-                        @hasrole('managing director|pjs')
+                    @hasrole('managing director|pjs')
+                        <x-nav-link :href="route('dashboard.proposals.index')" :active="request()->routeIs('dashboard.proposals.*')">
+                            Ajukan Proposal
+                        </x-nav-link>
+                        <x-nav-link :href="route('dashboard.workProgram.index', ['department' => Auth::user()->department])" :active="request()->routeIs('dashboard.workProgram.*')">
+                            Program Kerja
+                        </x-nav-link>
+                    @endhasrole
+
+                    {{-- IF user is bph only --}}
+                    @hasrole('bph')
+                        @unlessrole('managing director|pjs')
                             <x-nav-link :href="route('dashboard.workProgram.index', ['department' => Auth::user()->department])" :active="request()->routeIs('dashboard.workProgram.*')">
                                 Program Kerja
                             </x-nav-link>
-                        @endhasrole
-
-                        {{-- IF user is bph only --}}
-                        @hasrole('bph')
-                            @unlessrole('managing director|pjs')
-                                <x-nav-link :href="route('dashboard.workProgram.index', ['department' => Auth::user()->department])" :active="request()->routeIs('dashboard.workProgram.*')">
-                                    Program Kerja
-                                </x-nav-link>
-                            @endunlessrole
-                        @endhasrole
-                    @endif
+                        @endunlessrole
+                        <x-nav-link :href="route('dashboard.proposals.index')" :active="request()->routeIs('dashboard.proposals.*')" class="relative">
+                            <x-nav-link-count :title="'Review Proposal'" :count="$pendingProposalsCount ?? 0"> </x-nav-link-count>
+                        </x-nav-link>
+                    @endhasrole
 
                     @hasrole('bph|supervisor')
                         <x-nav-link :href="route('dashboard.modview.department.index')" :active="request()->routeIs('dashboard.modview.*')">
@@ -140,10 +144,20 @@
             </x-responsive-nav-link>
 
             @if(Auth::user()->department)
+                <x-responsive-nav-link :href="route('dashboard.proposals.index')" :active="request()->routeIs('dashboard.proposals.*')">
+                    Ajukan Proposal
+                </x-responsive-nav-link>
+
                 <x-responsive-nav-link :href="route('dashboard.workProgram.index', ['department' => Auth::user()->department])" :active="request()->routeIs('dashboard.workProgram.*')">
                     Program Kerja
                 </x-responsive-nav-link>
             @endif
+
+            @hasanyrole('bph')
+                <x-responsive-nav-link :href="route('dashboard.proposals.index')" :active="request()->routeIs('dashboard.proposals.*')">
+                    <x-responsive-nav-link-count :title="'Review Proposal'" :count="$pendingProposalsCount ?? 0"> </x-responsive-nav-link-count>
+                </x-responsive-nav-link>
+            @endhasanyrole
 
             @hasanyrole('bph|supervisor')
                 <x-responsive-nav-link :href="route('dashboard.modview.department.index')" :active="request()->routeIs('dashboard.modview.*')">

@@ -45,6 +45,16 @@ Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(functi
     Route::post('services/{service}/comments', [ServiceRequestCommentController::class, 'store'])->name('services.comments.store');
 });
 
+// Proposal routes
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard/proposals', [\App\Http\Controllers\ProposalController::class, 'index'])->name('dashboard.proposals.index');
+    Route::get('/dashboard/proposals/create', [\App\Http\Controllers\ProposalController::class, 'create'])->name('dashboard.proposals.create');
+    Route::post('/dashboard/proposals', [\App\Http\Controllers\ProposalController::class, 'store'])->name('dashboard.proposals.store');
+    Route::get('/dashboard/proposals/{proposal}', [\App\Http\Controllers\ProposalController::class, 'show'])->name('dashboard.proposals.show');
+    Route::post('/dashboard/proposals/{proposal}/review', [\App\Http\Controllers\ProposalController::class, 'review'])->name('dashboard.proposals.review');
+    Route::get('/dashboard/proposals/{proposal}/download', [\App\Http\Controllers\ProposalController::class, 'download'])->name('dashboard.proposals.download');
+});
+
 // -------------------------------------------------------
 // Main dashboard — semua role yang punya akun dept bisa masuk,
 // pembatasan akses per fitur dilakukan di dalam controller / view
@@ -219,7 +229,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 });
-
 
 
 require __DIR__.'/auth.php';
