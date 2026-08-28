@@ -15,21 +15,17 @@ class ProposalController extends Controller
     {
         $user = auth()->user();
 
-        $order = "FIELD(status, 'pending', 'approved', 'rejected')";
+        abort_unless($user->hasRole(['bph', 'superadmin']), 403, 'Hanya BPH yang dapat mengakses menu ini.');
 
-        if ($user->hasRole('bph')) {
-            $proposals = Proposal::with('uploader', 'reviewer')
-                ->orderByRaw($order)
-                ->orderByDesc('created_at')
-                ->paginate(10);
-        } else {
-            $proposals = Proposal::where('uploader_id', $user->id)
-                ->orderByRaw($order)
-                ->orderByDesc('created_at')
-                ->with('uploader', 'reviewer')
-                ->paginate(10);
+        $status = request('status', 'pending');
 
-        }
+        $proposals = Proposal::with('uploader.department', 'reviewer')
+            ->when($status !== 'all', function($q) use ($status) {
+                $q->where('status', $status);
+            })
+            ->orderByDesc('created_at')
+            ->paginate(10)
+            ->withQueryString();
 
         return view('dashboard.proposals.index', ['proposals' => $proposals]);
     }
@@ -82,7 +78,7 @@ class ProposalController extends Controller
             // Auto-create pending work program
             // encode multiple sources into JSON string for storage
             $validated['sources_of_funds'] = json_encode($validated['sources_of_funds']);
-            WorkProgram::create([
+            $workProgram = WorkProgram::create([
                 'name' => $validated['nama_proker'],
                 'description' => $validated['description'],
                 'start_at' => $validated['start_at'],
@@ -96,9 +92,20 @@ class ProposalController extends Controller
                 'proposal_id' => $newProposal->id,
             ]);
 
+            // Notify BPH
+            $bphUsers = \App\Models\User::role('bph')->get();
+            $user = auth()->user();
+            $department = $user->department;
+            \Illuminate\Support\Facades\Notification::send($bphUsers, new ProposalNotification(
+                'Dokumen Masuk',
+                "Proposal baru masuk dari {$user->name} ({$department->name})",
+                route('dashboard.proposals.show', $newProposal),
+                'proposal_submission'
+            ));
+
             DB::commit();
 
-            return redirect()->route('dashboard.proposals.index')
+            return redirect()->route('dashboard.workProgram.index', ['department' => auth()->user()->department])
                 ->with('success', ['message' => 'Proposal berhasil diupload. Menunggu review dari BPH.', 'id' => Str::ulid()->toBase32()]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -141,8 +148,24 @@ class ProposalController extends Controller
                 if ($validated['status'] === 'approved') {
                     $workProgram->update(['status' => 'accepted']);
                 } elseif ($validated['status'] === 'rejected') {
-                    $workProgram->delete();
+                    $workProgram->update(['status' => 'reviewed']);
                 }
+            }
+
+            // Notify Uploader
+            $uploader = $proposal->uploader;
+            if ($uploader) {
+                $statusText = $validated['status'] === 'approved' ? 'Disetujui' : 'Ditolak/Revisi';
+                $notificationUrl = ($validated['status'] === 'approved' && $workProgram)
+                    ? route('dashboard.workProgram.detail', ['department' => $uploader->department->slug, 'workProgram' => $workProgram->id])
+                    : route('dashboard.workProgram.index', ['department' => $uploader->department->slug]);
+                
+                $uploader->notify(new \App\Notifications\ProposalNotification(
+                    $proposal,
+                    'Hasil Review Proposal: ' . $proposal->title,
+                    'Proposal Anda telah ' . $statusText . ' oleh BPH.',
+                    $notificationUrl
+                ));
             }
 
             DB::commit();
@@ -153,6 +176,56 @@ class ProposalController extends Controller
             DB::rollBack();
 
             return back()->with('error', ['message' => 'Gagal mereview proposal: ' . $e->getMessage(), 'id' => Str::ulid()->toBase32()]);
+        }
+    }
+
+    public function reupload(Request $request, Proposal $proposal)
+    {
+        $user = auth()->user();
+        abort_unless($user->id === $proposal->uploader_id, 403, 'Hanya pengunggah yang dapat melakukan re-upload proposal ini.');
+
+        $request->validate([
+            'file' => 'required|file|mimes:pdf|max:5120',
+        ], [
+            'file.mimes' => 'File harus berformat PDF.',
+            'file.max' => 'Ukuran file maksimal 5 MB.',
+            'file.required' => 'File revisi wajib diunggah.',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            if (\Illuminate\Support\Facades\Storage::disk('private')->exists($proposal->file_path)) {
+                \Illuminate\Support\Facades\Storage::disk('private')->delete($proposal->file_path);
+            }
+
+            $filepath = $request->file('file')->store('proposals', 'private');
+
+            $proposal->update([
+                'file_path' => $filepath,
+                'status' => 'pending',
+                'review_notes' => null,
+                'reviewer_id' => null,
+                'reviewed_at' => null,
+            ]);
+
+            if ($proposal->workProgram) {
+                $proposal->workProgram->update(['status' => 'pending']);
+            }
+
+            $bphUsers = \App\Models\User::role('bph')->get();
+            $department = $user->department;
+            \Illuminate\Support\Facades\Notification::send($bphUsers, new \App\Notifications\ProposalNotification(
+                $proposal,
+                'Revisi Dokumen Masuk',
+                "Revisi proposal baru masuk dari {$user->name} ({$department->name})",
+                route('dashboard.proposals.show', $proposal)
+            ));
+
+            DB::commit();
+            return redirect()->back()->with('success', ['message' => 'Revisi proposal berhasil diunggah.']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', ['message' => 'Gagal mengunggah revisi proposal: ' . $e->getMessage()]);
         }
     }
 

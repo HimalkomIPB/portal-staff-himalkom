@@ -159,7 +159,7 @@
                     </select>
                 </div>
 
-                <x-workprogram.file-upload-edit name="proposal_url" label="Upload Proposal" :filePath="$workProgram->proposal_url" />
+                <x-workprogram.file-upload-edit name="proposal_url" label="Upload Proposal" :filePath="$workProgram->proposal ? $workProgram->proposal->file_path : $workProgram->proposal_url" />
                 <x-workprogram.file-upload-edit name="lpj_url" label="Upload LPJ" :filePath="$workProgram->lpj_url" />
                 <x-workprogram.file-upload-edit name="spg_url" label="Upload SPJ" :filePath="$workProgram->spg_url" />
                 <x-workprogram.file-upload-edit name="komnews_url" label="Upload Komnews/Berita" :filePath="$workProgram->komnews_url" />

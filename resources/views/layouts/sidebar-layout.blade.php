@@ -53,13 +53,19 @@
             ? route('dashboard.workProgram.index', ['department' => $authUser->department])
             : null;
 
-        // Documents / Archives
+        // Archives
         $archiveHref = $authUser->can('archive.view')
             ? route('dashboard.archive.department.index')
             : null;
 
+        // Periksa Dokumen (BPH Inbox)
+        $documentHref = $authUser->hasRole(['bph', 'superadmin'])
+            ? route('dashboard.proposals.index')
+            : null;
+
+
         // Supervisi / Mod-View
-        $modviewHref = $authUser->can('archive.view-all')
+        $modviewHref = $authUser->hasRole(['bph', 'superadmin'])
             ? route('dashboard.modview.department.index')
             : null;
 
@@ -93,7 +99,7 @@
          Alpine.js root — wraps the entire page
          ============================================================ --}}
     <div
-        x-data="{ sidebarOpen: false }"
+        x-data="{ sidebarOpen: false, searchQuery: '' }"
         class="min-h-screen lg:flex relative"
     >
 
@@ -127,13 +133,47 @@
                             <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" stroke-linecap="round" />
                         </svg>
                     </span>
-                    <input type="search" placeholder="Cari Menu..."
+                    <input type="search" placeholder="Cari Menu..." x-model="searchQuery"
                         class="h-10 w-full rounded-full border border-slate-300 bg-[#eef2ff] pl-10 pr-4 text-sm text-slate-700 placeholder:text-slate-400 focus:border-[#0b5bd3] focus:ring-[#0b5bd3]">
                 </label>
             </div>
 
             {{-- Navigation --}}
-            <nav class="flex-1 overflow-y-auto px-6 pb-4">
+            <nav class="flex-1 overflow-y-auto px-6 pb-4"
+                 x-data="{
+                     init() {
+                         this.$el.scrollTop = localStorage.getItem('sidebarScrollTop') || 0;
+                         this.$el.addEventListener('scroll', () => {
+                             localStorage.setItem('sidebarScrollTop', this.$el.scrollTop);
+                         });
+                         this.$watch('searchQuery', value => {
+                             const q = value.toLowerCase();
+                             const items = this.$el.querySelectorAll('.flex.items-center.gap-3');
+                             items.forEach(el => {
+                                 const text = el.textContent.trim().toLowerCase();
+                                 if(text.includes(q)) {
+                                     el.style.display = '';
+                                 } else {
+                                     el.style.display = 'none';
+                                 }
+                             });
+                             const sections = this.$el.querySelectorAll('p.uppercase');
+                             sections.forEach(p => {
+                                 const div = p.nextElementSibling;
+                                 if(div && div.classList.contains('space-y-1')) {
+                                     const visibleItems = Array.from(div.querySelectorAll('.flex.items-center.gap-3')).filter(el => el.style.display !== 'none');
+                                     if(visibleItems.length === 0 && q !== '') {
+                                         p.style.display = 'none';
+                                         div.style.display = 'none';
+                                     } else {
+                                         p.style.display = '';
+                                         div.style.display = '';
+                                     }
+                                 }
+                             });
+                         });
+                     }
+                 }">
 
                 {{-- Homepage --}}
                 @php
@@ -219,22 +259,30 @@
 
                 <p class="mt-7 px-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-400">Administration</p>
                 <div class="mt-3 space-y-1">
-                    {{-- Documents / Archives --}}
+                    {{-- Periksa Dokumen (BPH Inbox) --}}
+                    @if ($documentHref)
+                        <a href="{{ $documentHref }}" class="{{ $navClass('dashboard.proposals.*') }}">
+                            <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            Periksa Dokumen
+                        </a>
+                    @endif
+
+                    {{-- Archives --}}
                     @if ($archiveHref)
                         <a href="{{ $archiveHref }}" class="{{ $navClass('dashboard.archive.*') }}">
                             <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M6 2h9l5 5v15H6z" stroke-linejoin="round" />
-                                <path d="M14 2v6h6M9 13h6M9 17h6" stroke-linecap="round" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                             </svg>
-                            Documents
+                            Archive
                         </a>
                     @else
                         <span class="{{ $sidebarItem }} {{ $sidebarDisabled }}">
                             <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M6 2h9l5 5v15H6z" stroke-linejoin="round" />
-                                <path d="M14 2v6h6M9 13h6M9 17h6" stroke-linecap="round" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                             </svg>
-                            Documents
+                            Archive
                         </span>
                     @endif
 
@@ -269,14 +317,6 @@
                             </svg>
                             Supervisi
                         </a>
-                    @else
-                        <span class="{{ $sidebarItem }} {{ $sidebarDisabled }}">
-                            <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                                <circle cx="12" cy="12" r="3" />
-                            </svg>
-                            Supervisi
-                        </span>
                     @endif
 
                     {{-- Performance --}}

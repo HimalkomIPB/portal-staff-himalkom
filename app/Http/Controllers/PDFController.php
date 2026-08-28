@@ -13,9 +13,14 @@ class PDFController extends Controller
             abort(403, 'Unauthorized access to file');
         }
 
-        $pathToFile = Storage::disk('private')->path('private/'.$filename);
+        $pathPrivate = Storage::disk('private')->path('private/'.$filename);
+        $pathProposals = Storage::disk('private')->path('proposals/'.$filename);
 
-        if (! file_exists($pathToFile)) {
+        if (file_exists($pathPrivate)) {
+            $pathToFile = $pathPrivate;
+        } elseif (file_exists($pathProposals)) {
+            $pathToFile = $pathProposals;
+        } else {
             abort(404, 'File not found');
         }
 

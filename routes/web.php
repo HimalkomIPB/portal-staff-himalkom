@@ -52,6 +52,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/dashboard/proposals', [\App\Http\Controllers\ProposalController::class, 'store'])->name('dashboard.proposals.store');
     Route::get('/dashboard/proposals/{proposal}', [\App\Http\Controllers\ProposalController::class, 'show'])->name('dashboard.proposals.show');
     Route::post('/dashboard/proposals/{proposal}/review', [\App\Http\Controllers\ProposalController::class, 'review'])->name('dashboard.proposals.review');
+    Route::post('/dashboard/proposals/{proposal}/reupload', [\App\Http\Controllers\ProposalController::class, 'reupload'])->name('dashboard.proposals.reupload');
     Route::get('/dashboard/proposals/{proposal}/download', [\App\Http\Controllers\ProposalController::class, 'download'])->name('dashboard.proposals.download');
 });
 
@@ -160,6 +161,11 @@ Route::middleware('auth')
         Route::get('/{workProgram}/edit', [WorkProgramsController::class, 'edit'])
             ->middleware('permission:work-program.edit')
             ->name('workProgram.edit');
+
+        // Inline File Upload — edit permission
+        Route::post('/{workProgram}/upload-file', [WorkProgramsController::class, 'uploadFile'])
+            ->middleware('permission:work-program.edit')
+            ->name('workProgram.uploadFile');
 
         // Store — create permission
         Route::post('/', [WorkProgramsController::class, 'store'])

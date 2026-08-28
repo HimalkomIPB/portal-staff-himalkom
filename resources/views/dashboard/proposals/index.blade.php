@@ -1,38 +1,21 @@
-<x-app-layout>
+<x-sidebar-layout>
     <x-slot name="header">
-        <div class="flex flex-row items-center">
-            <div class="text-[12px] text-gray-500 font-medium md:text-sm">
-                <nav class="flex items-center space-x-1 md:space-x-2">
-                    <span>
-                        Proposal
-                    </span>
-                </nav>
-            </div>
-        </div>
+        <x-breadcrumb :links="['Dashboard' => auth()->user()->getDashboardRoute(), 'Periksa Dokumen' => null]" />
     </x-slot>
 
-    <div class="max-w-6xl mx-auto py-2 px-2">
+    <div class="max-w-7xl mx-auto py-2 px-2">
         @include('components.sweet-alert')
 
-        <div class="flex justify-end mb-3">
-            @can('create', App\Models\Proposal::class)
-                <a href="{{ route('dashboard.proposals.create') }}"
-                    class="mr-2 lg:mr-0 
-                           bg-[#111B5A] 
-                           text-white 
-                           px-2 py-1 md:px-3 md:py-2 
-                           rounded-lg 
-                           shadow-md 
-                           hover:bg-[#14267B] 
-                           transition duration-200 
-                           text-[12px] md:text-sm
-                           font-semibold 
-                           tracking-wide 
-                           flex items-center gap-2">
-                    <span class="text-lg md:text-xl">+</span>
-                    Ajukan Proposal
-                </a>
-            @endcan
+        <div class="flex justify-between items-center mb-4 px-2">
+            <h2 class="text-xl font-bold text-gray-800">Daftar Proposal Masuk</h2>
+            <form action="{{ route('dashboard.proposals.index') }}" method="GET" class="flex gap-2">
+                <select name="status" onchange="this.form.submit()" class="border border-gray-300 rounded-md text-sm py-1.5 px-3 focus:ring-[#0b5bd3] focus:border-[#0b5bd3]">
+                    <option value="all" {{ request('status') === 'all' ? 'selected' : '' }}>Semua Status</option>
+                    <option value="pending" {{ request('status', 'pending') === 'pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>Approved</option>
+                    <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Rejected (Revisi)</option>
+                </select>
+            </form>
         </div>
 
         <div class="overflow-x-auto bg-white rounded-lg shadow-md">
@@ -40,6 +23,7 @@
                 <thead class="bg-gray-100">
                     <tr>
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Judul Proposal</th>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Divisi Pengirim</th>
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Nama Proker</th>
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Uploader</th>
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
@@ -52,6 +36,7 @@
                     @forelse ($proposals as $proposal)
                         <tr class="border-t hover:bg-gray-50 transition">
                             <td class="px-6 py-4 text-sm text-gray-700">{{ $proposal->title }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-700 font-semibold">{{ $proposal->uploader->department->name ?? '—' }}</td>
                             <td class="px-6 py-4 text-sm text-gray-700">{{ $proposal->nama_proker }}</td>
                             <td class="px-6 py-4 text-sm text-gray-700">{{ $proposal->uploader->name }}</td>
                             <td class="px-6 py-4 text-sm">
@@ -72,7 +57,7 @@
                             </td>
                             <td class="px-6 py-4 text-sm">
                                 <a href="{{ route('dashboard.proposals.show', $proposal) }}"
-                                    class="inline-flex items-center gap-1 text-white bg-[#111B5A] hover:bg-[#14267B] transition px-3 py-1.5 text-xs font-medium rounded-full">
+                                    class="inline-flex items-center gap-1 text-white bg-[#0b5bd3] hover:bg-blue-700 transition px-3 py-1.5 text-xs font-medium rounded-full shadow-sm shadow-blue-700/20">
                                     View
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24"
                                         stroke="currentColor">
@@ -92,5 +77,9 @@
                 </tbody>
             </table>
         </div>
+
+        <div class="mt-4">
+            {{ $proposals->links() }}
+        </div>
     </div>
-</x-app-layout>
+</x-sidebar-layout>

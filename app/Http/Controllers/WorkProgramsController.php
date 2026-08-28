@@ -200,6 +200,45 @@ class WorkProgramsController extends Controller
         }
     }
 
+    public function uploadFile(Request $request, Department $department, WorkProgram $workProgram)
+    {
+        if (! $this->canDoAction($department)) {
+            abort(403, 'Unauthorized Access of Department WorkProgram');
+        }
+
+        $validated = $request->validate([
+            'file_type' => 'required|in:lpj_url,spg_url,komnews_url',
+            'file' => 'required|mimes:pdf|max:5120',
+        ], [
+            'file.required' => 'File wajib diunggah.',
+            'file.mimes' => 'File harus berformat PDF.',
+            'file.max' => 'Ukuran file maksimal 5 MB.',
+        ]);
+
+        $field = $validated['file_type'];
+
+        DB::beginTransaction();
+        try {
+            if ($workProgram->$field && \Illuminate\Support\Facades\Storage::disk('private')->exists($workProgram->$field)) {
+                \Illuminate\Support\Facades\Storage::disk('private')->delete($workProgram->$field);
+            }
+
+            $filepath = $request->file('file')->storeAs(
+                'private',
+                $this->generateFilename($request->file('file')),
+                'private'
+            );
+
+            $workProgram->update([$field => $filepath]);
+
+            DB::commit();
+            return redirect()->back()->with('success', ['message' => 'Dokumen berhasil diunggah!']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', ['message' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+        }
+    }
+
     public function destroy(Department $department, WorkProgram $workProgram)
     {
         if (! $this->canDoAction($department)) {
@@ -207,6 +246,16 @@ class WorkProgramsController extends Controller
         }
         try {
             DB::beginTransaction();
+            
+            // If this work program has an associated proposal, delete the proposal as well
+            if ($workProgram->proposal) {
+                // Delete the physical file for the proposal if needed (assuming Proposal handles it in its boot method or here)
+                if (Storage::disk('private')->exists($workProgram->proposal->file_path)) {
+                    Storage::disk('private')->delete($workProgram->proposal->file_path);
+                }
+                $workProgram->proposal->delete();
+            }
+
             $workProgram->delete();
             DB::commit();
 

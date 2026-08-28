@@ -1,21 +1,7 @@
-<x-app-layout>
+<x-sidebar-layout>
     <x-slot name="header">
-        <div class="flex flex-row items-center">
-            <div class="text-gray-500 font-medium text-[11px] md:text-sm ">
-                <nav class="flex items-center space-x-1 md:space-x-2">
-                    <a href="{{ route('dashboard.proposals.index') }}"
-                        class="hover:underline hover:text-[#111B5A] cursor-pointer">
-                        Proposal
-                    </a>
-                    <span class="text-gray-400">/</span>
-                    <span class="text-gray-800 font-semibold">
-                        Ajukan Proposal
-                    </span>
-                </nav>
-            </div>
-        </div>
+        <x-breadcrumb :links="['Dashboard' => auth()->user()->getDashboardRoute(), 'Program Kerja' => route('dashboard.workProgram.index', ['department' => auth()->user()->department]), 'Ajukan Proposal' => null]" />
     </x-slot>
-
     <div
         class="relative max-w-[90dvw] lg:max-w-6xl mx-auto mt-2 mb-8 p-2 bg-white rounded-xl md:rounded-2xl lg:rounded-3xl shadow-lg 
             before:absolute before:inset-0 before:-z-10 before:bg-gradient-to-r before:from-gray-200 before:to-gray-100 
@@ -45,7 +31,6 @@
                 @php
                     $fields = [
                         'nama_proker' => 'Nama Program Kerja',
-                        'title' => 'Judul Proposal',
                         'description' => 'Deskripsi Program Kerja',
                         'start_at' => 'Tanggal Mulai',
                         'finished_at' => 'Tanggal Selesai',
@@ -54,6 +39,7 @@
                         'participation_total' => 'Jumlah Partisipan',
                         'participation_coverage' => 'Cakupan Partisipasi',
                         'file' => 'Upload File Proposal (PDF, max: 5 MB)',
+                        'title' => 'Judul Proposal',
                     ];
                 @endphp
 
@@ -114,15 +100,14 @@
 
                 <div class="text-center">
                     <button type="submit"
-                        class="mt-4 bg-[#14267B] text-white px-4 py-2 md:px-6 md:py-2 rounded-xl shadow hover:bg-[#111B5A] hover:transition text-sm md:text-md lg:text-lg">
+                        class="mt-4 flex items-center justify-center gap-3 rounded-full px-4 py-3 md:px-6 text-sm font-medium transition bg-[#0b5bd3] text-white shadow-md shadow-blue-700/20 hover:bg-blue-700 w-full sm:w-auto">
                         Ajukan Proposal
                     </button>
                 </div>
             </form>
         </div>
     </div>
-</x-app-layout>
-
+</x-sidebar-layout>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const displayInput = document.getElementById("funds_display");
@@ -157,6 +142,16 @@
         allowMultiple: false,
         acceptedFileTypes: ['application/pdf'],
         labelIdle: 'Drag & Drop file Proposal atau <span class="filepond--label-action text-[#14267B]">Klik di sini</span>',
-        storeAsFile: true
+        storeAsFile: true,
+        onaddfile: (error, fileItem) => {
+            if (!error) {
+                const filename = fileItem.file.name;
+                const nameWithoutExt = filename.substring(0, filename.lastIndexOf('.')) || filename;
+                const titleInput = document.getElementById('title');
+                if (titleInput && !titleInput.value) {
+                    titleInput.value = nameWithoutExt;
+                }
+            }
+        }
     });
 </script>
