@@ -20,8 +20,20 @@
     <div class="relative max-w-[90dvw] mx-auto rounded-lg px-2 py-1 md:px-4 md:py-1.5 lg:px-6 lg:py-2">
         <div
             class="bg-white rounded-xl shadow-md border border-gray-200 flex gap-2 flex-row justify-between mt-2 md:mt-3 lg:mt-4 p-3 md:p-4 lg:p-6">
-            <h1 class="font-bold text-[#111B5A] text-lg md:text-xl  lg:text-3xl">
-                {{ $workProgram->name }}</h1>
+            <div class="flex flex-col gap-2">
+                <h1 class="font-bold text-[#111B5A] text-lg md:text-xl  lg:text-3xl">
+                    {{ $workProgram->name }}</h1>
+                <div>
+                    <span class="px-3 py-1 rounded-full text-[10px] md:text-xs font-semibold whitespace-nowrap
+                        @if ($workProgram->status === 'pending') bg-yellow-100 text-yellow-800
+                        @elseif ($workProgram->status === 'accepted') bg-green-100 text-green-800
+                        @elseif ($workProgram->status === 'reviewed') bg-red-100 text-red-800
+                        @else bg-gray-100 text-gray-800
+                        @endif">
+                        Status Proposal: {{ $workProgram->status === 'reviewed' ? 'Revisi' : ucfirst($workProgram->status) }}
+                    </span>
+                </div>
+            </div>
             <div class="flex gap-3 md:gap-4 lg:gap-6 items-center">
                 <a href="{{ route('dashboard.workProgram.edit', ['workProgram' => $workProgram, 'department' => $workProgram->department]) }}"
                     class="text-blue-600 hover:text-blue-800 ">
@@ -56,13 +68,13 @@
                 'Deskripsi' => $workProgram->description,
                 'Periode' => $workProgram->timeline_range_text,
                 'Dana' => 'Rp ' . number_format($workProgram->funds, 0, ',', '.'),
-                'Sumber Dana' => $workProgram->sources_of_funds,
+                'Sumber Dana' => is_array(json_decode($workProgram->sources_of_funds, true)) ? implode(', ', json_decode($workProgram->sources_of_funds, true)) : $workProgram->sources_of_funds,
                 'Total Partisipasi' => $workProgram->participation_total . ' Orang',
                 'Cakupan Partisipasi' => $workProgram->participation_coverage,
             ];
 
             $files = [
-                'Proposal' => $workProgram->proposal_url,
+                'Proposal' => $workProgram->proposal ? $workProgram->proposal->file_path : $workProgram->proposal_url,
                 'LPJ' => $workProgram->lpj_url,
                 'SPJ' => $workProgram->spg_url,
                 'Komnews' => $workProgram->komnews_url,
@@ -70,15 +82,9 @@
         @endphp
 
         <div class="bg-white rounded-xl shadow-md border border-gray-200 mt-2 lg:mt-4 p-3 md:p-4 lg:p-6">
-            <div class="flex flex-col justify-center">
-                <h2 class="font-bold text-[#111B5A] mb-1 text-md md:text-lg md:mb-2 lg:text-2xl">Informasi Program
+            <div class="flex flex-col justify-center mb-2 md:mb-4">
+                <h2 class="font-bold text-[#111B5A] mb-1 text-md md:text-lg lg:text-2xl">Informasi Program
                     Kerja</h2>
-                <p class="text-[8px] md:text-[10px] text-gray-400 italic mb-0 md:mb-0 ml-2">id: {{ $workProgram->id }}
-                <p class="text-[8px] md:text-[10px] text-gray-400 italic mb-0 md:mb-0 ml-2">created at:
-                    {{ $workProgram->created_at->format('d M Y H:i') }}
-                <p class="text-[8px] md:text-[10px] text-gray-400 italic mb-4 md:mb-4 ml-2">last updated:
-                    {{ $workProgram->updated_at->format('d M Y H:i') }}
-                </p>
             </div>
 
             <div class="grid grid-cols-1 gap-2 md:grid-cols-2 md:gap-6">
@@ -110,16 +116,54 @@
                                 </p>
                                 <p class="text-[9px] md:text-sm italic text-gray-600">{{ explode('/', $url)[1] }}</p>
                             </div>
-                            <a href="{{ route('pdf.show', ['filename' => explode('/', $url)[1]]) }}" target="_blank"
-                                class="text-[10px] w-[140px] md:text-sm px-2 py-2 md:px-4 text-white bg-[#111B5A] hover:bg-[#14267B] rounded-md transition">
-                                Lihat / Unduh
-                            </a>
+                            <div class="flex gap-2">
+                                @if($label === 'Proposal' && $workProgram->proposal_id)
+                                    @if($workProgram->status === 'pending')
+                                        <a href="{{ route('dashboard.proposals.show', $workProgram->proposal_id) }}"
+                                            class="text-[10px] md:text-sm px-2 py-2 md:px-4 text-white bg-[#0b5bd3] hover:bg-blue-700 shadow-sm shadow-blue-700/20 rounded-md transition text-center flex items-center">
+                                            Periksa
+                                        </a>
+                                    @elseif($workProgram->status === 'reviewed')
+                                        <a href="{{ route('dashboard.proposals.show', $workProgram->proposal_id) }}"
+                                            class="text-[10px] md:text-sm px-2 py-2 md:px-4 text-white bg-red-500 hover:bg-red-700 shadow-sm shadow-red-500/20 rounded-md transition text-center flex items-center justify-center">
+                                            Detail Revisi
+                                        </a>
+                                    @else
+                                        <a href="{{ route('pdf.show', ['filename' => explode('/', $url)[1] ?? $url]) }}" target="_blank"
+                                            class="text-[10px] w-auto md:text-sm px-2 py-2 md:px-4 text-white bg-[#111B5A] hover:bg-[#14267B] rounded-md transition text-center flex items-center">
+                                            Lihat / Unduh
+                                        </a>
+                                    @endif
+                                @else
+                                    <a href="{{ route('pdf.show', ['filename' => explode('/', $url)[1] ?? $url]) }}" target="_blank"
+                                        class="text-[10px] w-auto md:text-sm px-2 py-2 md:px-4 text-white bg-[#111B5A] hover:bg-[#14267B] rounded-md transition text-center flex items-center">
+                                        Lihat / Unduh
+                                    </a>
+                                @endif
+                            </div>
                         </div>
                     @else
-                        <div class="bg-red-100 border border-red-300 rounded-lg p-2 md:p-3 lg:p-4">
-                            <p class="text-[13px] md:text-lg text-red-700 font-medium">File
-                                {{ $label }}</p>
-                            <p class="text-[9px] md:text-sm text-gray-800">File {{ $label }} belum diunggah</p>
+                        <div class="bg-red-100 border border-red-300 rounded-lg p-2 md:p-3 lg:p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                            <div>
+                                <p class="text-[13px] md:text-lg text-red-700 font-medium">File {{ $label }}</p>
+                                <p class="text-[9px] md:text-sm text-gray-800">File {{ $label }} belum diunggah</p>
+                            </div>
+                            @if($label !== 'Proposal')
+                                <form action="{{ route('dashboard.workProgram.uploadFile', ['department' => $workProgram->department, 'workProgram' => $workProgram]) }}" method="POST" enctype="multipart/form-data" class="flex flex-col md:flex-row md:items-center gap-2">
+                                    @csrf
+                                    @php
+                                        $fileType = '';
+                                        if($label === 'LPJ') $fileType = 'lpj_url';
+                                        elseif($label === 'SPJ') $fileType = 'spg_url';
+                                        elseif($label === 'Komnews') $fileType = 'komnews_url';
+                                    @endphp
+                                    <input type="hidden" name="file_type" value="{{ $fileType }}">
+                                    <input type="file" name="file" accept="application/pdf" class="text-[10px] md:text-sm w-full md:w-48 text-gray-700 bg-white border border-gray-300 rounded-md file:mr-2 file:py-1.5 file:px-2 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100" required>
+                                    <button type="submit" class="text-[10px] md:text-sm px-3 py-1.5 md:px-4 md:py-2 text-white bg-red-600 hover:bg-red-700 rounded-md transition text-center whitespace-nowrap">
+                                        Unggah
+                                    </button>
+                                </form>
+                            @endif
                         </div>
                     @endif
                 @endforeach
@@ -198,4 +242,10 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/trix/1.3.1/trix.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/trix/1.3.1/trix.css">
+    <script>
+        document.addEventListener("trix-file-accept", function(event) {
+            event.preventDefault();
+            alert("Maaf, fitur penyisipan gambar/file ke dalam catatan saat ini dinonaktifkan.");
+        });
+    </script>
 </x-sidebar-layout>

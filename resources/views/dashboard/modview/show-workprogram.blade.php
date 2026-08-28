@@ -6,8 +6,20 @@
     <div class="relative max-w-[90dvw] mx-auto rounded-lg px-2 py-1 md:px-4 md:py-1.5 lg:px-6 lg:py-2">
         <div
             class="bg-white rounded-xl shadow-md border border-gray-200 flex gap-2 flex-row justify-between mt-2 md:mt-3 lg:mt-4 p-3 md:p-4 lg:p-6">
-            <h1 class=" font-bold text-[#111B5A] text-lg md:text-xl  lg:text-3xl ">
-                {{ $workProgram->name }}</h1>
+            <div class="flex flex-col gap-2">
+                <h1 class="font-bold text-[#111B5A] text-lg md:text-xl  lg:text-3xl">
+                    {{ $workProgram->name }}</h1>
+                <div>
+                    <span class="px-3 py-1 rounded-full text-[10px] md:text-xs font-semibold whitespace-nowrap
+                        @if ($workProgram->status === 'pending') bg-yellow-100 text-yellow-800
+                        @elseif ($workProgram->status === 'accepted') bg-green-100 text-green-800
+                        @elseif ($workProgram->status === 'reviewed') bg-red-100 text-red-800
+                        @else bg-gray-100 text-gray-800
+                        @endif">
+                        Status Proposal: {{ $workProgram->status === 'reviewed' ? 'Revisi' : ucfirst($workProgram->status) }}
+                    </span>
+                </div>
+            </div>
 
             @hasanyrole('bph')
                 <div class="flex gap-3 md:gap-4 lg:gap-6 items-center">
@@ -53,7 +65,7 @@
             ];
 
             $files = [
-                'Proposal' => $workProgram->proposal_url,
+                'Proposal' => $workProgram->proposal ? $workProgram->proposal->file_path : $workProgram->proposal_url,
                 'LPJ' => $workProgram->lpj_url,
                 'SPJ' => $workProgram->spg_url,
                 'Komnews' => $workProgram->komnews_url,
@@ -101,10 +113,30 @@
                                 </p>
                                 <p class="text-[9px] md:text-sm italic text-gray-600">{{ explode('/', $url)[1] }}</p>
                             </div>
-                            <a href="{{ route('pdf.show', ['filename' => explode('/', $url)[1]]) }}" target="_blank"
-                                class="text-[10px] w-[140px] md:text-sm px-2 py-2 md:px-4 text-white bg-[#111B5A] hover:bg-[#14267B] rounded-md transition">
-                                Lihat / Unduh
-                            </a>
+                            <div class="flex gap-2">
+                                @if($label === 'Proposal' && $workProgram->proposal_id)
+                                    @if($workProgram->status === 'pending')
+                                        <a href="{{ route('dashboard.proposals.show', $workProgram->proposal_id) }}"
+                                            class="text-[10px] md:text-sm px-2 py-2 md:px-4 text-white bg-[#0b5bd3] hover:bg-blue-700 shadow-sm shadow-blue-700/20 rounded-md transition text-center flex items-center">
+                                            Periksa
+                                        </a>
+                                    @elseif($workProgram->status === 'reviewed')
+                                        <span class="text-[10px] md:text-sm px-2 py-2 md:px-4 text-white bg-red-500 shadow-sm shadow-red-500/20 rounded-md text-center flex items-center cursor-default">
+                                            Revisi
+                                        </span>
+                                    @else
+                                        <a href="{{ route('pdf.show', ['filename' => explode('/', $url)[1] ?? $url]) }}" target="_blank"
+                                            class="text-[10px] w-auto md:text-sm px-2 py-2 md:px-4 text-white bg-[#111B5A] hover:bg-[#14267B] rounded-md transition text-center flex items-center">
+                                            Lihat / Unduh
+                                        </a>
+                                    @endif
+                                @else
+                                    <a href="{{ route('pdf.show', ['filename' => explode('/', $url)[1] ?? $url]) }}" target="_blank"
+                                        class="text-[10px] w-auto md:text-sm px-2 py-2 md:px-4 text-white bg-[#111B5A] hover:bg-[#14267B] rounded-md transition text-center flex items-center">
+                                        Lihat / Unduh
+                                    </a>
+                                @endif
+                            </div>
                         </div>
                     @else
                         <div class="bg-red-100 border border-red-300 rounded-lg p-2 md:p-3 lg:p-4">
