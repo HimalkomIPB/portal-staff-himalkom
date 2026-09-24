@@ -88,6 +88,7 @@
                 notes: '',
             },
             openForm(member) {
+                const existing = member.existing_eval || null;
                 this.formData = {
                     evaluated_id: member.id,
                     department_id: member.department_id,
@@ -95,11 +96,11 @@
                     period_year: {{ $selectedYear }},
                     member_name: member.name,
                     dept_name: member.dept_name,
-                    score_attendance: 0,
-                    score_commitment: 0,
-                    score_contribution: 0,
-                    score_initiative: 0,
-                    notes: '',
+                    score_attendance: existing ? existing.score_attendance : 0,
+                    score_commitment: existing ? existing.score_commitment : 0,
+                    score_contribution: existing ? existing.score_contribution : 0,
+                    score_initiative: existing ? existing.score_initiative : 0,
+                    notes: existing ? (existing.notes || '') : '',
                 };
                 this.formOpen = true;
             },
@@ -174,7 +175,6 @@
                     </select>
                 </div>
                 <div class="flex items-center gap-2">
-                    @if ($viewMode === 'divisions')
                         <label class="flex items-center gap-2 cursor-pointer mr-2">
                             <div class="relative">
                                 <input type="checkbox" x-model="showAllDivision" class="sr-only">
@@ -184,7 +184,6 @@
                             <span class="text-sm font-bold" :class="showAllDivision ? 'text-blue-600' : 'text-slate-600'">All Division</span>
                         </label>
                         <div class="hidden sm:block h-6 w-px bg-slate-300 mr-1"></div>
-                    @endif
 
                     @if ($viewMode === 'staff')
                         <label class="flex items-center gap-2 cursor-pointer mr-2">
@@ -312,11 +311,35 @@
                                                             id: '{{ $member['id'] }}',
                                                             name: '{{ addslashes($member['name']) }}',
                                                             dept_name: '{{ addslashes($member['department_name']) }}',
-                                                            department_id: '{{ $member['department_id'] }}'
+                                                            department_id: '{{ $member['department_id'] }}',
+                                                            existing_eval: null
                                                         })"
                                                         class="h-9 w-full rounded-md bg-[#0b5bd3] px-4 text-sm font-semibold text-white transition hover:bg-blue-700 active:scale-[0.98] shadow-sm">
                                                         Isi Penilaian
                                                     </button>
+
+                                                @elseif ($member['button_status'] === 'edit')
+                                                    <div class="flex gap-2">
+                                                        <button type="button"
+                                                            @click="openForm({
+                                                                id: '{{ $member['id'] }}',
+                                                                name: '{{ addslashes($member['name']) }}',
+                                                                dept_name: '{{ addslashes($member['department_name']) }}',
+                                                                department_id: '{{ $member['department_id'] }}',
+                                                                existing_eval: {{ json_encode($member['existing_eval']) }}
+                                                            })"
+                                                            class="h-9 flex-1 rounded-md bg-amber-500 px-4 text-sm font-semibold text-white transition hover:bg-amber-600 active:scale-[0.98] shadow-sm">
+                                                            Edit Penilaian
+                                                        </button>
+                                                        <a href="{{ route('dashboard.performance.show', [$member['id'], 'month' => $member['period_month'], 'year' => $member['period_year']]) }}"
+                                                            class="flex h-9 items-center justify-center rounded-md bg-blue-100 px-3 text-sm font-semibold text-[#0b5bd3] transition hover:bg-blue-200"
+                                                            title="Lihat Detail">
+                                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke-linecap="round" stroke-linejoin="round"/>
+                                                                <circle cx="12" cy="12" r="3"/>
+                                                            </svg>
+                                                        </a>
+                                                    </div>
 
                                                 @elseif ($member['button_status'] === 'filled')
                                                     <button type="button" disabled
@@ -647,7 +670,7 @@
                             </button>
                         </div>
                         <p class="mt-3 text-center text-[11px] font-medium text-slate-400">
-                            ⚠️ Formulir ini hanya dapat diisi satu kali. Pastikan semua data sudah benar sebelum menyimpan.
+                            ⚠️ Anda dapat mengubah penilaian hingga batas waktu (tanggal 5). Pastikan semua data sudah benar.
                         </p>
                     </div>
                 </form>
