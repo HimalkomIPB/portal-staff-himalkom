@@ -670,7 +670,7 @@
                             </button>
                         </div>
                         <p class="mt-3 text-center text-[11px] font-medium text-slate-400">
-                            ⚠️ Anda dapat mengubah penilaian hingga batas waktu (tanggal 5). Pastikan semua data sudah benar.
+                            ⚠️ Anda dapat mengubah penilaian hingga batas waktu (tanggal {{ $sotmEndDay }}). Pastikan semua data sudah benar.
                         </p>
                     </div>
                 </form>

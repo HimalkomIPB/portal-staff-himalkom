@@ -157,8 +157,9 @@ class PerformanceController extends Controller
         $actor = $request->user();
         $actor->loadMissing('scDepartments');
 
-        // SOTM Agustus = 25 Agt – 5 Sep → jika tanggal 1-5 dan user belum pilih bulan, default ke bulan sebelumnya
-        $defaultDate = (! $request->has('month') && now()->day <= 5) ? now()->copy()->subMonth() : now();
+        // SOTM Agustus = 25 Agt – 5 Sep → jika tanggal belum lewat batas tutup, default ke bulan sebelumnya
+        $endDay = (int) Setting::getVal('sotm_end_day', 5);
+        $defaultDate = (! $request->has('month') && now()->day <= $endDay) ? now()->copy()->subMonth() : now();
         $selectedMonth = (int) $request->integer('month', $defaultDate->month);
         if (! array_key_exists($selectedMonth, $months)) {
             $selectedMonth = $defaultDate->month;
@@ -278,6 +279,7 @@ class PerformanceController extends Controller
             'myDivisionIds' => $myDivisionIds,
             'showWarning' => $showWarning,
             'periodStatus' => $this->getEvaluationPeriodStatus($selectedMonth, $selectedYear),
+            'sotmEndDay' => Setting::getVal('sotm_end_day', 5),
         ];
     }
 
