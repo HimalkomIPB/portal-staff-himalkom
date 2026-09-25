@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('sotm_pjs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('department_id')->constrained()->cascadeOnDelete();
+            $table->foreignUlid('department_id')->constrained('departments')->cascadeOnDelete();
             $table->foreignUlid('user_id')->constrained('users')->cascadeOnDelete();
             $table->unique(['department_id', 'user_id']); // satu user hanya bisa jadi PJ satu kali per divisi
             $table->timestamps();
