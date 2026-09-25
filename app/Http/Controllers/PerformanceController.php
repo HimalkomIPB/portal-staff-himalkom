@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Department;
 use App\Models\PerformanceEvaluation;
+use App\Models\Setting;
+use App\Models\SotmPj;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -164,7 +166,10 @@ class PerformanceController extends Controller
         $selectedYear = (int) $request->integer('year', $defaultDate->year);
         $years = range(now()->year - 1, now()->year + 1);
 
-        $canViewAll = $actor->can('performance.view-all');
+        $pjInternalId = Setting::getVal('sotm_pj_internal_id');
+        $canViewAll = $actor->can('performance.view-all')
+            || $actor->id == $pjInternalId
+            || SotmPj::isAnyPj($actor->id);
         $canEvaluateAny = $actor->can('performance.evaluate');
         $canViewDeptPerf = $actor->can('performance.view');
         // "view-self" hanya berlaku jika tidak punya akses lebih tinggi
@@ -268,7 +273,7 @@ class PerformanceController extends Controller
             'selectedMonthName' => $months[$selectedMonth],
             'selectedYear' => $selectedYear,
             'canEvaluate' => $actor->can('performance.evaluate'),
-            'canExport' => $actor->can('performance.view-all') || $actor->can('performance.evaluate'),
+            'canExport' => $canViewAll || $actor->can('performance.evaluate'),
             'viewMode' => request('view', 'divisions') === 'staff' ? 'staff' : 'divisions',
             'myDivisionIds' => $myDivisionIds,
             'showWarning' => $showWarning,
@@ -382,8 +387,11 @@ class PerformanceController extends Controller
     // -------------------------------------------------------
     private function getEvaluationPeriodStatus(int $month, int $year): string
     {
-        $startDate = \Carbon\Carbon::create($year, $month, 25, 0, 0, 0);
-        $endDate = $startDate->copy()->addMonth()->startOfMonth()->addDays(4)->endOfDay();
+        $startDay = (int) Setting::getVal('sotm_start_day', 25);
+        $endDay = (int) Setting::getVal('sotm_end_day', 5);
+
+        $startDate = \Carbon\Carbon::create($year, $month, $startDay, 0, 0, 0);
+        $endDate = $startDate->copy()->addMonth()->startOfMonth()->addDays($endDay - 1)->endOfDay();
 
         $now = now();
 
