@@ -92,14 +92,14 @@ jobs:
           fi
 
           mkdir -p ~/.ssh
-          echo "$SSH_KEY" > ~/.ssh/deploy_key
+          printf '%s\n' "$SSH_KEY" | tr -d '\r' > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
 
           echo "📤 Uploading release bundle..."
-          scp -P $SSH_PORT -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no release.tar.gz $SSH_USER@$SSH_HOST:$DEPLOY_PATH/release.tar.gz
+          scp -v -P $SSH_PORT -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o PubkeyAcceptedKeyTypes=+ssh-rsa release.tar.gz $SSH_USER@$SSH_HOST:$DEPLOY_PATH/release.tar.gz
 
           echo "🚀 Extracting release and executing post-deploy tasks..."
-          ssh -p $SSH_PORT -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "
+          ssh -p $SSH_PORT -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o PubkeyAcceptedKeyTypes=+ssh-rsa $SSH_USER@$SSH_HOST "
             set -e
             export PATH=/bin:/usr/bin:/usr/local/bin:/opt/alt/php84/usr/bin:\$HOME/bin:\$PATH
             
