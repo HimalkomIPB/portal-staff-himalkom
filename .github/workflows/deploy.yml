@@ -136,13 +136,19 @@ jobs:
             # Ensure storage symlink exists
             php artisan storage:link || true
             
-            # Clear and rebuild caches
+            # Clear and rebuild caches (Laravel & Filament)
             php artisan optimize:clear
+            php artisan filament:optimize-clear || true
+            rm -rf bootstrap/cache/filament
             php artisan optimize
+            php artisan filament:optimize || true
             php artisan view:cache
             
             # Bring application back online
             php artisan up
+            
+            # Signal LiteSpeed Web Server to reload PHP workers & OPcache
+            mkdir -p tmp && touch tmp/restart.txt
             
             echo \"✅ Deployment to $ENV_NAME completed successfully!\"
           "
