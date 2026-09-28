@@ -25,18 +25,18 @@ class ViewServiceProvider extends ServiceProvider
         View::composer('layouts.app', function ($view) {
             $unreadCount = 0;
             $pendingProposalsCount = 0;
-            
+
             if (Auth::check()) {
                 $unreadCount = Auth::user()->unreadNotifications()->count();
-                
+
                 // Count pending proposals for BPH users
                 if (Auth::user()->hasRole('bph')) {
                     $pendingProposalsCount = Proposal::where('status', 'pending')->count();
                 }
             }
-            
+
             $view->with('unreadNotificationsCount', $unreadCount)
-                 ->with('pendingProposalsCount', $pendingProposalsCount);
+                ->with('pendingProposalsCount', $pendingProposalsCount);
         });
     }
 }

@@ -20,7 +20,7 @@ class ProposalController extends Controller
         $status = request('status', 'pending');
 
         $proposals = Proposal::with('uploader.department', 'reviewer')
-            ->when($status !== 'all', function($q) use ($status) {
+            ->when($status !== 'all', function ($q) use ($status) {
                 $q->where('status', $status);
             })
             ->orderByDesc('created_at')
@@ -43,17 +43,17 @@ class ProposalController extends Controller
 
         $validated = $request->validate(
             [
-            'title' => 'required|string|max:255',
-            'nama_proker' => 'required|string|max:255',
-            'description' => 'required|string',
-            'start_at' => 'required|date',
-            'finished_at' => 'required|date|after_or_equal:start_at',
-            'funds' => 'required|numeric|min:0',
-            'sources_of_funds' => 'required|array',
-            'sources_of_funds.*' => 'string|max:255',
-            'participation_total' => 'required|integer|min:1',
-            'participation_coverage' => 'required|string|max:255',
-            'file' => 'required|file|mimes:pdf|max:5120',
+                'title' => 'required|string|max:255',
+                'nama_proker' => 'required|string|max:255',
+                'description' => 'required|string',
+                'start_at' => 'required|date',
+                'finished_at' => 'required|date|after_or_equal:start_at',
+                'funds' => 'required|numeric|min:0',
+                'sources_of_funds' => 'required|array',
+                'sources_of_funds.*' => 'string|max:255',
+                'participation_total' => 'required|integer|min:1',
+                'participation_coverage' => 'required|string|max:255',
+                'file' => 'required|file|mimes:pdf|max:5120',
             ],
             [
                 'file.mimes' => 'File harus berformat PDF.',
@@ -112,7 +112,7 @@ class ProposalController extends Controller
 
             return redirect()->route('dashboard.proposals.create')
                 ->withInput()
-                ->with('error', ['message' => 'Gagal mengupload proposal: ' . $e->getMessage(), 'id' => Str::ulid()->toBase32()]);
+                ->with('error', ['message' => 'Gagal mengupload proposal: '.$e->getMessage(), 'id' => Str::ulid()->toBase32()]);
         }
     }
 
@@ -159,11 +159,11 @@ class ProposalController extends Controller
                 $notificationUrl = ($validated['status'] === 'approved' && $workProgram)
                     ? route('dashboard.workProgram.detail', ['department' => $uploader->department->slug, 'workProgram' => $workProgram->id])
                     : route('dashboard.workProgram.index', ['department' => $uploader->department->slug]);
-                
+
                 $uploader->notify(new \App\Notifications\ProposalNotification(
                     $proposal,
-                    'Hasil Review Proposal: ' . $proposal->title,
-                    'Proposal Anda telah ' . $statusText . ' oleh BPH.',
+                    'Hasil Review Proposal: '.$proposal->title,
+                    'Proposal Anda telah '.$statusText.' oleh BPH.',
                     $notificationUrl
                 ));
             }
@@ -175,7 +175,7 @@ class ProposalController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return back()->with('error', ['message' => 'Gagal mereview proposal: ' . $e->getMessage(), 'id' => Str::ulid()->toBase32()]);
+            return back()->with('error', ['message' => 'Gagal mereview proposal: '.$e->getMessage(), 'id' => Str::ulid()->toBase32()]);
         }
     }
 
@@ -222,10 +222,12 @@ class ProposalController extends Controller
             ));
 
             DB::commit();
+
             return redirect()->back()->with('success', ['message' => 'Revisi proposal berhasil diunggah.']);
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', ['message' => 'Gagal mengunggah revisi proposal: ' . $e->getMessage()]);
+
+            return redirect()->back()->with('error', ['message' => 'Gagal mengunggah revisi proposal: '.$e->getMessage()]);
         }
     }
 

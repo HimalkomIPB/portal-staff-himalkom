@@ -10,10 +10,11 @@ use Illuminate\Support\Str;
 class Proposal extends Model
 {
     use HasUlids, SoftDeletes;
+
     public $incrementing = false;
 
-    protected $keyType = "string";
-    
+    protected $keyType = 'string';
+
     protected $fillable = [
         'uploader_id',
         'reviewer_id',
@@ -44,7 +45,7 @@ class Proposal extends Model
         return $this->hasOne(WorkProgram::class);
     }
 
-     protected static function boot()
+    protected static function boot()
     {
         parent::boot();
 

@@ -232,10 +232,12 @@ class WorkProgramsController extends Controller
             $workProgram->update([$field => $filepath]);
 
             DB::commit();
+
             return redirect()->back()->with('success', ['message' => 'Dokumen berhasil diunggah!']);
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', ['message' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+
+            return redirect()->back()->with('error', ['message' => 'Terjadi kesalahan: '.$e->getMessage()]);
         }
     }
 
@@ -246,7 +248,7 @@ class WorkProgramsController extends Controller
         }
         try {
             DB::beginTransaction();
-            
+
             // If this work program has an associated proposal, delete the proposal as well
             if ($workProgram->proposal) {
                 // Delete the physical file for the proposal if needed (assuming Proposal handles it in its boot method or here)

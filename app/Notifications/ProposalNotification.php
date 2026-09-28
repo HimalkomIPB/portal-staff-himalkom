@@ -2,17 +2,20 @@
 
 namespace App\Notifications;
 
+use App\Models\Proposal;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
-use App\Models\Proposal;
 
 class ProposalNotification extends Notification
 {
     use Queueable;
 
     public $proposal;
+
     public $message;
+
     public $url;
+
     public $title;
 
     public function __construct(Proposal $proposal, $title, $message, $url)

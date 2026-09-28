@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Department;
 use App\Models\PerformanceEvaluation;
+use App\Models\Setting;
+use App\Models\SotmPj;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -50,21 +52,7 @@ class PerformanceController extends Controller
             abort(403, 'Anda tidak bisa menilai diri sendiri.');
         }
 
-        // Cek apakah sudah pernah menilai
-        if (PerformanceEvaluation::alreadyEvaluated(
-            $actor->id,
-            $validated['evaluated_id'],
-            $validated['department_id'],
-            $evaluatorRole,
-            $validated['period_month'],
-            $validated['period_year'],
-        )) {
-            throw ValidationException::withMessages([
-                'evaluated_id' => 'Anda sudah pernah mengisi penilaian untuk anggota ini di periode yang sama.',
-            ]);
-        }
-
-        // Cek apakah periode penilaian masih dibuka
+        // Cek apakah periode penilaian masih dibuka (tanggal 25 – 5 bulan berikutnya)
         $periodStatus = $this->getEvaluationPeriodStatus($validated['period_month'], $validated['period_year']);
         if ($periodStatus !== 'open') {
             throw ValidationException::withMessages([
@@ -79,20 +67,25 @@ class PerformanceController extends Controller
             $validated['score_initiative'],
         );
 
-        PerformanceEvaluation::create([
-            'evaluator_id' => $actor->id,
-            'evaluated_id' => $validated['evaluated_id'],
-            'department_id' => $validated['department_id'],
-            'evaluator_role' => $evaluatorRole,
-            'period_month' => $validated['period_month'],
-            'period_year' => $validated['period_year'],
-            'score_attendance' => $validated['score_attendance'],
-            'score_commitment' => $validated['score_commitment'],
-            'score_contribution' => $validated['score_contribution'],
-            'score_initiative' => $validated['score_initiative'],
-            'final_score' => $finalScore,
-            'notes' => $validated['notes'],
-        ]);
+        // Gunakan updateOrCreate agar nilai bisa diubah selama periode masih open (sampai tanggal 5)
+        PerformanceEvaluation::updateOrCreate(
+            [
+                'evaluator_id' => $actor->id,
+                'evaluated_id' => $validated['evaluated_id'],
+                'department_id' => $validated['department_id'],
+                'evaluator_role' => $evaluatorRole,
+                'period_month' => $validated['period_month'],
+                'period_year' => $validated['period_year'],
+            ],
+            [
+                'score_attendance' => $validated['score_attendance'],
+                'score_commitment' => $validated['score_commitment'],
+                'score_contribution' => $validated['score_contribution'],
+                'score_initiative' => $validated['score_initiative'],
+                'final_score' => $finalScore,
+                'notes' => $validated['notes'],
+            ]
+        );
 
         return redirect()
             ->route('dashboard.performance.index', [
@@ -164,14 +157,20 @@ class PerformanceController extends Controller
         $actor = $request->user();
         $actor->loadMissing('scDepartments');
 
-        $selectedMonth = (int) $request->integer('month', now()->month);
+        // SOTM Agustus = 25 Agt – 5 Sep → jika tanggal belum lewat batas tutup, default ke bulan sebelumnya
+        $endDay = (int) Setting::getVal('sotm_end_day', 5);
+        $defaultDate = (! $request->has('month') && now()->day <= $endDay) ? now()->copy()->subMonth() : now();
+        $selectedMonth = (int) $request->integer('month', $defaultDate->month);
         if (! array_key_exists($selectedMonth, $months)) {
-            $selectedMonth = now()->month;
+            $selectedMonth = $defaultDate->month;
         }
-        $selectedYear = (int) $request->integer('year', now()->year);
+        $selectedYear = (int) $request->integer('year', $defaultDate->year);
         $years = range(now()->year - 1, now()->year + 1);
 
-        $canViewAll = $actor->can('performance.view-all');
+        $pjInternalId = Setting::getVal('sotm_pj_internal_id');
+        $canViewAll = $actor->can('performance.view-all')
+            || $actor->id == $pjInternalId
+            || SotmPj::isAnyPj($actor->id);
         $canEvaluateAny = $actor->can('performance.evaluate');
         $canViewDeptPerf = $actor->can('performance.view');
         // "view-self" hanya berlaku jika tidak punya akses lebih tinggi
@@ -275,11 +274,13 @@ class PerformanceController extends Controller
             'selectedMonthName' => $months[$selectedMonth],
             'selectedYear' => $selectedYear,
             'canEvaluate' => $actor->can('performance.evaluate'),
-            'canExport' => $actor->can('performance.view-all') || $actor->can('performance.evaluate'),
+            'canExport' => $canViewAll || $actor->can('performance.evaluate'),
             'viewMode' => request('view', 'divisions') === 'staff' ? 'staff' : 'divisions',
             'myDivisionIds' => $myDivisionIds,
             'showWarning' => $showWarning,
             'periodStatus' => $this->getEvaluationPeriodStatus($selectedMonth, $selectedYear),
+            'sotmStartDay' => Setting::getVal('sotm_start_day', 25),
+            'sotmEndDay' => Setting::getVal('sotm_end_day', 5),
         ];
     }
 
@@ -305,6 +306,7 @@ class PerformanceController extends Controller
 
         $actorRole = $this->resolveEvaluatorRole($actor, $department);
         $actorHasFilled = $evals->contains(fn ($e) => $e->evaluator_id === $actor->id);
+        $actorEval = $evals->firstWhere('evaluator_id', $actor->id);
         $isSelf = $actor->id === $member->id;
 
         // Tentukan status tombol
@@ -331,7 +333,14 @@ class PerformanceController extends Controller
             'both_filled' => $bothFilled,
             'actor_has_filled' => $actorHasFilled,
             'can_evaluate' => $canEvaluate,
-            'button_status' => $buttonStatus, // 'evaluate' | 'waiting' | 'detail' | 'view_only'
+            'existing_eval' => $actorEval ? [
+                'score_attendance' => $actorEval->score_attendance,
+                'score_commitment' => $actorEval->score_commitment,
+                'score_contribution' => $actorEval->score_contribution,
+                'score_initiative' => $actorEval->score_initiative,
+                'notes' => $actorEval->notes ?? '',
+            ] : null,
+            'button_status' => $buttonStatus, // 'evaluate' | 'edit' | 'detail' | 'view_only'
             'period_month' => $month,
             'period_year' => $year,
             // Untuk bintang Kehadiran (dari MD saja)
@@ -344,32 +353,36 @@ class PerformanceController extends Controller
     // -------------------------------------------------------
     private function resolveButtonStatus(bool $canEvaluate, bool $actorHasFilled, bool $bothFilled, bool $isSelf, string $periodStatus): string
     {
-        // Keduanya sudah isi -> bisa lihat detail (terlepas dari role, asalkan diizinkan view)
-        if ($bothFilled) {
-            return 'detail';
-        }
-
         if ($isSelf) {
             return 'self'; // Tidak bisa nilai diri sendiri
         }
 
+        // Sudah dinilai + evaluator bisa edit + periode masih open → bisa edit
+        if ($bothFilled && $canEvaluate && $periodStatus === 'open') {
+            return 'edit';
+        }
+
+        // Sudah dinilai, tapi di luar jadwal atau bukan evaluator → lihat detail saja
+        if ($bothFilled) {
+            return 'detail';
+        }
+
         if (! $canEvaluate) {
-            // Anggota atau role lain yang hanya bisa lihat, dan belum ada nilai lengkap
             return 'view_only';
         }
 
         if (! $actorHasFilled) {
             if ($periodStatus === 'past') {
-                return 'closed_past'; // Di luar jadwal (terlambat)
+                return 'closed_past';
             }
             if ($periodStatus === 'future') {
-                return 'closed_future'; // Di luar jadwal (kecepatan)
+                return 'closed_future';
             }
 
-            return 'evaluate'; // Belum isi, tampilkan "Isi Penilaian"
+            return 'evaluate';
         }
 
-        return 'filled'; // Aktor sudah isi tapi belum lengkap (masih tunggu evaluator lain)
+        return 'filled';
     }
 
     // -------------------------------------------------------
@@ -377,8 +390,11 @@ class PerformanceController extends Controller
     // -------------------------------------------------------
     private function getEvaluationPeriodStatus(int $month, int $year): string
     {
-        $startDate = \Carbon\Carbon::create($year, $month, 25, 0, 0, 0);
-        $endDate = $startDate->copy()->addMonth()->startOfMonth()->addDays(4)->endOfDay();
+        $startDay = (int) Setting::getVal('sotm_start_day', 25);
+        $endDay = (int) Setting::getVal('sotm_end_day', 5);
+
+        $startDate = \Carbon\Carbon::create($year, $month, $startDay, 0, 0, 0);
+        $endDate = $startDate->copy()->addMonth()->startOfMonth()->addDays($endDay - 1)->endOfDay();
 
         $now = now();
 
