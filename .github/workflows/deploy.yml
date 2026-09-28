@@ -106,6 +106,17 @@ jobs:
             echo \"Deploying to $ENV_NAME environment...\"
             cd $DEPLOY_PATH
             
+            echo \"================ DEPLOY DIAGNOSTICS ================\"
+            echo \"Target Directory: \$(pwd)\"
+            echo \"User Home: \$HOME\"
+            if [ -f .env ]; then
+              echo \"Configured APP_URL: \$(grep '^APP_URL=' .env || true)\"
+              echo \"Configured DB_DATABASE: \$(grep '^DB_DATABASE=' .env || true)\"
+            else
+              echo \"⚠️ No .env file found in \$(pwd)\"
+            fi
+            echo \"===================================================\"
+            
             # Put app in maintenance mode
             php artisan down || true
             
@@ -143,6 +154,9 @@ jobs:
             
             # Bring application back online
             php artisan up
+            
+            # Signal LiteSpeed Web Server to reload PHP workers & OPcache
+            mkdir -p tmp && touch tmp/restart.txt
             
             echo \"✅ Deployment to $ENV_NAME completed successfully!\"
           "
