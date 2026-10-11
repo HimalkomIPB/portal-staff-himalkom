@@ -122,11 +122,11 @@
                     </div>
                 @elseif ($periodStatus === 'future')
                     <div class="mb-6 rounded-md bg-blue-50 border border-blue-200 px-4 py-3 shadow-sm">
-                        <p class="text-sm font-medium text-blue-700">Jadwal pengisian form bulan ini belum dibuka (hanya dapat diakses mulai tanggal 25 hingga tanggal 5 bulan berikutnya).</p>
+                        <p class="text-sm font-medium text-blue-700">Jadwal pengisian form bulan ini belum dibuka (hanya dapat diakses mulai tanggal {{ $sotmStartDay }} hingga tanggal {{ $sotmEndDay }} bulan berikutnya).</p>
                     </div>
                 @else
                     <div class="mb-6 rounded-md bg-[#e53e3e] px-4 py-3 shadow-sm">
-                        <p class="text-sm font-medium text-white">Form penilaian staff bulan ini belum diisi seluruhnya, segera isi sebelum batas waktu (tanggal 5)!</p>
+                        <p class="text-sm font-medium text-white">Form penilaian staff bulan ini belum diisi seluruhnya, segera isi sebelum batas waktu (tanggal {{ $sotmEndDay }})!</p>
                     </div>
                 @endif
             @endif
@@ -364,7 +364,7 @@
                                                 @elseif (in_array($member['button_status'], ['closed_past', 'closed_future']))
                                                     <button type="button" disabled
                                                         class="h-9 w-full rounded-md bg-rose-50 px-4 text-sm font-medium text-rose-400 cursor-not-allowed border border-rose-100">
-                                                        Di Luar Jadwal (Tgl 25 - 5)
+                                                        Di Luar Jadwal (Tgl {{ $sotmStartDay }} - {{ $sotmEndDay }})
                                                     </button>
                                                 @else
                                                     {{-- view_only: belum ada nilai, user tidak bisa menilai --}}

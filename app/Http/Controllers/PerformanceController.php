@@ -279,6 +279,7 @@ class PerformanceController extends Controller
             'myDivisionIds' => $myDivisionIds,
             'showWarning' => $showWarning,
             'periodStatus' => $this->getEvaluationPeriodStatus($selectedMonth, $selectedYear),
+            'sotmStartDay' => Setting::getVal('sotm_start_day', 25),
             'sotmEndDay' => Setting::getVal('sotm_end_day', 5),
         ];
     }
