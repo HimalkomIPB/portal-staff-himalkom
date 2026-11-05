@@ -19,7 +19,7 @@ class ServiceRequestCommentController extends Controller
 
         $request->validate([
             'content' => 'required|string',
-            'attachment' => 'nullable|file|max:10240', // 10MB max
+            'attachment' => 'nullable|file|mimes:png,jpg,jpeg,gif,webp,pdf,doc,docx,xls,xlsx,ppt,pptx,txt,zip|max:10240', // 10MB max
         ]);
 
         $path = null;
