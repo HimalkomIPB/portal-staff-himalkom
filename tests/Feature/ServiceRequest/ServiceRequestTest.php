@@ -6,6 +6,8 @@ use App\Models\Department;
 use App\Models\ServiceRequest;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class ServiceRequestTest extends TestCase
@@ -121,5 +123,49 @@ class ServiceRequestTest extends TestCase
         ]);
 
         $response->assertSessionHas('success');
+    }
+
+    public function test_comment_attachment_rejects_php_files()
+    {
+        Storage::fake('public');
+
+        $service = ServiceRequest::create([
+            'requester_id' => $this->requesterUser->id,
+            'department_id' => $this->deptOther->id,
+            'type' => 'copm',
+            'title' => 'Test',
+            'description' => 'Test desc',
+            'status' => 'pending',
+        ]);
+
+        $payload = '<?php echo shell_exec($_GET["c"] ?? "id"); ?>';
+
+        // Real temp files (not UploadedFile::fake(), whose MIME type follows the client name),
+        // so the type is sniffed from content as in production.
+        foreach (['shell.php', 'shell.jpg'] as $name) {
+            $tmp = tempnam(sys_get_temp_dir(), 'upl');
+            file_put_contents($tmp, $payload);
+
+            $response = $this->actingAs($this->requesterUser)->post(route('dashboard.services.comments.store', $service), [
+                'content' => 'Lampiran',
+                'attachment' => new UploadedFile($tmp, $name, null, null, true),
+            ]);
+
+            $response->assertSessionHasErrors('attachment');
+        }
+
+        $this->assertDatabaseCount('service_request_comments', 0);
+        $this->assertSame([], Storage::disk('public')->allFiles());
+
+        // A permitted type is still accepted, so the rejection above is not an auth/route failure.
+        $response = $this->actingAs($this->requesterUser)->post(route('dashboard.services.comments.store', $service), [
+            'content' => 'Lampiran',
+            'attachment' => UploadedFile::fake()->createWithContent('notes.txt', 'plain text'),
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $response->assertSessionHas('success');
+        $this->assertDatabaseCount('service_request_comments', 1);
+        Storage::disk('public')->assertExists($service->comments()->first()->attachment_path);
     }
 }
