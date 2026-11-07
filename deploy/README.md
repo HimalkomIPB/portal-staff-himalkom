@@ -12,3 +12,9 @@ Coolify builds `Dockerfile` from this repo and deploys automatically on push:
 - The container does **not** run migrations. Run `php artisan migrate --force` by hand after review.
 - Test changes on `staging` first, then merge into `main`.
 - Add `[skip ci]` to a commit message to skip the Coolify deploy.
+
+## Deployment trigger
+Pushes to `main` / `staging` are delivered by a GitHub repo webhook (push events, HMAC-signed) to Coolify's
+native GitHub webhook endpoint, which builds this Dockerfile and does a health-checked rolling update.
+The legacy SSH workflow `.github/workflows/deploy.yml` targeted a terminated host and is disabled through the
+GitHub Actions API (state `disabled_manually`); re-enable with `gh workflow enable deploy.yml` if ever needed.
