@@ -21,6 +21,7 @@
  */
 
 use App\Models\User;
+use Illuminate\Support\HtmlString;
 
 // ---------------------------------------------------------------------------
 // Properti 1: Konten Slot Dirender Verbatim
@@ -54,7 +55,7 @@ test(
         $this->actingAs($user);
 
         $html = view('layouts.sidebar-layout', [
-            'slot' => new \Illuminate\Support\HtmlString($slotContent),
+            'slot' => new HtmlString($slotContent),
         ])->render();
 
         expect($html)->toContain($slotContent);
@@ -94,8 +95,8 @@ test(
 
         // Render the layout with the header slot via Blade component rendering
         $html = view('layouts.sidebar-layout', [
-            'slot' => new \Illuminate\Support\HtmlString(''),
-            'header' => new \Illuminate\Support\HtmlString($headerContent),
+            'slot' => new HtmlString(''),
+            'header' => new HtmlString($headerContent),
         ])->render();
 
         expect($html)->toContain($headerContent);
@@ -134,7 +135,7 @@ test(
         $this->actingAs($user);
 
         $html = view('layouts.sidebar-layout', [
-            'slot' => new \Illuminate\Support\HtmlString(''),
+            'slot' => new HtmlString(''),
             'title' => $title,
         ])->render();
 
@@ -159,7 +160,7 @@ test('Properti 3b — default title menggunakan nama aplikasi ketika $title tida
     $this->actingAs($user);
 
     $html = view('layouts.sidebar-layout', [
-        'slot' => new \Illuminate\Support\HtmlString(''),
+        'slot' => new HtmlString(''),
     ])->render();
 
     $appName = config('app.name', 'Portal Himalkom');

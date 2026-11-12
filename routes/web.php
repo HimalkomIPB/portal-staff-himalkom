@@ -7,6 +7,7 @@ use App\Http\Controllers\ModViewController;
 use App\Http\Controllers\PDFController;
 use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProposalController;
 use App\Http\Controllers\ServiceRequestCommentController;
 use App\Http\Controllers\ServiceRequestController;
 use App\Http\Controllers\WorkProgramCommentController;
@@ -47,13 +48,13 @@ Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(functi
 
 // Proposal routes
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard/proposals', [\App\Http\Controllers\ProposalController::class, 'index'])->name('dashboard.proposals.index');
-    Route::get('/dashboard/proposals/create', [\App\Http\Controllers\ProposalController::class, 'create'])->name('dashboard.proposals.create');
-    Route::post('/dashboard/proposals', [\App\Http\Controllers\ProposalController::class, 'store'])->name('dashboard.proposals.store');
-    Route::get('/dashboard/proposals/{proposal}', [\App\Http\Controllers\ProposalController::class, 'show'])->name('dashboard.proposals.show');
-    Route::post('/dashboard/proposals/{proposal}/review', [\App\Http\Controllers\ProposalController::class, 'review'])->name('dashboard.proposals.review');
-    Route::post('/dashboard/proposals/{proposal}/reupload', [\App\Http\Controllers\ProposalController::class, 'reupload'])->name('dashboard.proposals.reupload');
-    Route::get('/dashboard/proposals/{proposal}/download', [\App\Http\Controllers\ProposalController::class, 'download'])->name('dashboard.proposals.download');
+    Route::get('/dashboard/proposals', [ProposalController::class, 'index'])->name('dashboard.proposals.index');
+    Route::get('/dashboard/proposals/create', [ProposalController::class, 'create'])->name('dashboard.proposals.create');
+    Route::post('/dashboard/proposals', [ProposalController::class, 'store'])->name('dashboard.proposals.store');
+    Route::get('/dashboard/proposals/{proposal}', [ProposalController::class, 'show'])->name('dashboard.proposals.show');
+    Route::post('/dashboard/proposals/{proposal}/review', [ProposalController::class, 'review'])->name('dashboard.proposals.review');
+    Route::post('/dashboard/proposals/{proposal}/reupload', [ProposalController::class, 'reupload'])->name('dashboard.proposals.reupload');
+    Route::get('/dashboard/proposals/{proposal}/download', [ProposalController::class, 'download'])->name('dashboard.proposals.download');
 });
 
 // -------------------------------------------------------

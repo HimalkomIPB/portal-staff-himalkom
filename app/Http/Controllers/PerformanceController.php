@@ -7,6 +7,8 @@ use App\Models\PerformanceEvaluation;
 use App\Models\Setting;
 use App\Models\SotmPj;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -134,7 +136,7 @@ class PerformanceController extends Controller
     {
         $data = $this->buildPerformanceData($request);
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.performance_report', $data);
+        $pdf = Pdf::loadView('exports.performance_report', $data);
         $pdf->setPaper('a4', 'landscape');
 
         $filename = "SOTM_{$data['selectedMonthName']}_{$data['selectedYear']}.pdf";
@@ -153,7 +155,7 @@ class PerformanceController extends Controller
             9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
         ];
 
-        /** @var \App\Models\User $actor */
+        /** @var User $actor */
         $actor = $request->user();
         $actor->loadMissing('scDepartments');
 
@@ -393,7 +395,7 @@ class PerformanceController extends Controller
         $startDay = (int) Setting::getVal('sotm_start_day', 25);
         $endDay = (int) Setting::getVal('sotm_end_day', 5);
 
-        $startDate = \Carbon\Carbon::create($year, $month, $startDay, 0, 0, 0);
+        $startDate = Carbon::create($year, $month, $startDay, 0, 0, 0);
         $endDate = $startDate->copy()->addMonth()->startOfMonth()->addDays($endDay - 1)->endOfDay();
 
         $now = now();

@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Proposal;
+use App\Models\User;
 use App\Models\WorkProgram;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -93,10 +95,10 @@ class ProposalController extends Controller
             ]);
 
             // Notify BPH
-            $bphUsers = \App\Models\User::role('bph')->get();
+            $bphUsers = User::role('bph')->get();
             $user = auth()->user();
             $department = $user->department;
-            \Illuminate\Support\Facades\Notification::send($bphUsers, new ProposalNotification(
+            Notification::send($bphUsers, new ProposalNotification(
                 'Dokumen Masuk',
                 "Proposal baru masuk dari {$user->name} ({$department->name})",
                 route('dashboard.proposals.show', $newProposal),
@@ -194,8 +196,8 @@ class ProposalController extends Controller
 
         DB::beginTransaction();
         try {
-            if (\Illuminate\Support\Facades\Storage::disk('private')->exists($proposal->file_path)) {
-                \Illuminate\Support\Facades\Storage::disk('private')->delete($proposal->file_path);
+            if (Storage::disk('private')->exists($proposal->file_path)) {
+                Storage::disk('private')->delete($proposal->file_path);
             }
 
             $filepath = $request->file('file')->store('proposals', 'private');
@@ -212,9 +214,9 @@ class ProposalController extends Controller
                 $proposal->workProgram->update(['status' => 'pending']);
             }
 
-            $bphUsers = \App\Models\User::role('bph')->get();
+            $bphUsers = User::role('bph')->get();
             $department = $user->department;
-            \Illuminate\Support\Facades\Notification::send($bphUsers, new \App\Notifications\ProposalNotification(
+            Notification::send($bphUsers, new \App\Notifications\ProposalNotification(
                 $proposal,
                 'Revisi Dokumen Masuk',
                 "Revisi proposal baru masuk dari {$user->name} ({$department->name})",

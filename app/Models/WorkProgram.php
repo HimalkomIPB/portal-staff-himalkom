@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -29,10 +30,10 @@ use Illuminate\Support\Str;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property string|null $proposal_url
  * @property string|null $komnews_url
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\WorkProgramComment> $comments
+ * @property-read Collection<int, WorkProgramComment> $comments
  * @property-read int|null $comments_count
- * @property-read \App\Models\Department $department
- * @property-read \App\Models\Proposal|null $proposal
+ * @property-read Department $department
+ * @property-read Proposal|null $proposal
  * @property-read mixed $timeline_range_text
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|WorkProgram newModelQuery()
