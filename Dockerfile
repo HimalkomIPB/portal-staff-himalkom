@@ -1,4 +1,4 @@
-# Production image (nginx + PHP-FPM 8.3 in one container), built by Coolify from this repo (build context = repo root).
+# Production image (nginx + PHP-FPM 8.3 in one container), built by GitHub Actions (.github/workflows/build-and-deploy.yml, build context = repo root).
 # The container does NOT run migrations. Runtime config (.env values, APP_KEY, DB) comes from Coolify env vars only.
 FROM composer:2 AS vendor
 WORKDIR /app
