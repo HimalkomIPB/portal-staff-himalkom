@@ -1,0 +1,60 @@
+# Builds the Docker image on GitHub's runners (not on the VPS), pushes it to GHCR,
+# then tells Coolify to pull and run it. Coolify apps use the "Docker Image" build pack.
+name: Build and deploy
+
+on:
+  push:
+    branches: [staging, main]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: deploy-${{ github.ref_name }}
+  cancel-in-progress: false # never kill a half-finished deploy
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-24.04-arm # the Coolify VPS is ARM64 (Oracle Ampere); build natively, no QEMU
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    # Per-environment secrets: COOLIFY_URL, COOLIFY_TOKEN, COOLIFY_APP_UUID.
+    environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
+    permissions:
+      contents: read
+      packages: write
+    env:
+      IMAGE: ghcr.io/himalkomipb/portal-staff-himalkom
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          platforms: linux/arm64
+          push: true
+          provenance: false
+          tags: |
+            ${{ env.IMAGE }}:${{ github.ref_name }}
+            ${{ env.IMAGE }}:sha-${{ github.sha }}
+          cache-from: type=gha,scope=${{ github.ref_name }}
+          cache-to: type=gha,mode=max,scope=${{ github.ref_name }}
+
+      - name: Trigger Coolify deploy
+        env:
+          COOLIFY_URL: ${{ secrets.COOLIFY_URL }}
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+          COOLIFY_APP_UUID: ${{ secrets.COOLIFY_APP_UUID }}
+        run: |
+          curl --fail-with-body --silent --show-error --max-time 60 --request POST \
+            --header "Authorization: Bearer $COOLIFY_TOKEN" \
+            "$COOLIFY_URL/api/v1/deploy?uuid=$COOLIFY_APP_UUID&force=false"

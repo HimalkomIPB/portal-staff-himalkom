@@ -3,12 +3,14 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
+use App\Models\Department;
 use App\Models\User;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\IconColumn;
@@ -18,6 +20,7 @@ use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Spatie\Permission\Models\Role;
 
 class UserResource extends Resource
 {
@@ -74,12 +77,12 @@ class UserResource extends Resource
                             ->helperText('Departemen tempat user ini bertugas sebagai MD/PJS/Sekretaris/dll.'),
                         Select::make('sub_division')
                             ->label('Sub Divisi')
-                            ->options(function (\Filament\Forms\Get $get) {
+                            ->options(function (Get $get) {
                                 $departmentId = $get('department_id');
                                 if (! $departmentId) {
                                     return [];
                                 }
-                                $department = \App\Models\Department::find($departmentId);
+                                $department = Department::find($departmentId);
                                 if (! $department) {
                                     return [];
                                 }
@@ -98,7 +101,7 @@ class UserResource extends Resource
 
                                 return array_combine($subs, $subs);
                             })
-                            ->visible(function (\Filament\Forms\Get $get) {
+                            ->visible(function (Get $get) {
                                 $selectedRoles = $get('roles');
                                 if (empty($selectedRoles)) {
                                     return false;
@@ -107,7 +110,7 @@ class UserResource extends Resource
                                 $rolesArray = array_map('strval', (array) $selectedRoles);
 
                                 // Ambil ID dari role-role yang tidak boleh punya sub-divisi
-                                $bannedRoles = \Spatie\Permission\Models\Role::whereIn('name', [
+                                $bannedRoles = Role::whereIn('name', [
                                     'supervisor', 'bph', 'managing director', 'pjs',
                                 ])->pluck('id')->map(fn ($id) => (string) $id)->toArray();
 
@@ -120,7 +123,7 @@ class UserResource extends Resource
                                 }
 
                                 // Tampilkan jika memiliki role anggota
-                                $anggotaRoleId = (string) \Spatie\Permission\Models\Role::where('name', 'anggota')->value('id');
+                                $anggotaRoleId = (string) Role::where('name', 'anggota')->value('id');
 
                                 return in_array('anggota', $rolesArray) || in_array($anggotaRoleId, $rolesArray);
                             })
@@ -129,13 +132,13 @@ class UserResource extends Resource
                             ->label('Status Aktif')
                             ->default(true)
                             ->helperText('Hanya 1 MD/PJS yang boleh aktif dalam satu departemen. Jika diaktifkan, MD/PJS lain di departemen yang sama akan otomatis dinonaktifkan.')
-                            ->visible(function (\Filament\Forms\Get $get) {
+                            ->visible(function (Get $get) {
                                 $selectedRoles = $get('roles');
                                 if (empty($selectedRoles)) {
                                     return false;
                                 }
-                                $mdRoleId = \Spatie\Permission\Models\Role::where('name', 'managing director')->value('id');
-                                $pjsRoleId = \Spatie\Permission\Models\Role::where('name', 'pjs')->value('id');
+                                $mdRoleId = Role::where('name', 'managing director')->value('id');
+                                $pjsRoleId = Role::where('name', 'pjs')->value('id');
 
                                 $roles = array_map('strval', (array) $selectedRoles);
 
@@ -149,12 +152,12 @@ class UserResource extends Resource
                             ->preload()
                             ->searchable()
                             ->helperText('Isi hanya jika user ini adalah SC (Steering Committee) dari BPH yang mengawasi departemen tertentu.')
-                            ->visible(function (\Filament\Forms\Get $get) {
+                            ->visible(function (Get $get) {
                                 $selectedRoles = $get('roles');
                                 if (empty($selectedRoles)) {
                                     return false;
                                 }
-                                $bphRoleId = \Spatie\Permission\Models\Role::where('name', 'bph')->value('id');
+                                $bphRoleId = Role::where('name', 'bph')->value('id');
 
                                 return in_array('bph', (array) $selectedRoles) || in_array((string) $bphRoleId, array_map('strval', (array) $selectedRoles));
                             }),
