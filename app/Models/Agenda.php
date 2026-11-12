@@ -5,11 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * @property string $id
  * @property string $title
- * @property \Illuminate\Support\Carbon $date
+ * @property Carbon $date
  * @property string $start_time
  * @property string $end_time
  * @property string $jenis offline|online
@@ -18,10 +19,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $deskripsi
  * @property string|null $department_id
  * @property string $created_by
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\Department|null $department
- * @property-read \App\Models\User $creator
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Department|null $department
+ * @property-read User $creator
  */
 class Agenda extends Model
 {

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
@@ -15,8 +16,8 @@ use Illuminate\Support\Str;
  * @property string $content
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\User $author
- * @property-read \App\Models\WorkProgram $workProgram
+ * @property-read User $author
+ * @property-read WorkProgram $workProgram
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|WorkProgramComment newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|WorkProgramComment newQuery()
@@ -56,7 +57,7 @@ class WorkProgramComment extends Model
 
     protected function createdAt(): Attribute
     {
-        return Attribute::get(fn ($value) => \Carbon\Carbon::parse($value)->format('d M Y H:i'));
+        return Attribute::get(fn ($value) => Carbon::parse($value)->format('d M Y H:i'));
     }
 
     protected static function boot()

@@ -219,8 +219,8 @@ class WorkProgramsController extends Controller
 
         DB::beginTransaction();
         try {
-            if ($workProgram->$field && \Illuminate\Support\Facades\Storage::disk('private')->exists($workProgram->$field)) {
-                \Illuminate\Support\Facades\Storage::disk('private')->delete($workProgram->$field);
+            if ($workProgram->$field && Storage::disk('private')->exists($workProgram->$field)) {
+                Storage::disk('private')->delete($workProgram->$field);
             }
 
             $filepath = $request->file('file')->storeAs(
