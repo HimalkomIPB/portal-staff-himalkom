@@ -184,6 +184,7 @@ class PerformanceController extends Controller
             'period_year' => $selectedYear,
         ])->get()->groupBy(fn ($e) => $e->evaluated_id.'_'.$e->department_id);
 
+        // Query ALL users for display (filtered by permission)
         $departments = Department::query()
             ->select(['id', 'name', 'abbreviation', 'slug'])
             ->with(['users' => function ($query) use ($actor, $viewSelfOnly) {
@@ -207,8 +208,16 @@ class PerformanceController extends Controller
             ->orderBy('name')
             ->get();
 
+        // Query ALL users for best performer calculation (unfiltered)
+        // Needed because viewSelfOnly limits the displayed list to the actor only.
+        $allUsersForBestPerformer = $viewSelfOnly
+            ? User::where('department_id', $actor->department_id)
+                ->whereDoesntHave('roles', fn ($rq) => $rq->whereIn('name', ['supervisor', 'bph', 'managing director', 'pjs']))
+                ->get(['id', 'sub_division'])
+            : collect();
+
         $departmentGroups = $departments->map(function (Department $department) use (
-            $actor, $allEvaluations, $selectedMonth, $selectedYear
+            $actor, $allEvaluations, $selectedMonth, $selectedYear, $allUsersForBestPerformer, $viewSelfOnly
         ) {
             $members = $department->users->map(fn (User $member) => $this->buildMemberCard($actor, $department, $member, $allEvaluations, $selectedMonth, $selectedYear)
             );
@@ -222,15 +231,58 @@ class PerformanceController extends Controller
                 return $group->sortByDesc('combined_score')->values();
             });
 
+            // Calculate best performers from ALL users (not filtered display list)
             $bestPerformers = [];
-            foreach ($groupedMembers as $subName => $group) {
-                // Pastikan semua anggota di sub-divisi ini sudah memiliki Nilai Akhir
-                $allEvaluated = $group->every(fn ($member) => $member['combined_score'] !== null);
+            if ($viewSelfOnly && $allUsersForBestPerformer->isNotEmpty()) {
+                // Group ALL users by sub_division
+                $allUsersGrouped = $allUsersForBestPerformer->groupBy(fn ($u) => $u->sub_division ?: 'Tanpa Divisi');
 
-                if ($allEvaluated) {
-                    $bestScore = $group->max('combined_score');
-                    if ($bestScore !== null && $bestScore > 0) {
-                        $bestPerformers[$subName] = $group->where('combined_score', $bestScore)->first()['id'];
+                foreach ($allUsersGrouped as $subName => $group) {
+                    if ($group->count() < 2) {
+                        continue; // Need 2+ members to have best performer
+                    }
+
+                    // Check if ALL members in this sub_division have scores
+                    $allHaveScores = $group->every(function ($user) use ($allEvaluations, $department) {
+                        $key = $user->id.'_'.$department->id;
+                        $evals = $allEvaluations->get($key, collect());
+                        $mdEval = $evals->firstWhere('evaluator_role', 'md');
+
+                        return $mdEval !== null;
+                    });
+
+                    if ($allHaveScores) {
+                        // Find member with highest score
+                        $bestScore = null;
+                        $bestUserId = null;
+
+                        foreach ($group as $user) {
+                            $key = $user->id.'_'.$department->id;
+                            $evals = $allEvaluations->get($key, collect());
+                            $mdEval = $evals->firstWhere('evaluator_role', 'md');
+
+                            if ($mdEval && ($bestScore === null || $mdEval->final_score > $bestScore)) {
+                                $bestScore = $mdEval->final_score;
+                                $bestUserId = $user->id;
+                            }
+                        }
+
+                        if ($bestUserId !== null && $bestScore > 0) {
+                            $bestPerformers[$subName] = $bestUserId;
+                        }
+                    }
+                }
+            } else {
+                // Normal case: calculate from displayed members
+                foreach ($groupedMembers as $subName => $group) {
+                    // Pastikan semua anggota di sub-divisi ini sudah memiliki Nilai Akhir
+                    $allEvaluated = $group->every(fn ($member) => $member['combined_score'] !== null);
+
+                    if ($allEvaluated && $group->count() > 1) {
+                        $bestScore = $group->max('combined_score');
+                        if ($bestScore !== null && $bestScore > 0) {
+                            $bestPerformers[$subName] = $group->where('combined_score', $bestScore)->first()['id'];
+                        }
                     }
                 }
             }
