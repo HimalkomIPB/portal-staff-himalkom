@@ -67,6 +67,9 @@ php artisan link or "ln -s $(pwd)/storage/app/public $(pwd)/public/storage"
 php artisan serve
 npm run dev
 
+## Or you can run both simultaneously
+composer run dev
+
 # access
 http://127.0.0.1:8000/superadmin for creating Users and Department
 http://127.0.0.1:8000 for main website

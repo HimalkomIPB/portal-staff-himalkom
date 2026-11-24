@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Proposal;
 use App\Models\User;
 use App\Models\WorkProgram;
+use App\Notifications\ProposalNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
@@ -97,12 +98,12 @@ class ProposalController extends Controller
             // Notify BPH
             $bphUsers = User::role('bph')->get();
             $user = auth()->user();
-            $department = $user->department;
+            $departmentName = $user->department?->name ?? '-';
             Notification::send($bphUsers, new ProposalNotification(
+                $newProposal,
                 'Dokumen Masuk',
-                "Proposal baru masuk dari {$user->name} ({$department->name})",
-                route('dashboard.proposals.show', $newProposal),
-                'proposal_submission'
+                "Proposal baru masuk dari {$user->name} ({$departmentName})",
+                route('dashboard.proposals.show', $newProposal)
             ));
 
             DB::commit();
@@ -162,7 +163,7 @@ class ProposalController extends Controller
                     ? route('dashboard.workProgram.detail', ['department' => $uploader->department->slug, 'workProgram' => $workProgram->id])
                     : route('dashboard.workProgram.index', ['department' => $uploader->department->slug]);
 
-                $uploader->notify(new \App\Notifications\ProposalNotification(
+                $uploader->notify(new ProposalNotification(
                     $proposal,
                     'Hasil Review Proposal: '.$proposal->title,
                     'Proposal Anda telah '.$statusText.' oleh BPH.',
@@ -215,11 +216,11 @@ class ProposalController extends Controller
             }
 
             $bphUsers = User::role('bph')->get();
-            $department = $user->department;
-            Notification::send($bphUsers, new \App\Notifications\ProposalNotification(
+            $departmentName = $user->department?->name ?? '-';
+            Notification::send($bphUsers, new ProposalNotification(
                 $proposal,
                 'Revisi Dokumen Masuk',
-                "Revisi proposal baru masuk dari {$user->name} ({$department->name})",
+                "Revisi proposal baru masuk dari {$user->name} ({$departmentName})",
                 route('dashboard.proposals.show', $proposal)
             ));
 
