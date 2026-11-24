@@ -96,7 +96,7 @@
                                         </td>
                                         <td valign="middle">
                                             <img
-                                                src="{{ asset('images/himalkom_logo.svg') }}"
+                                                src="{{ asset('images/himalkom_logo.webp') }}"
                                                 alt="Logo Himalkom IPB"
                                                 width="40"
                                                 height="40"
