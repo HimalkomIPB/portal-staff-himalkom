@@ -1,7 +1,5 @@
 # Portal Staff Himalkom
 
-Nama belum fix, but Portal Staff Himalkom looks good tho
-
 ### What is This?
 
 Management Information System — a centralized platform for managing all aspects of departmental initiatives and work programs. Supervisors and higher ups can easily access detailed information, descriptions, and related documents for each work program — all in one unified platform.
