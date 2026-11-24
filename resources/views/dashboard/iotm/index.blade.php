@@ -203,42 +203,36 @@
                                 @endif
                             </div>
 
-                            @foreach ($department['grouped_interns'] as $subDivisionName => $interns)
-                                <div class="mt-6 mb-4">
-                                    <h4 class="text-md font-bold text-slate-700 border-b border-slate-200 pb-2">{{ $subDivisionName }}</h4>
-                                </div>
-                                <div class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-                                    @foreach ($interns as $intern)
-                                        @php
-                                            $isIotm = $canViewResults
-                                                && isset($department['best_interns'][$subDivisionName])
-                                                && $department['best_interns'][$subDivisionName] === $intern['id'];
-                                            $modalPayload = json_encode([
-                                                'id' => $intern['id'],
-                                                'name' => $intern['name'],
-                                                'dept_name' => $intern['department_name'].($intern['sub_division'] ? ' — '.$intern['sub_division'] : ''),
-                                                'existing_eval' => $intern['existing_eval'],
-                                            ]);
-                                        @endphp
+                            <div class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+                                @foreach ($department['interns'] as $intern)
+                                    @php
+                                        $isIotm = $canViewResults && $department['best_intern_id'] === $intern['id'];
+                                        $modalPayload = json_encode([
+                                            'id' => $intern['id'],
+                                            'name' => $intern['name'],
+                                            'dept_name' => $intern['department_name'],
+                                            'existing_eval' => $intern['existing_eval'],
+                                        ]);
+                                    @endphp
 
-                                        <div class="relative overflow-hidden rounded-xl border {{ $isIotm ? 'border-amber-300 ring-1 ring-amber-200' : 'border-slate-200' }} bg-white p-5 shadow-sm flex flex-col justify-between">
-                                            @if ($isIotm)
-                                                <div class="ribbon">
-                                                    <span>IOTM</span>
-                                                </div>
-                                            @endif
+                                    <div class="relative overflow-hidden rounded-xl border {{ $isIotm ? 'border-amber-300 ring-1 ring-amber-200' : 'border-slate-200' }} bg-white p-5 shadow-sm flex flex-col justify-between">
+                                        @if ($isIotm)
+                                            <div class="ribbon">
+                                                <span>IOTM</span>
+                                            </div>
+                                        @endif
 
-                                            <div>
-                                                <div class="flex items-start justify-between gap-3 {{ $isIotm ? 'pl-8' : '' }}">
-                                                    <div class="flex items-center gap-3 min-w-0">
-                                                        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-blue-50 text-sm font-bold text-[#0b5bd3]">
-                                                            {{ $intern['initials'] }}
-                                                        </div>
-                                                        <div class="min-w-0">
-                                                            <p class="truncate text-sm font-bold text-slate-900">{{ $intern['name'] }}</p>
-                                                            <p class="truncate text-xs text-slate-500">{{ $intern['sub_division'] ?: $intern['department_name'] }}</p>
-                                                        </div>
+                                        <div>
+                                            <div class="flex items-start justify-between gap-3 {{ $isIotm ? 'pl-8' : '' }}">
+                                                <div class="flex items-center gap-3 min-w-0">
+                                                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-blue-50 text-sm font-bold text-[#0b5bd3]">
+                                                        {{ $intern['initials'] }}
                                                     </div>
+                                                    <div class="min-w-0">
+                                                        <p class="truncate text-sm font-bold text-slate-900">{{ $intern['name'] }}</p>
+                                                        <p class="truncate text-xs text-slate-500">{{ $intern['department_name'] }}</p>
+                                                    </div>
+                                                </div>
 
                                                     @if ($canViewResults)
                                                         <div class="text-right shrink-0">
@@ -316,10 +310,9 @@
                                                     </div>
                                                 @endif
                                             </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @endforeach
+                                    </div>
+                                @endforeach
+                            </div>
                         </section>
                     @endif
                 @endforeach

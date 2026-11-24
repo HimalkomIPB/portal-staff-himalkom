@@ -241,7 +241,6 @@ class IotmController extends Controller
                     'initials' => $this->initials($intern->name),
                     'department_id' => $department->id,
                     'department_name' => $department->name,
-                    'sub_division' => $intern->sub_division,
                     'evaluator_count' => $canViewResults ? $evals->count() : null,
                     'avg_scores' => $avgScores,
                     'avg_final_score' => $avgFinal,
@@ -260,27 +259,20 @@ class IotmController extends Controller
                 ];
             });
 
-            $groupedInterns = $interns->groupBy(fn ($intern) => $intern['sub_division'] ?: 'Tanpa Divisi')
-                ->map(function ($group) use ($canViewResults) {
-                    if ($canViewResults) {
-                        return $group->sortByDesc('avg_final_score')->values();
-                    }
+            $sortedInterns = $canViewResults
+                ? $interns->sortByDesc('avg_final_score')->values()
+                : $interns->values();
 
-                    return $group->values();
-                });
-
-            $bestInterns = [];
+            $bestInternId = null;
             if ($canViewResults) {
-                foreach ($groupedInterns as $subName => $group) {
-                    $bestScore = $group->max('avg_final_score');
-                    if ($bestScore !== null && $bestScore > 0) {
-                        $bestInterns[$subName] = $group->where('avg_final_score', $bestScore)->first()['id'];
-                    }
+                $bestScore = $sortedInterns->max('avg_final_score');
+                if ($bestScore !== null && $bestScore > 0) {
+                    $bestInternId = $sortedInterns->where('avg_final_score', $bestScore)->first()['id'];
                 }
             }
 
             $deptAvg = $canViewResults
-                ? $interns->whereNotNull('avg_final_score')->avg('avg_final_score')
+                ? $sortedInterns->whereNotNull('avg_final_score')->avg('avg_final_score')
                 : null;
 
             return [
@@ -288,20 +280,18 @@ class IotmController extends Controller
                 'name' => $department->name,
                 'abbreviation' => $department->abbreviation,
                 'average_score' => $deptAvg !== null ? round($deptAvg, 2) : null,
-                'grouped_interns' => $groupedInterns,
-                'interns_count' => $interns->count(),
-                'best_interns' => $bestInterns,
+                'interns' => $sortedInterns,
+                'interns_count' => $sortedInterns->count(),
+                'best_intern_id' => $bestInternId,
             ];
         });
 
         $showWarning = false;
         if ($periodStatus === 'open') {
             foreach ($departmentGroups as $dept) {
-                foreach ($dept['grouped_interns'] as $group) {
-                    if ($group->contains(fn ($intern) => $intern['can_evaluate'] && ! $intern['actor_has_filled'])) {
-                        $showWarning = true;
-                        break 2;
-                    }
+                if ($dept['interns']->contains(fn ($intern) => $intern['can_evaluate'] && ! $intern['actor_has_filled'])) {
+                    $showWarning = true;
+                    break;
                 }
             }
         }

@@ -28,7 +28,7 @@ class ListInterns extends ListRecords
                 ->icon('heroicon-o-arrow-up-tray')
                 ->color('success')
                 ->modalHeading('Import Data Intern')
-                ->modalDescription('Upload file Excel (.xlsx) atau CSV (.csv) sesuai template. Lihat sheet "Referensi" pada template untuk daftar nama Departemen dan Divisi yang valid.')
+                ->modalDescription('Upload file Excel (.xlsx) atau CSV (.csv) sesuai template. Lihat sheet "Referensi" pada template untuk daftar nama Departemen yang valid.')
                 ->form([
                     FileUpload::make('file')
                         ->label('File Excel / CSV')

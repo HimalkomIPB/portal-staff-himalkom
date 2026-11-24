@@ -59,59 +59,56 @@
         @if($dept['interns_count'] > 0)
             <h2>Departemen: {{ $dept['name'] }}</h2>
 
-            @foreach($dept['grouped_interns'] as $subName => $interns)
-                <h3>Divisi: {{ $subName }}</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width: 18%">Nama Intern</th>
-                            <th class="text-center" style="width: 10%">Ketepatan Waktu</th>
-                            <th class="text-center" style="width: 10%">Inisiatif & Proaktif</th>
-                            <th class="text-center" style="width: 10%">Kehadiran & Kontribusi</th>
-                            <th class="text-center" style="width: 10%">Komunikasi & Kerja Sama</th>
-                            <th class="text-center" style="width: 10%">Profesionalisme</th>
-                            <th class="text-center" style="width: 6%">Penilai</th>
-                            <th class="text-center" style="width: 8%">Rata-rata</th>
-                            <th style="width: 18%">Catatan</th>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 18%">Nama Intern</th>
+                        <th class="text-center" style="width: 10%">Ketepatan Waktu</th>
+                        <th class="text-center" style="width: 10%">Inisiatif & Proaktif</th>
+                        <th class="text-center" style="width: 10%">Kehadiran & Kontribusi</th>
+                        <th class="text-center" style="width: 10%">Komunikasi & Kerja Sama</th>
+                        <th class="text-center" style="width: 10%">Profesionalisme</th>
+                        <th class="text-center" style="width: 6%">Penilai</th>
+                        <th class="text-center" style="width: 8%">Rata-rata</th>
+                        <th style="width: 18%">Catatan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($dept['interns'] as $intern)
+                        @php
+                            $isBest = $dept['best_intern_id'] === $intern['id'];
+                        @endphp
+                        <tr {!! $isBest ? 'style="background-color: #fdf6e3;"' : '' !!}>
+                            <td>
+                                {{ $intern['name'] }}
+                                @if($isBest)
+                                    <span style="color: #d97706; font-weight: bold; font-size: 10px; margin-left: 5px;">(IOTM)</span>
+                                @endif
+                            </td>
+                            <td class="text-center">{{ $intern['avg_scores'] ? number_format($intern['avg_scores']['Ketepatan Waktu Kerja'], 2) : '-' }}</td>
+                            <td class="text-center">{{ $intern['avg_scores'] ? number_format($intern['avg_scores']['Inisiatif dan Proaktif'], 2) : '-' }}</td>
+                            <td class="text-center">{{ $intern['avg_scores'] ? number_format($intern['avg_scores']['Kehadiran dan Kontribusi Nyata'], 2) : '-' }}</td>
+                            <td class="text-center">{{ $intern['avg_scores'] ? number_format($intern['avg_scores']['Komunikasi dan Kerja Sama'], 2) : '-' }}</td>
+                            <td class="text-center">{{ $intern['avg_scores'] ? number_format($intern['avg_scores']['Profesionalisme'], 2) : '-' }}</td>
+                            <td class="text-center">{{ $intern['evaluator_count'] ?? 0 }}</td>
+                            <td class="text-center font-bold">{{ $intern['avg_final_score'] !== null ? number_format($intern['avg_final_score'], 2) : '-' }}</td>
+                            <td style="font-size: 10px;">
+                                @if(!empty($intern['notes_list']))
+                                    @foreach($intern['notes_list'] as $note)
+                                        <div style="margin-bottom: 3px;"><strong>{{ $note['evaluator_name'] }}:</strong> {{ $note['notes'] }}</div>
+                                    @endforeach
+                                @else
+                                    -
+                                @endif
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($interns as $intern)
-                            @php
-                                $isBest = isset($dept['best_interns'][$subName]) && $dept['best_interns'][$subName] === $intern['id'];
-                            @endphp
-                            <tr {!! $isBest ? 'style="background-color: #fdf6e3;"' : '' !!}>
-                                <td>
-                                    {{ $intern['name'] }}
-                                    @if($isBest)
-                                        <span style="color: #d97706; font-weight: bold; font-size: 10px; margin-left: 5px;">(IOTM)</span>
-                                    @endif
-                                </td>
-                                <td class="text-center">{{ $intern['avg_scores'] ? number_format($intern['avg_scores']['Ketepatan Waktu Kerja'], 2) : '-' }}</td>
-                                <td class="text-center">{{ $intern['avg_scores'] ? number_format($intern['avg_scores']['Inisiatif dan Proaktif'], 2) : '-' }}</td>
-                                <td class="text-center">{{ $intern['avg_scores'] ? number_format($intern['avg_scores']['Kehadiran dan Kontribusi Nyata'], 2) : '-' }}</td>
-                                <td class="text-center">{{ $intern['avg_scores'] ? number_format($intern['avg_scores']['Komunikasi dan Kerja Sama'], 2) : '-' }}</td>
-                                <td class="text-center">{{ $intern['avg_scores'] ? number_format($intern['avg_scores']['Profesionalisme'], 2) : '-' }}</td>
-                                <td class="text-center">{{ $intern['evaluator_count'] ?? 0 }}</td>
-                                <td class="text-center font-bold">{{ $intern['avg_final_score'] !== null ? number_format($intern['avg_final_score'], 2) : '-' }}</td>
-                                <td style="font-size: 10px;">
-                                    @if(!empty($intern['notes_list']))
-                                        @foreach($intern['notes_list'] as $note)
-                                            <div style="margin-bottom: 3px;"><strong>{{ $note['evaluator_name'] }}:</strong> {{ $note['notes'] }}</div>
-                                        @endforeach
-                                    @else
-                                        -
-                                    @endif
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="9" class="text-center">Belum ada intern yang dinilai</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="9" class="text-center">Belum ada intern yang dinilai</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         @endif
     @endforeach
 

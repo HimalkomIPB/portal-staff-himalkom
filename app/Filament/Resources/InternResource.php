@@ -3,14 +3,12 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\InternResource\Pages;
-use App\Models\Department;
 use App\Models\Intern;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
-use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\IconColumn;
@@ -51,35 +49,13 @@ class InternResource extends Resource
                             ->label('Nama Lengkap')
                             ->placeholder('Contoh: Budi Utomo')
                             ->required()
-                            ->maxLength(255)
-                            ->columnSpanFull(),
+                            ->maxLength(255),
                         Select::make('department_id')
                             ->label('Departemen')
                             ->relationship('department', 'name')
                             ->searchable()
                             ->preload()
-                            ->live()
-                            ->required()
-                            ->afterStateUpdated(fn (callable $set) => $set('sub_division', null)),
-                        Select::make('sub_division')
-                            ->label('Divisi / Sub Divisi')
-                            ->options(function (Get $get) {
-                                $departmentId = $get('department_id');
-                                if (! $departmentId) {
-                                    return [];
-                                }
-                                $department = Department::find($departmentId);
-                                if (! $department) {
-                                    return [];
-                                }
-
-                                $subs = Department::SUB_DIVISION_MAPPING[$department->name] ?? [];
-
-                                return array_combine($subs, $subs);
-                            })
-                            ->searchable()
-                            ->nullable()
-                            ->helperText('Pilih divisi tempat intern ditempatkan.'),
+                            ->required(),
                         Toggle::make('is_active')
                             ->label('Status Aktif')
                             ->default(true),
@@ -100,11 +76,6 @@ class InternResource extends Resource
                     ->placeholder('–')
                     ->sortable()
                     ->searchable(),
-                TextColumn::make('sub_division')
-                    ->label('Divisi')
-                    ->placeholder('–')
-                    ->searchable()
-                    ->sortable(),
                 IconColumn::make('is_active')
                     ->label('Aktif')
                     ->boolean()

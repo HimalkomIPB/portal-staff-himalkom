@@ -23,24 +23,17 @@ class InternSpreadsheetService
             $sheet1 = $writer->getCurrentSheet();
             $sheet1->setName('Data Intern');
 
-            $writer->addRow(Row::fromValues(['Nama Lengkap', 'Departemen', 'Divisi']));
-            $writer->addRow(Row::fromValues(['Contoh: Budi Santoso', 'Education', 'Academic & Development']));
+            $writer->addRow(Row::fromValues(['Nama Lengkap', 'Departemen']));
+            $writer->addRow(Row::fromValues(['Contoh: Budi Santoso', 'Education']));
 
-            // Sheet 2: Referensi Departemen & Divisi
+            // Sheet 2: Referensi Departemen
             $sheet2 = $writer->addNewSheetAndMakeItCurrent();
             $sheet2->setName('Referensi');
-            $writer->addRow(Row::fromValues(['Departemen', 'Singkatan', 'Divisi yang Tersedia']));
+            $writer->addRow(Row::fromValues(['Departemen', 'Singkatan']));
 
             $departments = Department::orderBy('name')->get();
             foreach ($departments as $dept) {
-                $subs = Department::SUB_DIVISION_MAPPING[$dept->name] ?? [];
-                if (empty($subs)) {
-                    $writer->addRow(Row::fromValues([$dept->name, $dept->abbreviation ?? '-', '-']));
-                } else {
-                    foreach ($subs as $sub) {
-                        $writer->addRow(Row::fromValues([$dept->name, $dept->abbreviation ?? '-', $sub]));
-                    }
-                }
+                $writer->addRow(Row::fromValues([$dept->name, $dept->abbreviation ?? '-']));
             }
 
             $writer->close();
@@ -86,7 +79,6 @@ class InternSpreadsheetService
 
                     $name = $cells[0] ?? '';
                     $deptInput = $cells[1] ?? '';
-                    $subInput = $cells[2] ?? '';
 
                     if ($name === '' || $deptInput === '') {
                         $errors[] = "Baris {$rowIndex}: Nama Lengkap dan Departemen wajib diisi.";
@@ -97,13 +89,6 @@ class InternSpreadsheetService
                     $department = $this->resolveDepartment($departments, $deptInput);
                     if (! $department) {
                         $errors[] = "Baris {$rowIndex} ({$name}): Departemen '{$deptInput}' tidak ditemukan.";
-
-                        continue;
-                    }
-
-                    $subDivision = $this->resolveSubDivision($department->name, $subInput);
-                    if ($subInput !== '' && $subInput !== '-' && $subDivision === null) {
-                        $errors[] = "Baris {$rowIndex} ({$name}): Divisi '{$subInput}' tidak valid untuk departemen {$department->name}.";
 
                         continue;
                     }
@@ -119,7 +104,7 @@ class InternSpreadsheetService
                         }
                         $existing->update([
                             'name' => $name,
-                            'sub_division' => $subDivision,
+                            'sub_division' => null,
                             'is_active' => true,
                         ]);
                         $updated++;
@@ -127,7 +112,7 @@ class InternSpreadsheetService
                         Intern::create([
                             'name' => $name,
                             'department_id' => $department->id,
-                            'sub_division' => $subDivision,
+                            'sub_division' => null,
                             'is_active' => true,
                         ]);
                         $created++;
@@ -170,29 +155,5 @@ class InternSpreadsheetService
             return mb_strtolower($dept->name) === $needle
                 || ($dept->abbreviation && mb_strtolower($dept->abbreviation) === $needle);
         });
-    }
-
-    private function resolveSubDivision(string $deptName, string $input): ?string
-    {
-        $trimmed = trim($input);
-        if ($trimmed === '' || $trimmed === '-') {
-            return null;
-        }
-
-        $needle = mb_strtolower($trimmed);
-        $validSubs = Department::SUB_DIVISION_MAPPING[$deptName] ?? [];
-
-        foreach ($validSubs as $sub) {
-            if (mb_strtolower($sub) === $needle) {
-                return $sub;
-            }
-        }
-
-        // Handle common spelling variant ("Talent Development" -> "Talent Developement")
-        if ($deptName === 'Talent and Sport' && $needle === 'talent development') {
-            return 'Talent Developement';
-        }
-
-        return null;
     }
 }
