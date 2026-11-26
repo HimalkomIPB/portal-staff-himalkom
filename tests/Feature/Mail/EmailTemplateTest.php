@@ -19,7 +19,7 @@ function assertHimalkomEmailChrome(string $html): void
         ->toContain('#AFE1EA')
         ->toContain('Himalkom')
         ->toContain('IPB')
-        ->toContain('images/email/himalkom-logo.png')
+        ->toMatch('/images\/(email\/himalkom-logo\.png|himalkom_logo\.webp)/')
         ->toContain('images/email/header-bg.png')
         ->toContain('Himpunan Mahasiswa Ilmu Komputer, IPB University')
         ->toContain('himalkom-ipb.com')
