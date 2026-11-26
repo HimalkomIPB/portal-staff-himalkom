@@ -26,8 +26,10 @@ class GlobalAnnouncement extends Notification
     {
         return (new MailMessage)
             ->subject($this->title)
-            ->line($notifiable->name)
-            ->line($this->message)
-            ->line('Thank you for your attention!');
+            ->view('emails.global-announcement', [
+                'title' => $this->title,
+                'recipientName' => $notifiable->name ?? null,
+                'announcementMessage' => $this->message,
+            ]);
     }
 }

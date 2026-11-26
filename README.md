@@ -1,7 +1,5 @@
 # Portal Staff Himalkom
 
-Nama belum fix, but Portal Staff Himalkom looks good tho
-
 ### What is This?
 
 Management Information System — a centralized platform for managing all aspects of departmental initiatives and work programs. Supervisors and higher ups can easily access detailed information, descriptions, and related documents for each work program — all in one unified platform.
@@ -66,6 +64,9 @@ php artisan link or "ln -s $(pwd)/storage/app/public $(pwd)/public/storage"
 # Run in development
 php artisan serve
 npm run dev
+
+## Or you can run both simultaneously
+composer run dev
 
 # access
 http://127.0.0.1:8000/superadmin for creating Users and Department

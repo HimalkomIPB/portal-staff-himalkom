@@ -39,9 +39,11 @@ class WorkProgramCommentNotification extends Notification
     {
         return (new MailMessage)
             ->subject($this->title)
-            ->greeting('Halo '.$notifiable->name.'!,')
-            ->line($this->message)
-            ->action('Cek', $this->url)
-            ->line('Thank you for your attention!');
+            ->view('emails.work-program-comment', [
+                'title' => $this->title,
+                'recipientName' => $notifiable->name ?? null,
+                'commentMessage' => $this->message,
+                'url' => $this->url,
+            ]);
     }
 }
