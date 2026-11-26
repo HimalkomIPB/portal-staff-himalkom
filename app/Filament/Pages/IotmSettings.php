@@ -41,8 +41,8 @@ class IotmSettings extends Page implements HasForms
         ]);
 
         $this->scheduleForm->fill([
-            'iotm_start_day' => Setting::getVal('iotm_start_day', 1),
-            'iotm_end_day' => Setting::getVal('iotm_end_day', 5),
+            'iotm_start_date' => Setting::getVal('iotm_start_date'),
+            'iotm_end_date' => Setting::getVal('iotm_end_date'),
         ]);
     }
 
@@ -82,18 +82,20 @@ class IotmSettings extends Page implements HasForms
         return $form
             ->schema([
                 Forms\Components\Section::make('Jadwal Pengisian IOTM')
-                    ->description('Tentukan tanggal buka dan tutup pengisian penilaian intern setiap bulannya.')
+                    ->description('IOTM hanya diadakan sekali. Tentukan tanggal mulai dan tanggal selesai pengisian (lengkap dengan bulan dan tahun). Setelah tanggal selesai, form otomatis tertutup dan tidak dibuka lagi di bulan berikutnya.')
                     ->schema([
-                        Forms\Components\TextInput::make('iotm_start_day')
-                            ->label('Tanggal Buka')
-                            ->numeric()
-                            ->minValue(1)->maxValue(31)
+                        Forms\Components\DatePicker::make('iotm_start_date')
+                            ->label('Tanggal Mulai')
+                            ->native(false)
+                            ->displayFormat('d F Y')
+                            ->format('Y-m-d')
                             ->required(),
 
-                        Forms\Components\TextInput::make('iotm_end_day')
-                            ->label('Tanggal Tutup')
-                            ->numeric()
-                            ->minValue(1)->maxValue(31)
+                        Forms\Components\DatePicker::make('iotm_end_date')
+                            ->label('Tanggal Selesai')
+                            ->native(false)
+                            ->displayFormat('d F Y')
+                            ->format('Y-m-d')
                             ->required(),
                     ])->columns(2),
             ])
@@ -148,10 +150,19 @@ class IotmSettings extends Page implements HasForms
     {
         $data = $this->scheduleForm->getState();
 
+        if ($data['iotm_end_date'] < $data['iotm_start_date']) {
+            Notification::make()
+                ->danger()
+                ->title('Tanggal selesai tidak boleh sebelum tanggal mulai.')
+                ->send();
+
+            return;
+        }
+
         foreach ($data as $key => $value) {
             Setting::updateOrCreate(
                 ['key' => $key],
-                ['value' => $value, 'type' => 'integer']
+                ['value' => $value, 'type' => 'string']
             );
         }
 

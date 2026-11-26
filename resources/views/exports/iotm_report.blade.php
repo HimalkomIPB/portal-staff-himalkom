@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>IOTM {{ $selectedMonthName }} {{ $selectedYear }}</title>
+    <title>IOTM {{ $periodLabel }}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -53,7 +53,7 @@
 </head>
 <body>
 
-    <h1>Laporan Intern of the Month (IOTM) Bulan {{ $selectedMonthName }} {{ $selectedYear }}</h1>
+    <h1>Laporan Intern of the Month (IOTM)<br><span style="font-size: 13px; text-transform: none;">Periode {{ $periodLabel }}</span></h1>
 
     @foreach($departmentGroups as $dept)
         @if($dept['interns_count'] > 0)

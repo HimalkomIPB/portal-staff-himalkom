@@ -1,7 +1,7 @@
 <x-sidebar-layout title="IOTM - {{ config('app.name', 'Portal Himalkom') }}">
     <x-slot name="header">
         <x-breadcrumb :links="['Dashboard' => auth()->user()->getDashboardRoute(), 'IOTM' => null]" />
-        <h1 class="mt-2 text-xl font-bold text-slate-900">{{ $selectedMonthName }} {{ $selectedYear }}</h1>
+        <h1 class="mt-2 text-xl font-bold text-slate-900">{{ $periodLabel }}</h1>
     </x-slot>
 
     <style>
@@ -40,8 +40,6 @@
                 intern_id: '',
                 intern_name: '',
                 dept_name: '',
-                period_month: {{ $selectedMonth }},
-                period_year: {{ $selectedYear }},
                 score_punctuality: 0,
                 score_initiative: 0,
                 score_attendance: 0,
@@ -55,8 +53,6 @@
                     intern_id: intern.id,
                     intern_name: intern.name,
                     dept_name: intern.dept_name,
-                    period_month: {{ $selectedMonth }},
-                    period_year: {{ $selectedYear }},
                     score_punctuality: existing ? existing.score_punctuality : 0,
                     score_initiative: existing ? existing.score_initiative : 0,
                     score_attendance: existing ? existing.score_attendance : 0,
@@ -95,30 +91,36 @@
             </div>
         @endif
 
-        @if ($showWarning)
+        @if ($periodStatus === 'not_set')
+            <div class="mb-6 rounded-md bg-slate-100 border border-slate-200 px-4 py-3 shadow-sm">
+                <p class="text-sm font-medium text-slate-600">
+                    Jadwal pengisian penilaian IOTM belum diatur oleh Superadmin.
+                </p>
+            </div>
+        @elseif ($showWarning)
             <div class="mb-6 rounded-md bg-[#e53e3e] px-4 py-3 shadow-sm">
                 <p class="text-sm font-medium text-white">
-                    Penilaian Intern of the Month (IOTM) masih ada yang belum Anda isi. Segera isi sebelum batas waktu (tanggal {{ $iotmEndDay }})!
+                    Penilaian Intern of the Month (IOTM) masih ada yang belum Anda isi. Segera isi sebelum batas waktu ({{ $iotmEndLabel }})!
                 </p>
             </div>
         @elseif ($periodStatus === 'future')
             <div class="mb-6 rounded-md bg-blue-50 border border-blue-200 px-4 py-3 shadow-sm">
                 <p class="text-sm font-medium text-blue-700">
-                    Jadwal pengisian penilaian IOTM bulan ini belum dibuka (dibuka tanggal {{ $iotmStartDay }} – {{ $iotmEndDay }}).
+                    Pengisian penilaian IOTM belum dibuka (dibuka {{ $iotmStartLabel }} – {{ $iotmEndLabel }}).
                 </p>
             </div>
         @elseif ($periodStatus === 'past')
             <div class="mb-6 rounded-md bg-slate-100 border border-slate-200 px-4 py-3 shadow-sm">
                 <p class="text-sm font-medium text-slate-600">
-                    Periode pengisian penilaian IOTM untuk bulan ini telah ditutup (tanggal {{ $iotmStartDay }} – {{ $iotmEndDay }}).
+                    Periode pengisian penilaian IOTM telah ditutup ({{ $iotmStartLabel }} – {{ $iotmEndLabel }}).
                 </p>
             </div>
         @endif
 
-        @if ($hasResultAccess && $periodStatus !== 'past')
+        @if ($hasResultAccess && in_array($periodStatus, ['open', 'future'], true))
             <div class="mb-6 rounded-md bg-amber-50 border border-amber-200 px-4 py-3 shadow-sm">
                 <p class="text-sm font-medium text-amber-800">
-                    Hasil rata-rata penilaian, pemenang IOTM, catatan penilai lain, dan Export PDF akan otomatis ditampilkan setelah melewati tanggal {{ $iotmEndDay }}.
+                    Hasil rata-rata penilaian, pemenang IOTM, catatan penilai lain, dan Export PDF akan otomatis ditampilkan setelah melewati {{ $iotmEndLabel }}.
                 </p>
             </div>
         @endif
@@ -133,12 +135,12 @@
                     </span>
                 </div>
                 <p class="mt-1 text-sm text-slate-500">
-                    Penilaian bulanan intern oleh seluruh pengurus tetap di departemennya masing-masing (skala 1–5, bobot 20% per poin).
+                    Penilaian intern oleh seluruh pengurus tetap di departemennya masing-masing (skala 1–5, bobot 20% per poin).
                 </p>
             </div>
 
             @if ($canExport)
-                <a href="{{ route('dashboard.iotm.export', ['month' => $selectedMonth, 'year' => $selectedYear]) }}"
+                <a href="{{ route('dashboard.iotm.export') }}"
                     class="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#0b5bd3] px-4 text-sm font-semibold text-white transition hover:bg-blue-700">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M12 3v12M8 11l4 4 4-4" stroke-linecap="round" stroke-linejoin="round" />
@@ -149,27 +151,21 @@
             @endif
         </div>
 
-        {{-- Filter bulan/tahun --}}
-        <form method="GET" class="mb-7 flex flex-col gap-4 rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-sm md:flex-row md:items-center md:justify-between">
-            <div class="flex flex-wrap items-center gap-3">
-                <label for="month" class="text-sm font-medium text-slate-600">Month:</label>
-                <select id="month" name="month" onchange="this.form.submit()"
-                    class="h-10 rounded-md border-slate-300 bg-slate-50 text-sm font-semibold text-slate-800 focus:border-[#0b5bd3] focus:ring-[#0b5bd3]">
-                    @foreach ($months as $mn => $mName)
-                        <option value="{{ $mn }}" @selected($selectedMonth === $mn)>{{ $mName }}</option>
-                    @endforeach
-                </select>
-                <select name="year" onchange="this.form.submit()"
-                    class="h-10 rounded-md border-slate-300 bg-slate-50 text-sm font-semibold text-slate-800 focus:border-[#0b5bd3] focus:ring-[#0b5bd3]">
-                    @foreach ($years as $yr)
-                        <option value="{{ $yr }}" @selected($selectedYear === $yr)>{{ $yr }}</option>
-                    @endforeach
-                </select>
+        {{-- Info periode --}}
+        <div class="mb-7 flex flex-col gap-2 rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-sm md:flex-row md:items-center md:justify-between">
+            <div class="flex items-center gap-3">
+                <svg class="h-5 w-5 text-[#0b5bd3]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M8 2v4M16 2v4M3 10h18" stroke-linecap="round" />
+                    <rect x="3" y="4" width="18" height="18" rx="2" />
+                </svg>
+                <span class="text-sm font-medium text-slate-600">Periode pengisian:</span>
+                <span class="text-sm font-bold text-slate-900">{{ $periodLabel }}</span>
             </div>
-            <div class="text-xs font-medium text-slate-500">
-                Periode pengisian: Tanggal {{ $iotmStartDay }} – {{ $iotmEndDay }}
-            </div>
-        </form>
+            <span class="text-xs font-semibold rounded-full px-3 py-1 w-fit
+                {{ $periodStatus === 'open' ? 'bg-emerald-100 text-emerald-700' : ($periodStatus === 'future' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600') }}">
+                {{ ['open' => 'Sedang Dibuka', 'future' => 'Belum Dibuka', 'past' => 'Sudah Ditutup', 'not_set' => 'Belum Diatur'][$periodStatus] }}
+            </span>
+        </div>
 
         {{-- List Intern per Departemen --}}
         @if ($departmentGroups->isEmpty() || $departmentGroups->every(fn ($d) => $d['interns_count'] === 0))
@@ -301,7 +297,7 @@
                                                     @else
                                                         <button type="button" disabled
                                                             class="w-full rounded-lg bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-400 cursor-not-allowed">
-                                                            {{ $periodStatus === 'future' ? "Dibuka Tgl {$iotmStartDay}–{$iotmEndDay}" : 'Periode Ditutup' }}
+                                                            {{ ['future' => "Dibuka {$iotmStartLabel}", 'past' => 'Periode Ditutup', 'not_set' => 'Jadwal Belum Diatur'][$periodStatus] ?? 'Ditutup' }}
                                                         </button>
                                                     @endif
                                                 @else
@@ -339,8 +335,6 @@
                 <form method="POST" action="{{ route('dashboard.iotm.store') }}" class="mt-5 space-y-5">
                     @csrf
                     <input type="hidden" name="intern_id" :value="formData.intern_id">
-                    <input type="hidden" name="period_month" :value="formData.period_month">
-                    <input type="hidden" name="period_year" :value="formData.period_year">
 
                     @foreach ($questions as $index => $q)
                         <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-4">

@@ -58,8 +58,6 @@ class IotmController extends Controller
 
         $validated = $request->validate([
             'intern_id' => ['required', 'string', 'exists:interns,id'],
-            'period_month' => ['required', 'integer', 'min:1', 'max:12'],
-            'period_year' => ['required', 'integer', 'min:2020'],
             'score_punctuality' => ['required', 'integer', 'min:1', 'max:5'],
             'score_initiative' => ['required', 'integer', 'min:1', 'max:5'],
             'score_attendance' => ['required', 'integer', 'min:1', 'max:5'],
@@ -74,13 +72,13 @@ class IotmController extends Controller
             abort(403, 'Anda hanya dapat menilai intern di departemen Anda sendiri.');
         }
 
-        $periodStatus = $this->getEvaluationPeriodStatus($validated['period_month'], $validated['period_year']);
-        if ($periodStatus !== 'open') {
-            $startDay = (int) Setting::getVal('iotm_start_day', 1);
-            $endDay = (int) Setting::getVal('iotm_end_day', 5);
-            throw ValidationException::withMessages([
-                'intern_id' => "Form penilaian IOTM untuk periode ini sedang ditutup. (Dibuka tanggal {$startDay} – {$endDay})",
-            ]);
+        $period = $this->getPeriod();
+        if ($period['status'] !== 'open') {
+            $message = $period['status'] === 'not_set'
+                ? 'Jadwal pengisian IOTM belum diatur oleh Superadmin.'
+                : "Form penilaian IOTM sedang ditutup. (Dibuka {$period['start_label']} – {$period['end_label']})";
+
+            throw ValidationException::withMessages(['intern_id' => $message]);
         }
 
         $finalScore = InternEvaluation::computeFinalScore(
@@ -95,8 +93,8 @@ class IotmController extends Controller
             [
                 'evaluator_id' => $actor->id,
                 'intern_id' => $intern->id,
-                'period_month' => $validated['period_month'],
-                'period_year' => $validated['period_year'],
+                'period_month' => $period['month'],
+                'period_year' => $period['year'],
             ],
             [
                 'department_id' => $intern->department_id,
@@ -111,10 +109,7 @@ class IotmController extends Controller
         );
 
         return redirect()
-            ->route('dashboard.iotm.index', [
-                'month' => $validated['period_month'],
-                'year' => $validated['period_year'],
-            ])
+            ->route('dashboard.iotm.index')
             ->with('success', 'Penilaian intern berhasil disimpan.');
     }
 
@@ -136,7 +131,7 @@ class IotmController extends Controller
         $pdf = Pdf::loadView('exports.iotm_report', $data);
         $pdf->setPaper('a4', 'landscape');
 
-        $filename = "IOTM_{$data['selectedMonthName']}_{$data['selectedYear']}.pdf";
+        $filename = 'IOTM_'.Str::slug($data['periodLabel'], '_').'.pdf';
 
         return $pdf->download($filename);
     }
@@ -150,41 +145,23 @@ class IotmController extends Controller
 
     private function buildIotmData(Request $request): array
     {
-        $months = [
-            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
-        ];
-
         /** @var User $actor */
         $actor = $request->user();
 
-        $startDay = (int) Setting::getVal('iotm_start_day', 1);
-        $endDay = (int) Setting::getVal('iotm_end_day', 5);
-
-        if ($startDay > $endDay) {
-            $defaultDate = (! $request->has('month') && now()->day <= $endDay) ? now()->copy()->subMonth() : now();
-        } else {
-            $defaultDate = now();
-        }
-
-        $selectedMonth = (int) $request->integer('month', $defaultDate->month);
-        if (! array_key_exists($selectedMonth, $months)) {
-            $selectedMonth = $defaultDate->month;
-        }
-        $selectedYear = (int) $request->integer('year', $defaultDate->year);
-        $years = range(now()->year - 1, now()->year + 1);
+        $period = $this->getPeriod();
+        $periodStatus = $period['status'];
 
         $isPjOrAdmin = $actor->isSuperAdmin() || IotmPj::isAnyPj($actor->id);
         $hasResultAccess = $this->canViewResults($actor);
-        $periodStatus = $this->getEvaluationPeriodStatus($selectedMonth, $selectedYear);
         $canViewResults = $hasResultAccess && $periodStatus === 'past';
 
-        $allEvaluations = InternEvaluation::with('evaluator:id,name')
-            ->where([
-                'period_month' => $selectedMonth,
-                'period_year' => $selectedYear,
-            ])->get()->groupBy('intern_id');
+        $allEvaluations = $periodStatus === 'not_set'
+            ? collect()
+            : InternEvaluation::with('evaluator:id,name')
+                ->where([
+                    'period_month' => $period['month'],
+                    'period_year' => $period['year'],
+                ])->get()->groupBy('intern_id');
 
         $departments = Department::query()
             ->select(['id', 'name', 'abbreviation', 'slug'])
@@ -299,46 +276,72 @@ class IotmController extends Controller
         return [
             'departmentGroups' => $departmentGroups,
             'questions' => self::QUESTIONS,
-            'months' => $months,
-            'years' => $years,
-            'selectedMonth' => $selectedMonth,
-            'selectedMonthName' => $months[$selectedMonth],
-            'selectedYear' => $selectedYear,
             'canViewResults' => $canViewResults,
             'hasResultAccess' => $hasResultAccess,
             'canExport' => $canViewResults,
             'showWarning' => $showWarning,
             'periodStatus' => $periodStatus,
-            'iotmStartDay' => $startDay,
-            'iotmEndDay' => $endDay,
+            'periodLabel' => $period['label'],
+            'iotmStartLabel' => $period['start_label'],
+            'iotmEndLabel' => $period['end_label'],
         ];
     }
 
-    private function getEvaluationPeriodStatus(int $month, int $year): string
+    /**
+     * Jadwal IOTM bersifat sekali jalan (tanggal mulai & selesai lengkap dengan bulan dan tahun).
+     * Penilaian disimpan dengan period_month / period_year dari tanggal mulai.
+     *
+     * @return array{status: string, month: ?int, year: ?int, start_label: ?string, end_label: ?string, label: string}
+     */
+    private function getPeriod(): array
     {
-        $startDay = (int) Setting::getVal('iotm_start_day', 1);
-        $endDay = (int) Setting::getVal('iotm_end_day', 5);
+        $start = Setting::getVal('iotm_start_date');
+        $end = Setting::getVal('iotm_end_date');
 
-        $startDate = Carbon::create($year, $month, min($startDay, Carbon::create($year, $month, 1)->daysInMonth), 0, 0, 0);
-
-        if ($startDay > $endDay) {
-            $endMonth = $startDate->copy()->addMonth()->startOfMonth();
-            $endDate = $endMonth->copy()->addDays(min($endDay, $endMonth->daysInMonth) - 1)->endOfDay();
-        } else {
-            $endDate = Carbon::create($year, $month, min($endDay, Carbon::create($year, $month, 1)->daysInMonth), 23, 59, 59);
+        if (! $start || ! $end) {
+            return [
+                'status' => 'not_set',
+                'month' => null,
+                'year' => null,
+                'start_label' => null,
+                'end_label' => null,
+                'label' => 'Jadwal belum diatur',
+            ];
         }
 
-        $now = now();
+        $tz = 'Asia/Jakarta';
+        $startDate = Carbon::parse($start, $tz)->startOfDay();
+        $endDate = Carbon::parse($end, $tz)->endOfDay();
+        $now = now($tz);
 
-        if ($now->lt($startDate)) {
-            return 'future';
-        }
+        $status = match (true) {
+            $now->lt($startDate) => 'future',
+            $now->gt($endDate) => 'past',
+            default => 'open',
+        };
 
-        if ($now->gt($endDate)) {
-            return 'past';
-        }
+        $startLabel = $this->formatDate($startDate);
+        $endLabel = $this->formatDate($endDate);
 
-        return 'open';
+        return [
+            'status' => $status,
+            'month' => $startDate->month,
+            'year' => $startDate->year,
+            'start_label' => $startLabel,
+            'end_label' => $endLabel,
+            'label' => "{$startLabel} – {$endLabel}",
+        ];
+    }
+
+    private function formatDate(Carbon $date): string
+    {
+        $months = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+        ];
+
+        return $date->day.' '.$months[$date->month].' '.$date->year;
     }
 
     private function initials(string $name): string
