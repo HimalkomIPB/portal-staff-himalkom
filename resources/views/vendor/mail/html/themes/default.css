@@ -1,0 +1,262 @@
+/* Base */
+
+body,
+body *:not(html):not(style):not(br):not(tr):not(code) {
+    box-sizing: border-box;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    position: relative;
+}
+
+body {
+    -webkit-text-size-adjust: none;
+    background-color: #F4F7F8;
+    color: #2B4248;
+    height: 100%;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    width: 100% !important;
+}
+
+p,
+ul,
+ol,
+blockquote {
+    line-height: 1.6;
+    text-align: left;
+}
+
+a {
+    color: #2B4248;
+}
+
+a img {
+    border: none;
+}
+
+/* Typography */
+
+h1 {
+    color: #0E293B;
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.3;
+    margin-top: 0;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+h2 {
+    color: #0E293B;
+    font-size: 20px;
+    font-weight: 700;
+    margin-top: 0;
+    text-align: left;
+}
+
+h3 {
+    color: #0E293B;
+    font-size: 16px;
+    font-weight: 700;
+    margin-top: 0;
+    text-align: left;
+}
+
+p {
+    color: #132C3B;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.65;
+    margin-top: 0;
+    margin-bottom: 16px;
+    text-align: left;
+}
+
+p.sub {
+    color: #4A5D68;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+img {
+    max-width: 100%;
+}
+
+/* Layout */
+
+.wrapper {
+    -premailer-cellpadding: 0;
+    -premailer-cellspacing: 0;
+    -premailer-width: 100%;
+    background-color: #F4F7F8;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+.email-container {
+    background-color: #FFFFFF;
+    margin: 0 auto;
+    max-width: 600px;
+    width: 600px;
+}
+
+/* Header */
+
+.header {
+    background-color: #0E293B;
+    border-bottom: 4px solid #AFE1EA;
+    height: 116px;
+    padding: 0 24px;
+    text-align: center;
+}
+
+.header a {
+    color: #FFFFFF;
+    text-decoration: none;
+}
+
+/* Body */
+
+.body {
+    -premailer-cellpadding: 0;
+    -premailer-cellspacing: 0;
+    -premailer-width: 100%;
+    background-color: #FFFFFF;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+.inner-body {
+    -premailer-cellpadding: 0;
+    -premailer-cellspacing: 0;
+    -premailer-width: 100%;
+    background-color: #FFFFFF;
+    margin: 0 auto;
+    padding: 0;
+    width: 100%;
+}
+
+.inner-body a {
+    word-break: break-word;
+}
+
+/* Subcopy */
+
+.subcopy {
+    border-top: 1px solid #D6E3E7;
+    margin-top: 24px;
+    padding-top: 20px;
+}
+
+.subcopy p {
+    color: #5B6B76;
+    font-size: 13px;
+}
+
+/* Tables */
+
+.table table {
+    -premailer-cellpadding: 0;
+    -premailer-cellspacing: 0;
+    -premailer-width: 100%;
+    border-collapse: collapse;
+    margin: 24px auto;
+    width: 100%;
+}
+
+.table th {
+    border-bottom: 1px solid #D6E3E7;
+    color: #5B6B76;
+    margin: 0;
+    padding-bottom: 8px;
+    text-align: left;
+}
+
+.table td {
+    border-top: 1px solid #D6E3E7;
+    color: #0E293B;
+    font-size: 15px;
+    line-height: 1.5;
+    margin: 0;
+    padding: 14px 0;
+}
+
+.content-cell {
+    max-width: 100vw;
+    padding: 40px 36px 36px 36px;
+}
+
+/* Buttons */
+
+.action {
+    -premailer-cellpadding: 0;
+    -premailer-cellspacing: 0;
+    -premailer-width: 100%;
+    margin: 28px 0 24px 0;
+    padding: 0;
+    text-align: left;
+    width: 100%;
+    float: unset;
+}
+
+.button {
+    -webkit-text-size-adjust: none;
+    border-radius: 9999px;
+    color: #FFFFFF;
+    display: inline-block;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.2;
+    overflow: hidden;
+    padding: 15px 32px;
+    text-decoration: none;
+}
+
+.button-blue,
+.button-primary {
+    background-color: #0E293B;
+}
+
+.button-green,
+.button-success {
+    background-color: #0E293B;
+}
+
+.button-red,
+.button-error {
+    background-color: #B91C1C;
+}
+
+/* Panels */
+
+.panel {
+    border-left: 4px solid #0E293B;
+    margin: 20px 0;
+}
+
+.panel-content {
+    background-color: #F4F7F8;
+    color: #2B4248;
+    padding: 16px;
+}
+
+.panel-content p {
+    color: #2B4248;
+}
+
+.panel-item {
+    padding: 0;
+}
+
+.panel-item p:last-of-type {
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+/* Utilities */
+
+.break-all {
+    word-break: break-all;
+}

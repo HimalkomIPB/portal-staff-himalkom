@@ -1,17 +1,21 @@
-<!DOCTYPE html>
-<html>
+<x-email.layout
+    title="Pemberitahuan Data Akun Himalkom"
+    preheader="Akun Portal Staff HIMALKOM kamu telah dibuat."
+    headline="Akun Portal Staff HIMALKOM kamu telah dibuat"
+    :greeting="'Halo ' . ($name ?? 'Rekan Himalkom') . ','"
+    :details="[
+        ['label' => 'Email', 'value' => $email, 'copyable' => true],
+        ['label' => 'Password', 'value' => $password, 'bold' => true, 'mono' => true, 'copyable' => true],
+    ]"
+    action-text="Masuk ke Portal"
+    :action-url="url('/login')"
+>
+    <p style="margin: 0; font-size: 16px; line-height: 1.65; font-weight: 600; color: #132C3B;">
+        Gunakan kredensial di bawah ini untuk masuk ke Portal Staff HIMALKOM. Demi keamanan akun kamu, segera ganti kata sandi setelah berhasil masuk.
+    </p>
 
-<head>
-    <title>Pemberitahuan Data Akun Himalkom</title>
-</head>
-
-<body>
-    <h2>Halo, akun Himalkom Anda telah dibuat!</h2>
-    <p>Silakan login dengan kredensial berikut:</p>
-    <p><strong>Email:</strong> {{ $email }}</p>
-    <p><strong>Password:</strong> {{ $password }}</p>
-    <p>Anda bisa login di <a href="{{ url('/login') }}">sini</a>.</p>
-    <p><strong>Jangan lupa untuk mengganti password setelah login!.</strong></p>
-</body>
-
-</html>
+    <x-slot:note>
+        Mengalami kendala saat masuk? Hubungi kami di
+        <a href="mailto:himalkom@apps.ipb.ac.id" style="color: #0E293B; font-weight: 600; text-decoration: underline;">himalkom@apps.ipb.ac.id</a>.
+    </x-slot:note>
+</x-email.layout>

@@ -329,6 +329,17 @@
                     </a>
                 </div>
 
+                <p class="mt-7 px-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-400">Intern</p>
+                <div class="mt-3 space-y-1">
+                    <a href="{{ route('dashboard.iotm.index') }}" class="{{ $navClass('dashboard.iotm.*') }}">
+                        <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 14l9-5-9-5-9 5 9 5z" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M12 14l6.16-3.422A12.083 12.083 0 0112 21a12.083 12.083 0 01-6.16-10.422L12 14z" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        IOTM
+                    </a>
+                </div>
+
             </nav>
 
             {{-- Bottom nav: Notifications, Settings, Logout --}}

@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\GlobalAnnouncement;
+use App\Filament\Pages\IotmSettings;
 use App\Filament\Pages\SotmSettings;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -43,6 +44,7 @@ class SuperadminPanelProvider extends PanelProvider
                 Pages\Dashboard::class,
                 GlobalAnnouncement::class,
                 SotmSettings::class,
+                IotmSettings::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([

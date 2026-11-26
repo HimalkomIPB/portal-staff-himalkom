@@ -28,6 +28,7 @@ class UserCreatedMail extends Mailable
         return $this->subject('Pemberitahuan Data Akun Himalkom')
             ->view('emails.user-created')
             ->with([
+                'name' => $this->data['name'] ?? null,
                 'email' => $this->data['email'],
                 'password' => $this->unhashedPassword,
             ]);

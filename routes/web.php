@@ -3,6 +3,7 @@
 use App\Http\Controllers\AgendaController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentArchiveController;
+use App\Http\Controllers\IotmController;
 use App\Http\Controllers\ModViewController;
 use App\Http\Controllers\PDFController;
 use App\Http\Controllers\PerformanceController;
@@ -82,6 +83,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard/performance/{evaluated}/detail', [PerformanceController::class, 'show'])
         ->middleware('permission:performance.view|performance.view-all|performance.evaluate|performance.view-self')
         ->name('dashboard.performance.show');
+
+    // -------------------------------------------------------
+    // IOTM (Intern of the Month)
+    // -------------------------------------------------------
+    Route::get('/dashboard/iotm', [IotmController::class, 'index'])
+        ->name('dashboard.iotm.index');
+
+    Route::post('/dashboard/iotm', [IotmController::class, 'store'])
+        ->name('dashboard.iotm.store');
+
+    Route::get('/dashboard/iotm/export', [IotmController::class, 'export'])
+        ->name('dashboard.iotm.export');
 
     // -------------------------------------------------------
     // Calendar / Agenda
