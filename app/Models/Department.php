@@ -48,6 +48,16 @@ class Department extends Model
 {
     use HasUlids, SoftDeletes;
 
+    public const SUB_DIVISION_MAPPING = [
+        'Education' => ['Competition & Community Empowerment', 'Academic & Development'],
+        'Finance' => ['Operations & Finance', 'Marketing & Technology'],
+        'Creative' => ['Social Media & Content Creation', 'Multimedia & Visual Design'],
+        'External' => ['Social Relation', 'Campus & Corporate Outreach'],
+        'Internal' => ['Internal Harmony', 'Internal Celebration'],
+        'Research and Technology' => ['Web Innovation', 'Research & Career Development'],
+        'Talent and Sport' => ['Talent Developement', 'Sport'],
+    ];
+
     public $incrementing = false;
 
     protected $keyType = 'string';
@@ -86,6 +96,11 @@ class Department extends Model
     public function users(): HasMany
     {
         return $this->hasMany(User::class);
+    }
+
+    public function interns(): HasMany
+    {
+        return $this->hasMany(Intern::class);
     }
 
     /**
